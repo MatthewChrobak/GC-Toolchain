@@ -4,7 +4,7 @@ namespace Core
 {
     public static class Log
     {
-        private static bool[] AllowedOutputs = new bool[Enum.GetNames(typeof(OutputLevel)).Length];
+        private static readonly bool[] AllowedOutputs = new bool[Enum.GetNames(typeof(OutputLevel)).Length];
 
         static Log() {
             AllowedOutputs[(int)OutputLevel.Verbose] = false;
@@ -33,7 +33,7 @@ namespace Core
             if (!AllowedOutputs[(int)level]) {
                 return;
             }
-            Console.WriteLine(message);
+            Console.Write(message);
         }
 
         public static void WriteLevel(string message, OutputLevel level) {

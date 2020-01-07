@@ -11,11 +11,11 @@ namespace Core.Config
         public readonly string[] Body;
 
         public Section(string headerLine, string[] body, string configFileName, int lineNumber) {
-            Debug.Assert(headerLine.StartsWith(ConfigurationFile.SectionSymbol), $"Section header line on line {this.LineNumber} in {this.ConfigFileName} must start with '{ConfigurationFile.SectionSymbol}'.");
-            Debug.Assert(headerLine.Length > ConfigurationFile.SectionSymbol.Length, $"Section header line on line {this.LineNumber} in {this.ConfigFileName} must define a section tag.");
-
             this.ConfigFileName = configFileName;
             this.LineNumber = lineNumber;
+            
+            Debug.Assert(headerLine.StartsWith(ConfigurationFile.SectionSymbol), $"Section header line on line {this.LineNumber} in {this.ConfigFileName} must start with '{ConfigurationFile.SectionSymbol}'");
+            Debug.Assert(headerLine.Length > ConfigurationFile.SectionSymbol.Length, $"Section header line on line {this.LineNumber} in {this.ConfigFileName} must define a section tag");
 
             var splitHeaderLine = Regex.Split(headerLine, @"\s+");
             this.Tag = splitHeaderLine[0][1..];

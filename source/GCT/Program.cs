@@ -41,9 +41,11 @@ namespace GCT
             LexicalConfigurationFile tokenConfigurationFile;
             if (tokenConfigurationFilePath != null) {
                 try {
+                    Log.WriteLineVerbose($"Parsing configuration file: {tokenConfigurationFilePath}");
                     tokenConfigurationFile = new LexicalConfigurationFile(tokenConfigurationFilePath);
+                    Log.WriteLineVerbose($"Done.");
                 } catch (Exception e) {
-                    Log.WriteLineError(e.Message);
+                    Log.WriteLineError($"Unable to continue due to exception of type {e.GetType()} being thrown during lexical analysis. Exiting.");
                     return;
                 }
             }
