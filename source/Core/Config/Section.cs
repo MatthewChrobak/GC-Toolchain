@@ -22,5 +22,9 @@ namespace Core.Config
             this.Header = splitHeaderLine[1..];
             this.Body = body;
         }
+
+        public string GetLocation() {
+            return $"[{this.ConfigFileName}:{this.LineNumber}]";
+        }
     }
 }

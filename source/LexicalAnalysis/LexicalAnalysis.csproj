@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Automata\Automata.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 

@@ -18,13 +18,13 @@ namespace Core.Config
             foreach (var section in this.GetSections(SECTION_TAG_RULE)) {
                 string ruleKey = section.Header.FirstOrDefault();
                 if (String.IsNullOrEmpty(ruleKey)) {
-                    Log.WriteLineWarning($"Unable to find rule key on line {section.LineNumber}.");
+                    Log.WriteLineWarning($"Unable to find rule key in {section.GetLocation()}.");
                     continue;
                 }
 
                 string ruleValueString = section.Body.FirstOrDefault();
                 if (String.IsNullOrEmpty(ruleValueString)) {
-                    Log.WriteLineWarning($"Unable to find rule value for rule {ruleKey} on line {section.LineNumber}.");
+                    Log.WriteLineWarning($"Unable to find rule value for rule {ruleKey} in {section.GetLocation()}.");
                     continue;
                 }
                 if (ruleValueString.Length != 1) {

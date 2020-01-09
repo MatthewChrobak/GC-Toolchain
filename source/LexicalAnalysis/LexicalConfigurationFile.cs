@@ -28,6 +28,8 @@ namespace LexicalAnalysis
         public const string RULE_HEX_PREFIX_KEY = "hex_prefix";
         public const char RULE_HEX_PREFIX_VALUE = '%';
 
+        public const string HEADER_PRIORITY_PREFIX = "priority:";
+
         public LexicalConfigurationFile(string configurationFilePath) : base(configurationFilePath) {
             this.DefineDefaultRules();
         }
