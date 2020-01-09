@@ -48,6 +48,8 @@ namespace GCT
                     Log.WriteLineError($"Unable to continue due to exception of type {e.GetType()} being thrown during lexical analysis. Exiting.");
                     return;
                 }
+
+                var tokenizer = new Tokenizer(tokenConfigurationFile);
             }
         }
     }

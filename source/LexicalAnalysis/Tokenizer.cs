@@ -10,25 +10,27 @@ using System.Text.RegularExpressions;
 
 namespace LexicalAnalysis
 {
-    public class Lexer
+    public class Tokenizer
     {
         public readonly LexicalConfigurationFile ConfigurationFile;
         public readonly NFATable NFAParser;
 
-        public Lexer(LexicalConfigurationFile configurationFile) {
+        public Tokenizer(LexicalConfigurationFile configurationFile) {
             this.ConfigurationFile = configurationFile;
-            this.NFAParser = ConstructLexerTable();
+            this.NFAParser = this.ConstructLexerTable();
         }
 
         private NFATable ConstructLexerTable() {
             Log.WriteLineVerbose("Constructing subtokens...");
-            var definedSubTokens = GetTokenDefinitions(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_SUBTOKEN), new Dictionary<string, TokenNFATable>());
+            var definedSubTokens = new Dictionary<string, TokenNFATable>();
+            this.GetTokenDefinitions(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_SUBTOKEN), definedSubTokens, definedSubTokens);
 
             Log.WriteLineVerbose("Constructing tokens...");
-            var definedTokens = GetTokenDefinitions(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_TOKEN), definedSubTokens);
+            var definedTokens = new Dictionary<string, TokenNFATable>();
+            this.GetTokenDefinitions(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_TOKEN), definedTokens, definedSubTokens);
 
             Log.WriteLineVerbose("Minimizing tokens...");
-            var minimizedTokens = GetMinimizedTokens(definedTokens);
+            var minimizedTokens = this.GetMinimizedTokens(definedTokens);
 
             Log.WriteLineVerbose("Constructing final NFA...");
             var finalNFA = new TokenNFATable();
@@ -43,7 +45,7 @@ namespace LexicalAnalysis
         }
 
         private IEnumerable<TokenNFATable> GetMinimizedTokens(Dictionary<string, TokenNFATable> definedTokens) {
-            var tokenPriorities = GetTokenPriorities(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_TOKEN));
+            var tokenPriorities = this.GetTokenPriorities(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_TOKEN));
 
             foreach (var entry in definedTokens) {
                 string tokenName = entry.Key;
@@ -95,29 +97,31 @@ namespace LexicalAnalysis
             return priorities;
         }
 
-        private Dictionary<string, TokenNFATable> GetTokenDefinitions(IEnumerable<Section> sections, Dictionary<string, TokenNFATable> definedTokens) {
-            Debug.Assert(sections.Any(section => section.Tag != LexicalConfigurationFile.SECTION_TAG_SUBTOKEN), $"Unable to construct subtoken definition from a section with the tags: " + $"{String.Join("\r\n", sections.Where(section => section.Tag != LexicalConfigurationFile.SECTION_TAG_SUBTOKEN).Select(section => section.GetLocation() + "=>" + section.Tag))}");
+        private void GetTokenDefinitions(IEnumerable<Section> sections, Dictionary<string, TokenNFATable> destination, Dictionary<string, TokenNFATable> support) {
+            Debug.Assert(!sections.Any(section => section.Header.FirstOrDefault() == LexicalConfigurationFile.SECTION_TAG_SUBTOKEN || section.Header.FirstOrDefault() == LexicalConfigurationFile.SECTION_TAG_TOKEN), $"Unable to construct subtoken definition from a section with the tags: " + $"{String.Join("\r\n", sections.Where(section => section.Tag != LexicalConfigurationFile.SECTION_TAG_SUBTOKEN).Select(section => section.GetLocation() + "=>" + section.Tag))}");
 
             var pendingTokens = sections.ToHashSet();
-
-            bool subtokenDefined = false;
+            int passNumber = 1;
             while (pendingTokens.Count != 0) {
-                subtokenDefined = false;
+                Log.WriteLineVerbose($"Starting pass {passNumber++}");
+                var sectionsDefinedInThisIteration = new HashSet<Section>();
                 foreach (var section in pendingTokens) {
                     Log.WriteLineVerbose($"Trying to construct {section.Header.FirstOrDefault()} in {section.GetLocation()}...");
-                    if (ConstructTokenDefinition(section, definedTokens)) {
+                    if (ConstructTokenDefinition(section, destination, support)) {
                         Log.WriteLineVerbose($"Constructed {section.Header.FirstOrDefault()} in {section.GetLocation()}.");
-                        subtokenDefined = true;
+                        sectionsDefinedInThisIteration.Add(section);
                     }
                 }
 
-                Debug.Assert(subtokenDefined, $"Language definition is not regular. {String.Join(", ", pendingTokens.Select(section => section.Header.FirstOrDefault()))} cannot be constructed.");
-            }
+                foreach (var section in sectionsDefinedInThisIteration) {
+                    pendingTokens.Remove(section);
+                }
 
-            return definedTokens;
+                Debug.Assert(sectionsDefinedInThisIteration.Count != 0, $"Language definition is not regular. {String.Join(", ", pendingTokens.Select(section => section.Header.FirstOrDefault()))} cannot be constructed.");
+            }
         }
 
-        private bool ConstructTokenDefinition(Section section, Dictionary<string, TokenNFATable> definedTokens) {
+        private bool ConstructTokenDefinition(Section section, Dictionary<string, TokenNFATable> destination, Dictionary<string, TokenNFATable> support) {
             Debug.Assert(!String.IsNullOrEmpty(section.Header.FirstOrDefault()), $"Token Definition {section.GetLocation()} cannot have empty tag.");
 
             string tokenName = section.Header.FirstOrDefault();
@@ -152,20 +156,20 @@ namespace LexicalAnalysis
                     }
 
                     // Hex literal?
-                    if (component.StartsWith(LexicalConfigurationFile.RULE_HEX_PREFIX_KEY)) {
+                    if (component.StartsWith(this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_HEX_PREFIX_KEY))) {
                         component = component[1..];
                         char symbol = (char)Int16.Parse(component, System.Globalization.NumberStyles.HexNumber);
                         component = $"{this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_LITERAL_PREFIX_KEY)}{symbol}";
                     }
 
                     // Token?
-                    if (component.StartsWith(LexicalConfigurationFile.RULE_TOKEN_PREFIX_KEY)) {
+                    if (component.StartsWith(this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_TOKEN_PREFIX_KEY))) {
                         component = component[1..];
-                        if (!definedTokens.ContainsKey(component)) {
+                        if (!support.ContainsKey(component)) {
                             Log.WriteLineVerbose($"Unable to define '{tokenName}' since it depends on '{component}' which has not yet been defined.");
                             return false;
                         }
-                        ptr = partialRule.InsertTableTransition_AndCreateAnEndState(ptr, definedTokens[component]);
+                        ptr = partialRule.InsertTableTransition_AndCreateAnEndState(ptr, support[component]);
                     } else {
                         // Nope.
 
@@ -224,7 +228,7 @@ namespace LexicalAnalysis
                 finalRule.AddTransition(end, actualEnd);
             }
 
-            definedTokens.Add(tokenName, finalRule);
+            destination.Add(tokenName, finalRule);
             return true;
         }
     }

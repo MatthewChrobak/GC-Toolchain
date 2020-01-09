@@ -1,5 +1,6 @@
 ﻿using Core;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Automata
 {
@@ -29,7 +30,23 @@ namespace Automata
         }
 
         public AutomataTable(AutomataTable table) : this() {
-
+            this._idCounter = table._idCounter;
+            var map = new Dictionary<Node, Node>();
+            foreach (var node in table.Nodes) {
+                var copy = new Node(node);
+                map[node] = copy;
+                this._nodes.Add(copy);
+            }
+            this.StartState = map[table.StartState];
+            foreach (var transition in table.Transitions) {
+                var source = map[transition.Source];
+                var destination = map[transition.Destination];
+                if (transition.Symbol == null) {
+                    this._transitions.Add(Transition.New(source, destination));
+                } else {
+                    this._transitions.Add(Transition.New(source, destination, transition.Symbol));
+                }
+            }
         }
 
         public Node CreateNode() {
@@ -67,6 +84,30 @@ namespace Automata
                     yield return transition;
                 }
             }
+        }
+
+        public HashSet<Node> ApplyTransition(HashSet<Node> states, string symbol) {
+            var newStates = new HashSet<Node>();
+
+            foreach (var node in states) {
+                Debug.Assert(this._nodes.Contains(node), "Unable to apply transition on target not present in a table.");
+                foreach (var transition in this.GetTransitionsFor(node).Where(t => t.Symbol == symbol)) {
+                    Debug.Assert(this._nodes.Contains(transition.Destination), "Unable to apply transition on destination not present in a table.");
+                    newStates.Add(transition.Destination);
+                }
+            }
+
+            return newStates;
+        }
+
+        public HashSet<Node> ApplyTransition(Node state, string symbol) {
+            return ApplyTransition(new HashSet<Node>() { state }, symbol);
+        }
+
+        internal void RemoveNode(Node node) {
+            Debug.Assert(this._nodes.Contains(node), "Cannot remove node that is not a part of the table.");
+            this._nodes.Remove(node);
+            this._transitions.RemoveAll(transition => transition.Destination == node || transition.Source == node);
         }
     }
 }
