@@ -1,6 +1,8 @@
 ﻿using Core;
+using Core.ReportGeneration;
 using LexicalAnalysis;
 using System;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace GCT
@@ -14,6 +16,7 @@ namespace GCT
             }
 
             string? tokenConfigurationFilePath = null;
+            string? reportName = null;
 
             // Extract arguments.
             var match = Regex.Match(string.Join(' ', args), @"\-(\w+)(\s+([^\-\r\n]+|\"".+?\""|\'.+?\'))?");
@@ -33,12 +36,18 @@ namespace GCT
                     case "tokens":
                         tokenConfigurationFilePath = flagValue;
                         break;
+                    case "r":
+                    case "report":
+                        reportName = flagValue;
+                        break;
                 }
 
                 match = match.NextMatch();
             }
 
             LexicalConfigurationFile tokenConfigurationFile;
+            Log.SetState("Lexical-Analysis");
+            var report = new Report();
             if (tokenConfigurationFilePath != null) {
                 try {
                     Log.WriteLineVerbose($"Parsing configuration file: {tokenConfigurationFilePath}");
@@ -50,6 +59,12 @@ namespace GCT
                 }
 
                 var tokenizer = new Tokenizer(tokenConfigurationFile);
+            }
+
+            report.AddSectionToTop(Log.GetSections());
+
+            if (reportName != null) {
+                File.WriteAllText($"{reportName}.html", report.ToHTML());
             }
         }
     }

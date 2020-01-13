@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automata", "Automata\Automa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{7A5ACE30-B191-49D0-99AE-68E6D5AE0019}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LexicalAnalysis", "LexicalAnalysis\LexicalAnalysis.csproj", "{AA9DDAB6-6151-49C8-BF17-A52C9F2F8007}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LexicalAnalysis", "LexicalAnalysis\LexicalAnalysis.csproj", "{AA9DDAB6-6151-49C8-BF17-A52C9F2F8007}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

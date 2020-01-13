@@ -1,15 +1,27 @@
-﻿using System;
+﻿using Core.ReportGeneration;
+using System;
+using System.Collections.Generic;
 
 namespace Core
 {
     public static class Log
     {
         private static readonly bool[] AllowedOutputs = new bool[Enum.GetNames(typeof(OutputLevel)).Length];
+        private static string State;
+        private static Dictionary<string, List<string>> _stateHistory;
 
         static Log() {
+            _stateHistory = new Dictionary<string, List<string>>();
             AllowedOutputs[(int)OutputLevel.Verbose] = false;
             AllowedOutputs[(int)OutputLevel.Warning] = true;
             AllowedOutputs[(int)OutputLevel.Error] = true;
+        }
+
+        public static void SetState(string state) {
+            State = state;
+            if (!_stateHistory.ContainsKey(state)) {
+                _stateHistory[state] = new List<string>();
+            }
         }
 
         public static void WriteLineVerbose(string message) {
@@ -33,6 +45,7 @@ namespace Core
             if (!AllowedOutputs[(int)level]) {
                 return;
             }
+            _stateHistory[State].Add(message);
             Console.Write(message);
         }
 
@@ -50,6 +63,10 @@ namespace Core
 
         public static void EnableLevel(OutputLevel level) {
             AllowedOutputs[(int)level] = true;
+        }
+
+        public static Section GetSections() {
+            return new LogSection(_stateHistory);
         }
     }
 }
