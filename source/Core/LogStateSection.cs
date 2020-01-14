@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Core
 {
-    internal class LogStateSection : Section
+    internal class LogStateSection : ReportSection
     {
         private List<string> _lines;
 
@@ -11,11 +11,11 @@ namespace Core
             this._lines = lines;
         }
 
-        public override string ToHTML() {
+        public override string GetContent() {
             if (this._lines.Count == 0) {
                 return string.Empty;
             }
-            return HeaderHTML + string.Join("<br>", this._lines);
+            return string.Join("<br>", this._lines);
         }
     }
 }

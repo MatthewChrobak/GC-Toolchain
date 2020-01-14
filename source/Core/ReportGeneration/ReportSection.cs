@@ -1,27 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Core.ReportGeneration
 {
-    public abstract class Section
+    public abstract class ReportSection
     {
         public string? Header { get; set; }
-        public readonly List<Section> Sections = new List<Section>();
+        public readonly List<ReportSection> Sections = new List<ReportSection>();
         public string SectionNumber { get; private set; } = System.String.Empty;
         public string Content { get; set; }
 
         public string ID_HTML => $"{this.SectionNumber}\t{this.Header}";
         public string HeaderHTML => $"<h1 id='{ID_HTML}'>{ID_HTML}</h1>";
 
-        public Section(string header) {
+        public ReportSection(string header) {
             this.Header = header;
             this.Content = System.String.Empty;
         }
 
-        public void AddSection(Section section) {
+        public void AddSection(ReportSection section) {
             this.Sections.Add(section);
         }
 
-        public void AddSectionToTop(Section section) {
+        public void AddSectionToTop(ReportSection section) {
             this.Sections.Insert(0, section);
         }
 
@@ -38,11 +40,15 @@ namespace Core.ReportGeneration
             }
         }
 
-        public virtual string ToHTML() {
-            return $"<div class='container' id='{this.SectionNumber}' style='margin-top:100px'><div class='col-sm-12'>" +
-                $"<h2>{this.Header}</h2>" +
-                $"<div class='container'><div class='row'>{this.Content}</div></div>" +
-                $"</div>"; ;
+        public virtual string GetContent() {
+            return $"<div class='row'>{this.Content}</div>";
+        }
+
+        public string ToHTML() {
+            return $"<div class='container' style='margin-top:100px'><div class='col-sm-12'>" +
+                this.HeaderHTML +
+                $"<div class='container'>{this.GetContent()}</div>" +
+                $"</div></div>";
         }
     }
 }

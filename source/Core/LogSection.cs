@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Core
 {
-    internal class LogSection : Section
+    internal class LogSection : ReportSection
     {
         public LogSection(Dictionary<string, List<string>> stateHistory) : base("Log Entries") {
             foreach (var entry in stateHistory) {
@@ -12,9 +12,8 @@ namespace Core
             }
         }
 
-        public override string ToHTML() {
-            string body = string.Join("", this.Sections.Select(s => s.ToHTML()));
-            return HeaderHTML + body;
+        public override string GetContent() {
+            return string.Join("", this.Sections.Select(s => s.ToHTML()));
         }
     }
 }

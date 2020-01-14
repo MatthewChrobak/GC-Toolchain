@@ -1,8 +1,9 @@
 ﻿using Automata;
 using Automata.NonDeterministic;
 using Core;
-using Core.Config;
+using Core.ReportGeneration;
 using LexicalAnalysis.Automata;
+using LexicalAnalysis.ReportGeneration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +16,18 @@ namespace LexicalAnalysis
         public readonly LexicalConfigurationFile ConfigurationFile;
         public readonly NFATable NFAParser;
 
+        private ReportSection _section = new ParentReportSection("State Machines");
+        private ReportSection _subtokens_section = new ParentReportSection("SubTokens");
+        private Dictionary<string, ReportSection> _tokens_section = new Dictionary<string, ReportSection>();
+
         public Tokenizer(LexicalConfigurationFile configurationFile) {
             this.ConfigurationFile = configurationFile;
             this.NFAParser = this.ConstructLexerTable();
+
+            this._section.AddSection(this._subtokens_section);
+            foreach (var entry in this._tokens_section.OrderBy(val => val.Key)) {
+                this._section.AddSection(entry.Value);
+            }
         }
 
         private NFATable ConstructLexerTable() {
@@ -25,9 +35,18 @@ namespace LexicalAnalysis
             var definedSubTokens = new Dictionary<string, TokenNFATable>();
             this.GetTokenDefinitions(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_SUBTOKEN), definedSubTokens, definedSubTokens);
 
+            foreach (var entry in definedSubTokens) {
+                this._subtokens_section.AddSection(new AutomataVisualizationSection(entry.Key, entry.Value));
+            }
+
             Log.WriteLineVerbose("Constructing tokens...");
             var definedTokens = new Dictionary<string, TokenNFATable>();
             this.GetTokenDefinitions(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_TOKEN), definedTokens, definedSubTokens);
+
+            foreach (var entry in definedTokens) {
+                this._tokens_section.Add(entry.Key, new ParentReportSection(entry.Key));
+                this._tokens_section[entry.Key].AddSection(new AutomataVisualizationSection("E-NFA", entry.Value));
+            }
 
             Log.WriteLineVerbose("Minimizing tokens...");
             var minimizedTokens = this.GetMinimizedTokens(definedTokens);
@@ -40,6 +59,8 @@ namespace LexicalAnalysis
             foreach (var token in minimizedTokens) {
                 finalNFA.InsertTableTransition(start, token);
             }
+
+            this._section.AddSectionToTop(new AutomataVisualizationSection("Final NFA Parser", finalNFA));
 
             return finalNFA;
         }
@@ -54,22 +75,33 @@ namespace LexicalAnalysis
                 definedToken.EndState.IsFinal = true;
                 definedToken.EndState.SetTag(Node.LABEL, $"{tokenName}~{tokenPriorities[tokenName]}");
 
+                var section = this._tokens_section[entry.Key];
+
                 // It's much faster to convert the rules to DFA's and minimize them in isolation rather than 
                 // add them into the same NFA and then convert/minimize since they tend to deal with different symbols.
 
                 Log.WriteLineVerbose($"Computing e-closure and NFA-To-DFA conversion for token {tokenName}...");
                 var dfa = definedToken.ToDFATable();
+                section.AddSection(new AutomataVisualizationSection("DFA", dfa));
 
                 Log.WriteLineVerbose($"Minimizing the dfa for token {tokenName}...");
                 var minDFA = dfa.Minimize();
+                section.AddSection(new AutomataVisualizationSection("Min-DFA", minDFA));
 
                 // Re-construct it as an NFA by removing trap states.
                 Log.WriteLineVerbose($"Removing trap states for token {tokenName}...");
-                yield return new TokenNFATable(minDFA.RemoveTrapStates());
+                var minNFA = new TokenNFATable(minDFA.RemoveTrapStates());
+                section.AddSection(new AutomataVisualizationSection("Min-NFA", minNFA));
+
+                yield return minNFA;
             }
         }
 
-        private Dictionary<string, int> GetTokenPriorities(IEnumerable<Section> sections) {
+        public ReportSection GetReportSections() {
+            return this._section;
+        }
+
+        private Dictionary<string, int> GetTokenPriorities(IEnumerable<Core.Config.ConfigSection> sections) {
             var priorities = new Dictionary<string, int>();
 
             foreach (var section in sections) {
@@ -97,14 +129,14 @@ namespace LexicalAnalysis
             return priorities;
         }
 
-        private void GetTokenDefinitions(IEnumerable<Section> sections, Dictionary<string, TokenNFATable> destination, Dictionary<string, TokenNFATable> support) {
+        private void GetTokenDefinitions(IEnumerable<Core.Config.ConfigSection> sections, Dictionary<string, TokenNFATable> destination, Dictionary<string, TokenNFATable> support) {
             Debug.Assert(!sections.Any(section => section.Header.FirstOrDefault() == LexicalConfigurationFile.SECTION_TAG_SUBTOKEN || section.Header.FirstOrDefault() == LexicalConfigurationFile.SECTION_TAG_TOKEN), $"Unable to construct subtoken definition from a section with the tags: " + $"{String.Join("\r\n", sections.Where(section => section.Tag != LexicalConfigurationFile.SECTION_TAG_SUBTOKEN).Select(section => section.GetLocation() + "=>" + section.Tag))}");
 
             var pendingTokens = sections.ToHashSet();
             int passNumber = 1;
             while (pendingTokens.Count != 0) {
                 Log.WriteLineVerbose($"Starting pass {passNumber++}");
-                var sectionsDefinedInThisIteration = new HashSet<Section>();
+                var sectionsDefinedInThisIteration = new HashSet<Core.Config.ConfigSection>();
                 foreach (var section in pendingTokens) {
                     Log.WriteLineVerbose($"Trying to construct {section.Header.FirstOrDefault()} in {section.GetLocation()}...");
                     if (ConstructTokenDefinition(section, destination, support)) {
@@ -121,7 +153,7 @@ namespace LexicalAnalysis
             }
         }
 
-        private bool ConstructTokenDefinition(Section section, Dictionary<string, TokenNFATable> destination, Dictionary<string, TokenNFATable> support) {
+        private bool ConstructTokenDefinition(Core.Config.ConfigSection section, Dictionary<string, TokenNFATable> destination, Dictionary<string, TokenNFATable> support) {
             Debug.Assert(!String.IsNullOrEmpty(section.Header.FirstOrDefault()), $"Token Definition {section.GetLocation()} cannot have empty tag.");
 
             string tokenName = section.Header.FirstOrDefault();

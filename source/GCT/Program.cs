@@ -59,9 +59,10 @@ namespace GCT
                 }
 
                 var tokenizer = new Tokenizer(tokenConfigurationFile);
+                report.AddSection(tokenizer.GetReportSections());
             }
 
-            report.AddSectionToTop(Log.GetSections());
+            report.AddSection(Log.GetReportSections());
 
             if (reportName != null) {
                 File.WriteAllText($"{reportName}.html", report.ToHTML());

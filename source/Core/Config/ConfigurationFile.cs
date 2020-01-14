@@ -8,7 +8,7 @@ namespace Core.Config
     {
         public const string SectionSymbol = "#";
         // Tag -> Sections
-        private readonly Dictionary<string, List<Section>> _sections = new Dictionary<string, List<Section>>();
+        private readonly Dictionary<string, List<ConfigSection>> _sections = new Dictionary<string, List<ConfigSection>>();
         public readonly string ConfigFileName;
 
         public ConfigurationFile(string[] configurationFileContents, string configFileName) {
@@ -63,23 +63,23 @@ namespace Core.Config
                 }
                 int bodyEndPtr = ptr;
 
-                this.AddSection(new Section(headerLine, lines[bodyStartPtr..bodyEndPtr], this.ConfigFileName, sectionStartPtr));
+                this.AddSection(new ConfigSection(headerLine, lines[bodyStartPtr..bodyEndPtr], this.ConfigFileName, sectionStartPtr));
             }
         }
 
-        private void AddSection(Section section) {
+        private void AddSection(ConfigSection section) {
             string tag = section.Tag.ToLowerInvariant();
             
             if (!this._sections.ContainsKey(tag)) {
-                this._sections[tag] = new List<Section>();
+                this._sections[tag] = new List<ConfigSection>();
             }
             this._sections[tag].Add(section);
         }
 
-        public IEnumerable<Section> GetSections(string tag) {
+        public IEnumerable<ConfigSection> GetSections(string tag) {
             tag = tag.ToLowerInvariant();
             if (!this._sections.ContainsKey(tag)) {
-                return Array.Empty<Section>();
+                return Array.Empty<ConfigSection>();
             }
             return this._sections[tag];
         }

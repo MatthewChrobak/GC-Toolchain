@@ -3,15 +3,15 @@ using System.Linq;
 
 namespace Core.ReportGeneration
 {
-    internal class TableOfContents : Section
+    internal class TableOfContents : ReportSection
     {
-        private List<Section> _sections;
+        private List<ReportSection> _sections;
 
         public TableOfContents(Report report) : base("Table of Contents") {
             report.RefreshSectionNumber("");
 
-            _sections = new List<Section>();
-            var stk = new Stack<Section>();
+            _sections = new List<ReportSection>();
+            var stk = new Stack<ReportSection>();
 
             foreach (var section in report.Sections) {
                 stk.Push(section);
@@ -26,8 +26,8 @@ namespace Core.ReportGeneration
             }
         }
 
-        public override string ToHTML() {
-            return this.HeaderHTML + string.Join("<br>", this._sections.Select(section => $"<a href='#{section.SectionNumber}\t{section.Header}'>{section.SectionNumber}\t{section.Header}</a>").OrderBy(val => val));
+        public override string GetContent() {
+            return string.Join("<br>", this._sections.Select(section => $"<a href='#{section.SectionNumber}\t{section.Header}'>{section.SectionNumber}\t{section.Header}</a>").OrderBy(val => val));
         }
     }
 }

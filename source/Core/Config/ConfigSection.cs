@@ -2,7 +2,7 @@
 
 namespace Core.Config
 {
-    public class Section
+    public class ConfigSection
     {
         public readonly string ConfigFileName;
         public readonly int LineNumber;
@@ -10,7 +10,7 @@ namespace Core.Config
         public readonly string[] Header;
         public readonly string[] Body;
 
-        public Section(string headerLine, string[] body, string configFileName, int lineNumber) {
+        public ConfigSection(string headerLine, string[] body, string configFileName, int lineNumber) {
             this.ConfigFileName = configFileName;
             this.LineNumber = lineNumber;
             

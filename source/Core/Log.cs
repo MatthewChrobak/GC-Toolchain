@@ -65,7 +65,7 @@ namespace Core
             AllowedOutputs[(int)level] = true;
         }
 
-        public static Section GetSections() {
+        public static ReportSection GetReportSections() {
             return new LogSection(_stateHistory);
         }
     }
