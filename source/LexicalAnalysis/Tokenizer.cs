@@ -117,6 +117,8 @@ namespace LexicalAnalysis
                 string priorityStr = priorityStrs.FirstOrDefault();
                 if (String.IsNullOrEmpty(priorityStr)) {
                     priorityStr = "0";
+                } else {
+                    priorityStr = priorityStr.Remove(0, LexicalConfigurationFile.HEADER_PRIORITY_PREFIX.Length);
                 }
 
                 if (!Int32.TryParse(priorityStr, out int priority)) {

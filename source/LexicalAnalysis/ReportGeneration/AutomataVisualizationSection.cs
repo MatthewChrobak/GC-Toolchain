@@ -115,7 +115,11 @@ namespace LexicalAnalysis.ReportGeneration
                 if (node.IsFinal) {
                     this._nodes.Append("color=yellow ");
                 }
-                this._nodes.Append(@$"label=""{node.ID}""");
+                string label = string.Join(", ", node.GetTags(Node.LABEL));
+                if (label.Length == 0) {
+                    label = node.ID.ToString();
+                }
+                this._nodes.Append(@$"label=""{label}""");
                 this._nodes.Append("]; ");
             }
         }

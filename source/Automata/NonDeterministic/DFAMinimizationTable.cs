@@ -42,10 +42,9 @@ namespace Automata.NonDeterministic
             var mergedStateMap = new Dictionary<Node, Node>();
             foreach (var mergedState in mergedStates) {
                 var node = dfa.CreateNode();
-                node.SetTag(Node.LABEL, mergedState.GetIdentifier());
 
                 foreach (var state in mergedState) {
-                    // TODO: Tag?
+                    node.UnionTags(state.GetTags());
                     mergedStateMap[state] = node;
                 }
 

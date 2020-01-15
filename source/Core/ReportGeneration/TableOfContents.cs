@@ -13,21 +13,21 @@ namespace Core.ReportGeneration
             _sections = new List<ReportSection>();
             var stk = new Stack<ReportSection>();
 
-            foreach (var section in report.Sections) {
+            foreach (var section in report.GetOrderedSections()) {
                 stk.Push(section);
             }
 
             while (stk.Count != 0) {
                 var section = stk.Pop();
                 _sections.Add(section);
-                foreach (var s in section.Sections) {
+                foreach (var s in section.GetOrderedSections()) {
                     stk.Push(s);
                 }
             }
         }
 
         public override string GetContent() {
-            return string.Join("<br>", this._sections.Select(section => $"<a href='#{section.SectionNumber}\t{section.Header}'>{section.SectionNumber}\t{section.Header}</a>").OrderBy(val => val));
+            return string.Join("<br>", this._sections.Select(section => $"<a href='#{section.SectionNumber}\t{section.Header}'>{section.SectionNumber}\t{section.Header}</a>"));
         }
     }
 }

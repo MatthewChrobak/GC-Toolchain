@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Core.ReportGeneration
 {
@@ -9,6 +8,7 @@ namespace Core.ReportGeneration
         public string? Header { get; set; }
         public readonly List<ReportSection> Sections = new List<ReportSection>();
         public string SectionNumber { get; private set; } = System.String.Empty;
+        private int LocalSectionNumber;
         public string Content { get; set; }
 
         public string ID_HTML => $"{this.SectionNumber}\t{this.Header}";
@@ -23,12 +23,21 @@ namespace Core.ReportGeneration
             this.Sections.Add(section);
         }
 
+        public IEnumerable<ReportSection> GetOrderedSections() {
+            return this.Sections.OrderByDescending(section => section.LocalSectionNumber);
+        }
+
         public void AddSectionToTop(ReportSection section) {
             this.Sections.Insert(0, section);
         }
 
         public void RefreshSectionNumber(string prefix) {
             this.SectionNumber = prefix;
+            this.LocalSectionNumber = 0;
+            if (prefix.Length != 0) {
+                this.LocalSectionNumber = int.Parse(prefix[(prefix.LastIndexOf('.') + 1)..]);
+            }
+
             if (prefix.Length == 0) {
                 for (int i = 1; i <= this.Sections.Count; i++) {
                     this.Sections[i - 1].RefreshSectionNumber($"{i}");

@@ -25,11 +25,10 @@ namespace Automata.NonDeterministic
 
             foreach (var row in this._rows) {
                 var node = nodes[this._rowMapping[row.GetStatesIdentifier()]];
-                node.SetTag(Node.LABEL, row.GetStatesIdentifier());
                 node.IsFinal = row.IsRowFinal();
 
                 foreach (var n in row.States) {
-                    // TODO: Transfer tags
+                    node.UnionTags(n.GetTags());
                 }
 
                 foreach (var symbol in this._symbols) {
