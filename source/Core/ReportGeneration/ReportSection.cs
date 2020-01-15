@@ -10,9 +10,11 @@ namespace Core.ReportGeneration
         public string SectionNumber { get; private set; } = System.String.Empty;
         private int LocalSectionNumber;
         public string Content { get; set; }
+        public bool IncludeInTableOfContents { get; set; } = true;
 
         public string ID_HTML => $"{this.SectionNumber}\t{this.Header}";
         public string HeaderHTML => $"<h1 id='{ID_HTML}'>{ID_HTML}</h1>";
+
 
         public ReportSection(string header) {
             this.Header = header;
@@ -24,7 +26,7 @@ namespace Core.ReportGeneration
         }
 
         public IEnumerable<ReportSection> GetOrderedSections() {
-            return this.Sections.OrderByDescending(section => section.LocalSectionNumber);
+            return this.Sections.Where(section => section.IncludeInTableOfContents).OrderByDescending(section => section.LocalSectionNumber);
         }
 
         public void AddSectionToTop(ReportSection section) {

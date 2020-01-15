@@ -11,22 +11,24 @@ using System.Text.RegularExpressions;
 
 namespace LexicalAnalysis
 {
-    public class Tokenizer
+    public class TokenParserTableGenerator
     {
         public readonly LexicalConfigurationFile ConfigurationFile;
-        public readonly NFATable NFAParser;
+        public readonly NFATable NFATable;
 
         private ReportSection _section = new ParentReportSection("State Machines");
         private ReportSection _subtokens_section = new ParentReportSection("SubTokens");
-        private Dictionary<string, ReportSection> _tokens_section = new Dictionary<string, ReportSection>();
+        private ReportSection _tokens_section = new ParentReportSection("Tokens");
+        private Dictionary<string, ReportSection> _token_parts = new Dictionary<string, ReportSection>();
 
-        public Tokenizer(LexicalConfigurationFile configurationFile) {
+        public TokenParserTableGenerator(LexicalConfigurationFile configurationFile) {
             this.ConfigurationFile = configurationFile;
-            this.NFAParser = this.ConstructLexerTable();
+            this.NFATable = this.ConstructLexerTable();
 
             this._section.AddSection(this._subtokens_section);
-            foreach (var entry in this._tokens_section.OrderBy(val => val.Key)) {
-                this._section.AddSection(entry.Value);
+            this._section.AddSection(this._tokens_section);
+            foreach (var entry in this._token_parts.OrderBy(val => val.Key)) {
+                this._tokens_section.AddSection(entry.Value);
             }
         }
 
@@ -44,8 +46,8 @@ namespace LexicalAnalysis
             this.GetTokenDefinitions(this.ConfigurationFile.GetSections(LexicalConfigurationFile.SECTION_TAG_TOKEN), definedTokens, definedSubTokens);
 
             foreach (var entry in definedTokens) {
-                this._tokens_section.Add(entry.Key, new ParentReportSection(entry.Key));
-                this._tokens_section[entry.Key].AddSection(new AutomataVisualizationSection("E-NFA", entry.Value));
+                this._token_parts.Add(entry.Key, new ParentReportSection(entry.Key));
+                this._token_parts[entry.Key].AddSection(new AutomataVisualizationSection("E-NFA", entry.Value) { IncludeInTableOfContents = false });
             }
 
             Log.WriteLineVerbose("Minimizing tokens...");
@@ -75,23 +77,23 @@ namespace LexicalAnalysis
                 definedToken.EndState.IsFinal = true;
                 definedToken.EndState.SetTag(Node.LABEL, $"{tokenName}~{tokenPriorities[tokenName]}");
 
-                var section = this._tokens_section[entry.Key];
+                var section = this._token_parts[entry.Key];
 
                 // It's much faster to convert the rules to DFA's and minimize them in isolation rather than 
                 // add them into the same NFA and then convert/minimize since they tend to deal with different symbols.
 
                 Log.WriteLineVerbose($"Computing e-closure and NFA-To-DFA conversion for token {tokenName}...");
                 var dfa = definedToken.ToDFATable();
-                section.AddSection(new AutomataVisualizationSection("DFA", dfa));
+                section.AddSection(new AutomataVisualizationSection("DFA", dfa) { IncludeInTableOfContents = false });
 
                 Log.WriteLineVerbose($"Minimizing the dfa for token {tokenName}...");
                 var minDFA = dfa.Minimize();
-                section.AddSection(new AutomataVisualizationSection("Min-DFA", minDFA));
+                section.AddSection(new AutomataVisualizationSection("Min-DFA", minDFA) { IncludeInTableOfContents = false });
 
                 // Re-construct it as an NFA by removing trap states.
                 Log.WriteLineVerbose($"Removing trap states for token {tokenName}...");
                 var minNFA = new TokenNFATable(minDFA.RemoveTrapStates());
-                section.AddSection(new AutomataVisualizationSection("Min-NFA", minNFA));
+                section.AddSection(new AutomataVisualizationSection("Min-NFA", minNFA) { IncludeInTableOfContents = false });
 
                 yield return minNFA;
             }
