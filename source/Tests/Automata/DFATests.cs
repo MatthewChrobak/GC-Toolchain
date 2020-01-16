@@ -1,5 +1,4 @@
 ﻿using Automata.Deterministic;
-using Core;
 using NUnit.Framework;
 using System.Linq;
 
@@ -7,9 +6,7 @@ namespace Tests.Automata
 {
     public class DFATests
     {
-        [Test]
-        public void DFA_Minimization()
-        {
+        private DFATable ConstructDFA() {
             var dfa = new DFATable();
             var a = dfa.CreateNode();
             var b = dfa.CreateNode();
@@ -42,10 +39,42 @@ namespace Tests.Automata
             dfa.AddTransition(f, f, "1");
             dfa.AddTransition(f, f, "0");
 
+            return dfa;
+        }
+
+        [Test]
+        public void DFA_Minimization()
+        {
+            var dfa = ConstructDFA();
             var minDFA = dfa.Minimize();
 
             Assert.AreEqual(minDFA.Nodes.Count(), 3);
             Assert.AreEqual(minDFA.Transitions.Count(), 6);
+        }
+
+        [Test]
+        public void DFA_Traversal() {
+            var dfa = ConstructDFA();
+
+            var states = dfa.ApplyTransition(dfa.StartState, "0");
+            Assert.AreEqual(states.Count, 1);
+            Assert.AreEqual(states.First().ID, b.ID);
+
+            states = dfa.ApplyTransition(states, "1");
+            Assert.AreEqual(states.Count, 1);
+            Assert.AreEqual(states.First().ID, d.ID);
+
+            states = dfa.ApplyTransition(states, "1");
+            Assert.AreEqual(states.Count, 1);
+            Assert.AreEqual(states.First().ID, f.ID);
+
+            states = dfa.ApplyTransition(states, "1");
+            Assert.AreEqual(states.Count, 1);
+            Assert.AreEqual(states.First().ID, f.ID);
+
+            states = dfa.ApplyTransition(states, "0");
+            Assert.AreEqual(states.Count, 1);
+            Assert.AreEqual(states.First().ID, f.ID);
         }
     }
 }
