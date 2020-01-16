@@ -41,7 +41,7 @@ namespace Core.Config
 
             string? headerLine;
             // Keep looping until we see a non-empty line.
-            while (!String.IsNullOrEmpty(headerLine = GetNextLine())) {
+            while ((headerLine = GetNextLine()) != null) {
 
                 // TODO: How to handle a non-empty line that does not belong in a section?
                 //       Option 1: Throw exception for badly formatted config file.
@@ -58,6 +58,7 @@ namespace Core.Config
                 string? bodyLine;
                 while (!String.IsNullOrEmpty(bodyLine = GetNextLine())) {
                     if (bodyLine.StartsWith(SectionSymbol)) {
+                        ptr--;
                         break;
                     }
                 }

@@ -3,7 +3,7 @@
 namespace Core
 {
     [Serializable]
-    internal class AssertionFailedException : Exception
+    public class AssertionFailedException : Exception
     {
         public readonly string FileName;
         public readonly string MethodName;

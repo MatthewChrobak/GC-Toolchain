@@ -199,7 +199,7 @@ namespace LexicalAnalysis
                     }
 
                     // Token?
-                    if (component.StartsWith(this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_TOKEN_PREFIX_KEY))) {
+                    if (component.StartsWith(this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_SUB_TOKEN_PREFIX_KEY))) {
                         component = component[1..];
                         if (!support.ContainsKey(component)) {
                             Log.WriteLineVerbose($"Unable to define '{tokenName}' since it depends on '{component}' which has not yet been defined.");

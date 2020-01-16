@@ -13,7 +13,7 @@ namespace LexicalAnalysis
         public const string RULE_RANGE_INCLUSIVE_KEY = "range_inclusive";
         public const char RULE_RANGE_INCLUSIVE_VALUE = '-';
 
-        public const string RULE_TOKEN_PREFIX_KEY = "token_prefix";
+        public const string RULE_SUB_TOKEN_PREFIX_KEY = "sub_token_prefix";
         public const char RULE_TOKEN_PREFIX_VALUE = '$';
 
         public const string RULE_ZERO_OR_MORE_KEY = "one_or_more";
@@ -44,7 +44,7 @@ namespace LexicalAnalysis
             this.SetRuleIfNotExists(RULE_LITERAL_PREFIX_KEY, RULE_LITERAL_PREFIX_VALUE);
             this.SetRuleIfNotExists(RULE_RANGE_INCLUSIVE_KEY, RULE_RANGE_INCLUSIVE_VALUE);
             this.SetRuleIfNotExists(RULE_START_KEY, RULE_START_VALUE);
-            this.SetRuleIfNotExists(RULE_TOKEN_PREFIX_KEY, RULE_TOKEN_PREFIX_VALUE);
+            this.SetRuleIfNotExists(RULE_SUB_TOKEN_PREFIX_KEY, RULE_TOKEN_PREFIX_VALUE);
             this.SetRuleIfNotExists(RULE_ZERO_OR_MORE_KEY, RULE_ZERO_OR_MORE_VALUE);
         }
     }
