@@ -1,4 +1,5 @@
-﻿using Automata.Deterministic;
+﻿using Automata;
+using Automata.Deterministic;
 using NUnit.Framework;
 using System.Linq;
 
@@ -6,14 +7,22 @@ namespace Tests.Automata
 {
     public class DFATests
     {
-        private DFATable ConstructDFA() {
-            var dfa = new DFATable();
-            var a = dfa.CreateNode();
-            var b = dfa.CreateNode();
-            var c = dfa.CreateNode();
-            var d = dfa.CreateNode();
-            var e = dfa.CreateNode();
-            var f = dfa.CreateNode();
+        private readonly DFATable dfa;
+        private readonly Node a;
+        private readonly Node b;
+        private readonly Node c;
+        private readonly Node d;
+        private readonly Node e;
+        private readonly Node f;
+
+        public DFATests() {
+            dfa = new DFATable();
+            a = dfa.CreateNode();
+            b = dfa.CreateNode();
+            c = dfa.CreateNode();
+            d = dfa.CreateNode();
+            e = dfa.CreateNode();
+            f = dfa.CreateNode(); 
 
             dfa.StartState = a;
 
@@ -38,14 +47,10 @@ namespace Tests.Automata
 
             dfa.AddTransition(f, f, "1");
             dfa.AddTransition(f, f, "0");
-
-            return dfa;
         }
 
         [Test]
-        public void DFA_Minimization()
-        {
-            var dfa = ConstructDFA();
+        public void DFA_Minimization() {
             var minDFA = dfa.Minimize();
 
             Assert.AreEqual(minDFA.Nodes.Count(), 3);
@@ -54,8 +59,6 @@ namespace Tests.Automata
 
         [Test]
         public void DFA_Traversal() {
-            var dfa = ConstructDFA();
-
             var states = dfa.ApplyTransition(dfa.StartState, "0");
             Assert.AreEqual(states.Count, 1);
             Assert.AreEqual(states.First().ID, b.ID);
