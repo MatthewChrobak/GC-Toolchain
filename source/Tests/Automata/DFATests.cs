@@ -75,7 +75,7 @@ namespace Tests.Automata
             var nfa = dfa.RemoveTrapStates();
 
             Assert.AreEqual(1, nfa.Nodes.Count());
-            Assert.AreEqual(1, nfa.Transitions.Count());
+            Assert.AreEqual(1, nfa.Transitions.Count()); 
             Assert.AreEqual(0, nfa.Transitions.First().Source.ID);
             Assert.AreEqual(0, nfa.Transitions.First().Destination.ID);
             Assert.AreEqual("0", nfa.Transitions.First().Symbol);

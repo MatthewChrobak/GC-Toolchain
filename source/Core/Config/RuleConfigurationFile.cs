@@ -52,12 +52,20 @@ namespace Core.Config
         private void SetRule(string ruleKey, char ruleValue) {
             Debug.Assert(!this.RuleExists(ruleKey), $"Unable to set the rule {ruleKey} which already exists");
             Log.WriteLineVerbose($"Setting {ruleKey} rule as {ruleValue}");
+            VerifyNonDuplicateRuleValue(ruleValue);
             this._rules[ruleKey] = ruleValue;
+        }
+
+        private void VerifyNonDuplicateRuleValue(char ruleValue) {
+            foreach (var rule in this._rules) {
+                Debug.Assert(rule.Value != ruleValue, $"Rule {rule.Key} already uses the rule value '{ruleValue}'");
+            }
         }
 
         private void OverrideRule(string ruleKey, char ruleValue) {
             Debug.Assert(this.RuleExists(ruleKey), $"Unable to override the rule {ruleKey} which does not exist");
             Log.WriteLineWarning($"Changing {ruleKey} rule from {this.GetRule(ruleKey)} to {ruleValue}");
+            VerifyNonDuplicateRuleValue(ruleValue);
             this._rules[ruleKey] = ruleValue;
         }
 
