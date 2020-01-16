@@ -106,8 +106,8 @@ namespace Automata.Deterministic
                             var aDestinations = this._dfa.ApplyTransition(a, symbol);
                             var bDestinations = this._dfa.ApplyTransition(b, symbol);
 
-                            Debug.Assert(aDestinations.Count == 1, "Found multiple aDestinations for a DFA");
-                            Debug.Assert(bDestinations.Count == 1, "Found multiple bDestinations for a DFA");
+                            Debug.Assert(aDestinations.Count == 1, "Found multiple or no aDestinations for a DFA");
+                            Debug.Assert(bDestinations.Count == 1, "Found multiple or no bDestinations for a DFA");
 
                             var aDestination = aDestinations.First();
                             var bDestination = bDestinations.First();

@@ -15,6 +15,7 @@ namespace Core
             AllowedOutputs[(int)OutputLevel.Verbose] = false;
             AllowedOutputs[(int)OutputLevel.Warning] = true;
             AllowedOutputs[(int)OutputLevel.Error] = true;
+            SetState("Unknown");
         }
 
         public static void SetState(string state) {
@@ -63,6 +64,10 @@ namespace Core
 
         public static void EnableLevel(OutputLevel level) {
             AllowedOutputs[(int)level] = true;
+        }
+
+        public static void DisableLevel(OutputLevel level) {
+            AllowedOutputs[(int)level] = false;
         }
 
         public static ReportSection GetReportSections() {
