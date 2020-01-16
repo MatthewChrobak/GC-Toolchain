@@ -58,6 +58,32 @@ namespace Tests.Automata
         }
 
         [Test]
+        public void DFA_RemoveTrapStates() {
+            var dfa = new DFATable();
+            var a = dfa.CreateNode();
+            var c = dfa.CreateNode();
+            a.IsFinal = true;
+
+            dfa.StartState = a;
+
+            dfa.AddTransition(a, a, "0");
+            dfa.AddTransition(a, c, "1");
+
+            dfa.AddTransition(c, c, "1");
+            dfa.AddTransition(c, c, "0");
+
+            var nfa = dfa.RemoveTrapStates();
+
+            Assert.AreEqual(1, nfa.Nodes.Count());
+            Assert.AreEqual(1, nfa.Transitions.Count());
+            Assert.AreEqual(0, nfa.Transitions.First().Source.ID);
+            Assert.AreEqual(0, nfa.Transitions.First().Destination.ID);
+            Assert.AreEqual("0", nfa.Transitions.First().Symbol);
+            Assert.AreEqual(1, nfa.GetAllPossibleSymbols().Count);
+            Assert.IsTrue(nfa.GetAllPossibleSymbols().Contains("0"));
+        }
+
+        [Test]
         public void DFA_Traversal() {
             var states = dfa.ApplyTransition(dfa.StartState, "0");
             Assert.AreEqual(states.Count, 1);

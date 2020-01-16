@@ -1,6 +1,7 @@
 ﻿using Core;
 using LexicalAnalysis;
 using NUnit.Framework;
+using System;
 
 namespace Tests.LexicalAnalysis
 {
@@ -15,6 +16,31 @@ namespace Tests.LexicalAnalysis
         private TokenStream GetTokenStreamFromConfig(string configuration, string program) {
             var parser = ConstructParser(configuration);
             return parser.ParseString(program);
+        }
+
+        [Test]
+        public void Hex() {
+            // + 1 because '\0' would not work.
+            byte byteVal = (byte)((new Random().Next() % 255) + 1);
+            string val = BitConverter.ToString(new byte[] { byteVal });
+            string config = $@"
+#rule {LexicalConfigurationFile.RULE_HEX_PREFIX_KEY}
+A
+
+#token hex
+A{val}
+";
+            string program = ((char)byteVal).ToString();
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Count, 1);
+            Assert.IsTrue(tokens.HasNext);
+            var token = tokens.Next;
+            Assert.AreEqual("hex", token.TokenType);
+            Assert.AreEqual(0, token.Row);
+            Assert.AreEqual(0, token.Column);
+            Assert.AreEqual(((char)byteVal).ToString(), token.Content);
+            Assert.IsFalse(tokens.HasNext);
         }
 
         [Test]
@@ -39,6 +65,76 @@ aAz
                 Assert.AreEqual(token.Content, program[i].ToString());
                 i++;
             }
+            Assert.IsFalse(tokens.HasNext);
+        }
+
+        [Test]
+        public void ZeroOrMore_SubTokens() {
+            string config = $@"
+#rule {LexicalConfigurationFile.RULE_ZERO_OR_MORE_KEY}
+A
+
+#subtoken zero_or_more_subtoken
+a
+
+#token zero_or_more
+$zero_or_more_subtokenA
+";
+            string program = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(1, tokens.Count);
+            var token = tokens.Next;
+            Assert.AreEqual(0, token.Row);
+            Assert.AreEqual(0, token.Column);
+            Assert.AreEqual("zero_or_more", token.TokenType);
+            Assert.AreEqual(program, token.Content);
+            Assert.IsFalse(tokens.HasNext);
+        }
+
+        [Test]
+        public void ZeroOrMore_SubToken() {
+            string config = $@"
+#rule {LexicalConfigurationFile.RULE_ZERO_OR_MORE_KEY}
+A
+
+#subtoken zero_or_more_subtoken
+aA
+
+#token zero_or_more
+$zero_or_more_subtoken
+";
+            string program = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(1, tokens.Count);
+            var token = tokens.Next;
+            Assert.AreEqual(0, token.Row);
+            Assert.AreEqual(0, token.Column);
+            Assert.AreEqual("zero_or_more", token.TokenType);
+            Assert.AreEqual(program, token.Content);
+            Assert.IsFalse(tokens.HasNext);
+        }
+
+        [Test]
+        public void ZeroOrMore() {
+            string config = $@"
+#rule {LexicalConfigurationFile.RULE_ZERO_OR_MORE_KEY}
+A
+
+#token zero_or_more
+aA
+";
+            string program = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(1, tokens.Count);
+            var token = tokens.Next;
+            Assert.AreEqual(0, token.Row);
+            Assert.AreEqual(0, token.Column);
+            Assert.AreEqual("zero_or_more", token.TokenType);
+            Assert.AreEqual(program, token.Content);
+            Assert.IsFalse(tokens.HasNext);
         }
 
         [Test]
