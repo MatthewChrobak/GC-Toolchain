@@ -1,10 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace LexicalAnalysis
 {
-    public class TextFileScanner
+    public class TextFileScanner : IDisposable
     {
         private string[] _contents;
+
         public int Line { get; private set; }
         public int Column { get; private set; }
         public const char EOF = '\0';
@@ -17,6 +19,12 @@ namespace LexicalAnalysis
             this.Line = 0;
             this.Column = 0;
             this._contents = File.ReadAllLines(sourcefile);
+        }
+
+        public TextFileScanner(string[] lines) {
+            this.Line = 0;
+            this.Column = 0;
+            this._contents = lines;
         }
 
         public char Read() {
@@ -57,6 +65,10 @@ namespace LexicalAnalysis
         public void GoToStart() {
             this.Line = 0;
             this.Column = 0;
+        }
+
+        public void Dispose() {
+
         }
     }
 }

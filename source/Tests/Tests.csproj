@@ -13,12 +13,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Core\" />
-    <Folder Include="LexicalAnalysis\" />
+    <ProjectReference Include="..\Automata\Automata.csproj" />
+    <ProjectReference Include="..\LexicalAnalysis\LexicalAnalysis.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Automata\Automata.csproj" />
+    <Folder Include="Core\" />
   </ItemGroup>
 
 </Project>

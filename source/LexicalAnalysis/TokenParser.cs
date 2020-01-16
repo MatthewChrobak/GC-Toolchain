@@ -2,7 +2,6 @@
 using Automata.NonDeterministic;
 using Core;
 using Core.ReportGeneration;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,8 +17,7 @@ namespace LexicalAnalysis
             this.nfaTable = nFATable;
         }
 
-        public TokenStream ParseFile(string sourcefile) {
-            var fs = new TextFileScanner(sourcefile);
+        private TokenStream Parse(TextFileScanner fs) {
             stream = new TokenStream();
             var tokenContent = new StringBuilder();
             int startLine = 0;
@@ -64,7 +62,7 @@ namespace LexicalAnalysis
                     fs.GoNext();
                 } while (currentStates.Count > 0);
 
-                Debug.Assert(token != null, $"Invalid symbol found during token parsing: '{tokenContent.ToString().Last()}' Ascii value:{(int)tokenContent.ToString().Last()}");
+                Debug.Assert(token != null, $"Invalid symbol found during token parsing: '{tokenContent.ToString().Last()}' Ascii value:{(int)tokenContent.ToString().Last()} around {startLine}:{startColumn}");
 
                 int goBackN = tokenContent.Length - token.Content.Length;
                 for (int i = 0; i < goBackN; i++) {
@@ -75,6 +73,19 @@ namespace LexicalAnalysis
             }
 
             return stream;
+        }
+
+        public TokenStream ParseFile(string sourcefile) {
+            var fs = new TextFileScanner(sourcefile);
+            return Parse(fs);
+        }
+
+        public TokenStream ParseString(string line) {
+            return this.ParseString(new string[] { line });
+        }
+
+        public TokenStream ParseString(string[] lines) {
+            return this.Parse(new TextFileScanner(lines));
         }
 
         public ReportSection GetReportSections() {
