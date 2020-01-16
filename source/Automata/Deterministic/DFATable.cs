@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Automata.NonDeterministic;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace Automata.NonDeterministic
+namespace Automata.Deterministic
 {
     public class DFATable : AutomataTable
     {

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Automata.Deterministic;
+using System.Collections.Generic;
 
 namespace Automata.NonDeterministic
 {

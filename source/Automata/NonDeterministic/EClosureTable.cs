@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using Automata.Deterministic;
+using Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;

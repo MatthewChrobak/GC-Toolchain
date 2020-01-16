@@ -1,8 +1,9 @@
-﻿using Core;
+﻿using Automata.NonDeterministic;
+using Core;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Automata.NonDeterministic
+namespace Automata.Deterministic
 {
     internal class DFAMinimizationTable
     {
