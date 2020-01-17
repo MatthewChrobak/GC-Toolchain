@@ -16,7 +16,7 @@ namespace LexicalAnalysis
         public const string RULE_SUB_TOKEN_PREFIX_KEY = "sub_token_prefix";
         public const char RULE_TOKEN_PREFIX_VALUE = '$';
 
-        public const string RULE_ZERO_OR_MORE_KEY = "one_or_more";
+        public const string RULE_ZERO_OR_MORE_KEY = "zero_or_more";
         public const char RULE_ZERO_OR_MORE_VALUE = '*';
 
         public const string RULE_EPSILON_KEY = "epsilon";
