@@ -19,6 +19,43 @@ namespace Tests.LexicalAnalysis
         }
 
         [Test]
+        public void PriorityMatching_EqualPriority() {
+            string config = @$"
+#token low_priority {LexicalConfigurationFile.HEADER_PRIORITY_PREFIX}0
+abcd
+
+#token high_priority {LexicalConfigurationFile.HEADER_PRIORITY_PREFIX}0
+abcd
+";
+            string program = "abcd";
+            Assert.Throws<AssertionFailedException>(new TestDelegate(() => {
+                var tokens = GetTokenStreamFromConfig(config, program);
+            }));
+        }
+
+        [Test]
+        public void PriorityMatching_TakeHigh() {
+            string config = @$"
+#token low_priority {LexicalConfigurationFile.HEADER_PRIORITY_PREFIX}0
+abcd
+
+#token high_priority {LexicalConfigurationFile.HEADER_PRIORITY_PREFIX}1
+abcd
+";
+            string program = "abcd";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.IsTrue(tokens.HasNext);
+            Assert.AreEqual(1, tokens.Count);
+            var token = tokens.Next;
+
+            Assert.AreEqual("high_priority", token.TokenType);
+            Assert.AreEqual(program, token.Content);
+            Assert.AreEqual(0, token.Row);
+            Assert.IsFalse(tokens.HasNext);
+        }
+
+        [Test]
         public void Hex() {
             // + 1 because '\0' would not work.
             byte byteVal = (byte)((new Random().Next() % 255) + 1);

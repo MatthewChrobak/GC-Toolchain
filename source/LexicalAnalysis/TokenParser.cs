@@ -52,8 +52,12 @@ namespace LexicalAnalysis
                             tags.Add((priority, tag));
                         }
                     }
-                    string highestPriorityTag = tags.OrderBy(val => val.priority).LastOrDefault().tag;
+                    var orderedTags = tags.OrderByDescending(val => val.priority);
+                    var highestPriority = orderedTags.FirstOrDefault();
+                    var secondHighestPriority = orderedTags.ElementAtOrDefault(1);
+                    string highestPriorityTag = highestPriority.tag;
                     if (highestPriorityTag != null) {
+                        Debug.Assert(secondHighestPriority.tag == null || highestPriority.priority > secondHighestPriority.priority, $"Conflict of priority found between {highestPriority.tag}:{highestPriority.priority} and {secondHighestPriority.tag}:{secondHighestPriority.priority}");
                         token = new Token(highestPriorityTag, tokenContent.ToString(), startLine, startColumn);
                     }
                     if (!fs.CanRead && fs.Peek() == TextFileScanner.EOF) {
