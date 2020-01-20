@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.181
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GCT", "GCT\GCT.csproj", "{AEFBFD65-D8F0-49D0-A77B-6DE076368794}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GCT", "GCT\GCT.csproj", "{AEFBFD65-D8F0-49D0-A77B-6DE076368794}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{E4C6F91A-5C71-400B-9FB1-E1089CEB232C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{E4C6F91A-5C71-400B-9FB1-E1089CEB232C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Automata", "Automata\Automata.csproj", "{C19215DC-7B45-4658-890E-045E0585FAA1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Automata", "Automata\Automata.csproj", "{C19215DC-7B45-4658-890E-045E0585FAA1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{7A5ACE30-B191-49D0-99AE-68E6D5AE0019}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", "{7A5ACE30-B191-49D0-99AE-68E6D5AE0019}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LexicalAnalysis", "LexicalAnalysis\LexicalAnalysis.csproj", "{AA9DDAB6-6151-49C8-BF17-A52C9F2F8007}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{7A5ACE30-B191-49D0-99AE-68E6D5AE0019}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A5ACE30-B191-49D0-99AE-68E6D5AE0019}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A5ACE30-B191-49D0-99AE-68E6D5AE0019}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA9DDAB6-6151-49C8-BF17-A52C9F2F8007}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA9DDAB6-6151-49C8-BF17-A52C9F2F8007}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA9DDAB6-6151-49C8-BF17-A52C9F2F8007}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA9DDAB6-6151-49C8-BF17-A52C9F2F8007}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

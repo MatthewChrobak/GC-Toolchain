@@ -1,9 +1,95 @@
-﻿namespace GCT
+﻿using Core;
+using Core.ReportGeneration;
+using LexicalAnalysis;
+using System;
+using System.IO;
+using System.Text.RegularExpressions;
+
+namespace GCT
 {
     public static class Program
     {
-        private static void Main(string[] args) {
+        public static void Main(string[] args) {
+            // If no args are given, take some.
+            if (args.Length == 0) {
+                Main(Console.ReadLine().Split(' '));
+            }
 
+            try {
+                RealMain(args);
+            } catch (Exception e) {
+                Log.WriteLineError($"Unable to continue due to exception of type {e.GetType()} being thrown during lexical analysis. Exiting.");
+            }
+        }
+
+        private static void RealMain(string[] args) {
+            string? tokenConfigurationFilePath = null;
+            string? reportName = null;
+            string? sourcefile = null;
+
+            // Extract arguments.
+            var match = Regex.Match(string.Join(' ', args), @"\-(\w+)(\s+([^\-\r\n]+|\"".+?\""|\'.+?\'))?");
+            while (match.Success) {
+
+                string flagKey = match.Groups[1].Value.Trim();
+                string flagValue = match.Groups[2].Value.Trim();
+
+                switch (flagKey) {
+                    case "v":
+                    case "verbose":
+                        Debug.Assert(flagValue == string.Empty, "Verbose flag should not trailed by any value");
+                        Log.EnableLevel(OutputLevel.Verbose);
+                        break;
+                    case "t":
+                    case "token":
+                    case "tokens":
+                        tokenConfigurationFilePath = flagValue;
+                        break;
+                    case "r":
+                    case "report":
+                        reportName = flagValue;
+                        break;
+                    case "sourcefile":
+                    case "program":
+                    case "p":
+                        sourcefile = flagValue;
+                        break;
+                }
+
+                match = match.NextMatch();
+            }
+
+            LexicalConfigurationFile tokenConfigurationFile;
+            Log.SetState("Lexical-Analysis");
+            TokenParser? tokenParser = null;
+            TokenStream? tokenStream = null;
+            var report = new Report();
+
+            // Build the parser table
+            if (tokenConfigurationFilePath != null) {
+                Log.WriteLineVerbose($"Parsing configuration file: {tokenConfigurationFilePath}");
+                tokenConfigurationFile = new LexicalConfigurationFile(tokenConfigurationFilePath);
+                Log.WriteLineVerbose($"Done.");
+
+                var tokenParserTableGenerator = new TokenParserTableGenerator(tokenConfigurationFile);
+                report.AddSection(tokenParserTableGenerator.GetReportSections());
+
+                tokenParser = new TokenParser(tokenParserTableGenerator.NFATable);
+            }
+
+            // Get the token stream
+            if (sourcefile != null) {
+                Debug.Assert(tokenParser != null, "TokenParser was not initialized.");
+
+                tokenStream = tokenParser.ParseFile(sourcefile);
+                report.AddSection(tokenParser.GetReportSections());
+            }
+
+            report.AddSection(Log.GetReportSections());
+
+            if (reportName != null) {
+                File.WriteAllText($"{reportName}.html", report.ToHTML());
+            }
         }
     }
 }
