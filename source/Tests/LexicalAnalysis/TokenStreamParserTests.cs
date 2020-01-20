@@ -19,6 +19,37 @@ namespace Tests.LexicalAnalysis
         }
 
         [Test]
+        public void TokenWithNoHeader() {
+            string config = @"
+#token
+$subtoken
+";
+            Assert.Throws<AssertionFailedException>(new TestDelegate(() => {
+                ConstructParser(config);
+            }));
+        }
+
+        [Test]
+        public void TokenWithNoBody() {
+            string config = @"
+#token test
+";
+            Assert.Throws<AssertionFailedException>(new TestDelegate(() => {
+                ConstructParser(config);
+            }));
+        }
+
+        [Test]
+        public void SubTokenWithNoBody() {
+            string config = @"
+#subtoken test
+";
+            Assert.Throws<AssertionFailedException>(new TestDelegate(() => {
+                ConstructParser(config);
+            }));
+        }
+
+        [Test]
         public void UnknownSubtoken() {
             string config = @"
 #token Test

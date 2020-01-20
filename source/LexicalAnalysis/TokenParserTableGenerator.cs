@@ -158,7 +158,8 @@ namespace LexicalAnalysis
         }
 
         private bool ConstructTokenDefinition(Core.Config.ConfigSection section, Dictionary<string, TokenNFATable> destination, Dictionary<string, TokenNFATable> support) {
-            Debug.Assert(!String.IsNullOrEmpty(section.Header.FirstOrDefault()), $"Token Definition {section.GetLocation()} cannot have empty tag.");
+            Debug.Assert(!String.IsNullOrEmpty(section.Header.FirstOrDefault()), $"Token Definition {section.GetLocation()} cannot have empty tag");
+            Debug.Assert(section.Body.Any(line => !string.IsNullOrEmpty(line)), $"Token Definition {section.GetLocation()} cannot have empty body.");
 
             string tokenName = section.Header.FirstOrDefault();
             var finalRule = new TokenNFATable();
