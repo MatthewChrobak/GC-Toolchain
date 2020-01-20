@@ -19,6 +19,17 @@ namespace Tests.LexicalAnalysis
         }
 
         [Test]
+        public void UnknownSubtoken() {
+            string config = @"
+#token Test
+$subtoken
+";
+            Assert.Throws<AssertionFailedException>(new TestDelegate(() => {
+                ConstructParser(config);
+            }));
+        }
+
+        [Test]
         public void PriorityMatching_EqualPriority() {
             string config = @$"
 #token low_priority {LexicalConfigurationFile.HEADER_PRIORITY_PREFIX}0

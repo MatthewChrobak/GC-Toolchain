@@ -153,7 +153,7 @@ namespace LexicalAnalysis
                     pendingTokens.Remove(section);
                 }
 
-                Debug.Assert(sectionsDefinedInThisIteration.Count != 0, $"Language definition is not regular. {String.Join(", ", pendingTokens.Select(section => section.Header.FirstOrDefault()))} cannot be constructed.");
+                Debug.Assert(sectionsDefinedInThisIteration.Count != 0, $"Language definition is not regular. {String.Join(", ", pendingTokens.Select(section => section.Header.FirstOrDefault()))} cannot be constructed");
             }
         }
 
