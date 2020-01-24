@@ -101,18 +101,16 @@ namespace GCT
                 var clrStates = new CLRStateGenerator(productionTable, syntaxConfigFile);
                 var lrTable = LRParsingTable.From(clrStates, productionTable);
                 report.AddSection(lrTable.GetReportSection());
+
+
+                Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream");
+                new LRParser().Parse(lrTable, tokenStream);
             }
-            
-            
-            
-            
-            
+
             report.AddSection(Log.GetReportSections());
             if (reportName != null) {
                 File.WriteAllText($"{reportName}.html", report.ToHTML());
             }
-
-            //Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream.");
         }
     }
 }

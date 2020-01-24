@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LexicalAnalysis", "LexicalAnalysis\LexicalAnalysis.csproj", "{AA9DDAB6-6151-49C8-BF17-A52C9F2F8007}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SyntacticAnalysis", "SyntacticAnalysis\SyntacticAnalysis.csproj", "{81933738-B448-4354-A835-8710EBB51EE5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SyntacticAnalysis", "SyntacticAnalysis\SyntacticAnalysis.csproj", "{81933738-B448-4354-A835-8710EBB51EE5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

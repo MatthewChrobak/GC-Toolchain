@@ -1,7 +1,6 @@
 ﻿using Core;
 using Core.ReportGeneration;
 using SyntacticAnalysis.CLR;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -32,6 +31,7 @@ namespace SyntacticAnalysis
             int ptr = 0;
             foreach (var production in productionTable.Productions) {
                 foreach (var rule in production.Rules) {
+                    table.Productions[ptr] = rule;
                     ruleLookup[rule] = ptr++;
                 }
             }
@@ -49,7 +49,8 @@ namespace SyntacticAnalysis
 
                     // ACTION?
                     if (symbol.Type == SymbolType.Token) {
-                        var aciton = new LRParsingTableAction(ActionType.Shift, kernelLookup[groupEntry.Value]);
+                        var action = new LRParsingTableAction(ActionType.Shift, kernelLookup[groupEntry.Value]);
+                        tableRow.Actions.Add(symbol.ID , action);
                     }
                     // GOTO?
                     if (symbol.Type == SymbolType.Production) {
@@ -64,6 +65,9 @@ namespace SyntacticAnalysis
                     }
                 }
             }
+
+            table.Rows[1].Actions[Symbol.EndStream.ID] = new LRParsingTableAction(ActionType.Accept, -1);
+            table.Rows[0].GOTO[productionTable.Productions.First().Key.ID] = 1;
 
             return table;
         }

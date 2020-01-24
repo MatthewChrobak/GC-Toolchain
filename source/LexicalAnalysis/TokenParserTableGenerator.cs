@@ -187,7 +187,7 @@ namespace LexicalAnalysis
                         // What if it's prefaced with a literal?
                         if (component.EndsWith(this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_LITERAL_PREFIX_KEY))) {
                             // Undo what we removed.
-                            component += this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_LITERAL_PREFIX_KEY);
+                            component += this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_ZERO_OR_MORE_KEY);
                             zero_or_more_loopPoint = null;
                         }
                     }
