@@ -144,9 +144,9 @@ namespace SyntacticAnalysis.CLR_V3
                         ItemSet newClosureItemSet;
                         var symbolAfterAfter = existingClosureItemSet.SymbolAfterAfter;
 
-                        // If null, lookahead is the end token stream symbol.
+                        // If null, lookahead is the previous itemset lookahead.
                         if (symbolAfterAfter == null) {
-                            newClosureItemSet = new ItemSet(rule, 0);
+                            newClosureItemSet = new ItemSet(rule, 0, existingClosureItemSet.Lookahead);
 
                             // If production, lookahead is its first
                         } else if (symbolAfterAfter.Type == SymbolType.Production) {
