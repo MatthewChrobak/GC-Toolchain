@@ -2,7 +2,7 @@
 using Core.ReportGeneration;
 using LexicalAnalysis;
 using SyntacticAnalysis;
-using SyntacticAnalysis.CLR_V3;
+using SyntacticAnalysis.CLR;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -91,18 +91,23 @@ namespace GCT
                 report.AddSection(tokenParser.GetReportSections());
             }
 
-            report.AddSection(Log.GetReportSections());
 
-            if (reportName != null) {
-                File.WriteAllText($"{reportName}.html", report.ToHTML());
-            }
 
             Log.SetState("Syntactic-Analysis");
             if (syntaxConfigurationFilePath != null) {
 
                 var syntaxConfigFile = new SyntacticConfigurationFile(syntaxConfigurationFilePath);
                 var productionTable = new ProductionTable(syntaxConfigFile);
-                var lrTable = new CLRTable(productionTable, syntaxConfigFile);
+                var lrTable = new CLRStateGenerator(productionTable, syntaxConfigFile);
+            }
+            
+            
+            
+            
+            
+            report.AddSection(Log.GetReportSections());
+            if (reportName != null) {
+                File.WriteAllText($"{reportName}.html", report.ToHTML());
             }
 
             //Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream.");

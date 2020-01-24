@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace SyntacticAnalysis.CLR
 {
@@ -7,31 +6,41 @@ namespace SyntacticAnalysis.CLR
     {
         public readonly Rule Rule;
         public readonly int Ptr;
-        //public readonly HashSet<Symbol> Follow;
+        public readonly HashSet<Symbol> Lookahead;
+        public Symbol? SymbolAfter => this.Rule.SymbolAfter(this.Ptr);
+        public Symbol? SymbolAfterAfter => this.Rule.SymbolAfter(this.Ptr + 1);
 
-        public ItemSet(Rule rule, int ptr/*, HashSet<Symbol> follow*/) {
+        public ItemSet(Rule rule, int ptr) : this(rule, ptr, new Symbol[] { Symbol.EndStream }) {
+
+        }
+
+        public ItemSet(Rule rule, int ptr, Symbol lookahead) : this(rule, ptr, new Symbol[] { lookahead }) {
+
+        }
+
+        public ItemSet(Rule rule, int ptr, IEnumerable<Symbol> lookahead) {
             this.Rule = rule;
             this.Ptr = ptr;
-            //this.Follow = follow;
-        }
-
-        public override string ToString() {
-            return $"{this.Rule.Key.ID} -> {this.Rule.ToStringWithSymbol(this.Ptr)} : {""/*string.Join(',', this.Follow.Select(follow => follow.ID))*/}";
-        }
-
-        public Symbol? NextSymbol() {
-            return this.Rule.SymbolAfter(this.Ptr);
+            this.Lookahead = new HashSet<Symbol>(lookahead);
         }
 
         public override bool Equals(object? obj) {
             if (obj is ItemSet itemset) {
-                return this.Ptr == itemset.Ptr && this.Rule.Equals(itemset.Rule) /*&& this.Follow == itemset.Follow*/;
+                if (this.Ptr != itemset.Ptr) {
+                    return false;
+                }
+
+                if (!this.Rule.Equals(itemset.Rule)) {
+                    return false;
+                }
+
+                return this.Lookahead.HasSameElementsAs(itemset.Lookahead);
             }
             return false;
         }
 
         public override int GetHashCode() {
-            return this.Rule.GetHashCode() + this.Ptr.GetHashCode();
+            return this.Ptr.GetHashCode() + this.Rule.TextRepresentation.GetHashCode() + this.Lookahead.Count;
         }
     }
 }
