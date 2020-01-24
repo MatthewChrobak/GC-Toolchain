@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace SyntacticAnalysis.CLR
 {
@@ -75,11 +76,11 @@ namespace SyntacticAnalysis.CLR
             }
         }
 
-        public Dictionary<string, HashSet<ItemSet>> GroupRulesBySymbolAfter() {
-            var groups = new Dictionary<string, HashSet<ItemSet>>();
+        public Dictionary<Symbol, Kernel> GroupRulesBySymbolAfter() {
+            var groups = new Dictionary<Symbol, HashSet<ItemSet>>();
 
             foreach (var item in Closure) {
-                var key = item.SymbolAfter?.ID;
+                var key = item.SymbolAfter;
                 if (key == null) {
                     continue;
                 }
@@ -90,7 +91,7 @@ namespace SyntacticAnalysis.CLR
                 groups[key].Add(new ItemSet(item.Rule, item.Ptr + 1, item.Lookahead));
             }
 
-            return groups;
+            return new Dictionary<Symbol, Kernel>(groups.Select(entry => new KeyValuePair<Symbol, Kernel>(entry.Key, new Kernel(entry.Value))));
         }
     }
 }

@@ -44,7 +44,7 @@
                     return true;
                 }
 
-                return this.ID == s.ID && this.Type == s.Type;
+                return this.ID == s.ID && this.Type == s.Type && s?.Tag == s?.Tag;
             }
 
             return false;

@@ -19,6 +19,8 @@ namespace SyntacticAnalysis.CLR
 
             CreateState("", new Kernel(new ItemSet(startRule, 0)));
 
+            Log.WriteLineVerboseClean("");
+            Log.WriteLineVerboseClean($"Num states: {States.Count}");
             foreach (var state in this.States) {
                 Log.WriteLineVerboseClean("");
                 Log.WriteLineVerboseClean($"[{state.Value.ID}]");
@@ -40,7 +42,7 @@ namespace SyntacticAnalysis.CLR
             this.States.Add(kernel, state);
 
             foreach (var group in state.GroupRulesBySymbolAfter()) {
-                CreateState(id + group.Key, new Kernel(group.Value));
+                CreateState(id + group.Key.ID, group.Value);
             }
         }
     }
