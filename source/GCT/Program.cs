@@ -1,6 +1,8 @@
 ﻿using Core;
 using Core.ReportGeneration;
 using LexicalAnalysis;
+using SyntacticAnalysis;
+using SyntacticAnalysis.CLR_V3;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -17,13 +19,14 @@ namespace GCT
 
             try {
                 RealMain(args);
-            } catch (Exception e) {
+            } catch (AssertionFailedException e) {
                 Log.WriteLineError($"Unable to continue due to exception of type {e.GetType()} being thrown during lexical analysis. Exiting.");
             }
         }
 
         private static void RealMain(string[] args) {
             string? tokenConfigurationFilePath = null;
+            string? syntaxConfigurationFilePath = null;
             string? reportName = null;
             string? sourcefile = null;
 
@@ -48,6 +51,9 @@ namespace GCT
                     case "r":
                     case "report":
                         reportName = flagValue;
+                        break;
+                    case "s":
+                        syntaxConfigurationFilePath = flagValue;
                         break;
                     case "sourcefile":
                     case "program":
@@ -90,6 +96,16 @@ namespace GCT
             if (reportName != null) {
                 File.WriteAllText($"{reportName}.html", report.ToHTML());
             }
+
+            Log.SetState("Syntactic-Analysis");
+            if (syntaxConfigurationFilePath != null) {
+
+                var syntaxConfigFile = new SyntacticConfigurationFile(syntaxConfigurationFilePath);
+                var productionTable = new ProductionTable(syntaxConfigFile);
+                var lrTable = new CLRTable(productionTable, syntaxConfigFile);
+            }
+
+            //Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream.");
         }
     }
 }
