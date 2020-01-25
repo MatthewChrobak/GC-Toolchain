@@ -19,7 +19,7 @@
         }
 
         public Symbol(string symbolData, SyntacticConfigurationFile config) {
-            string[] data = symbolData.Split(SyntacticConfigurationFile.TOKEN_TAG_SEPARATOR);
+            string[] data = symbolData.Trim().Split(SyntacticConfigurationFile.TOKEN_TAG_SEPARATOR);
             string id = data[0];
             string? tag = data.Length == 2 ? data[1] : null;
 

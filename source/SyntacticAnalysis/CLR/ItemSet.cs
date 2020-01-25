@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace SyntacticAnalysis.CLR
 {
@@ -26,11 +27,9 @@ namespace SyntacticAnalysis.CLR
 
         public override bool Equals(object? obj) {
             if (obj is ItemSet itemset) {
-                if (this.Ptr != itemset.Ptr) {
-                    return false;
-                }
 
-                if (!this.Rule.Equals(itemset.Rule)) {
+
+                if (this.Rule.ToStringWithSymbol(this.Ptr) != itemset.Rule.ToStringWithSymbol(itemset.Ptr)) {
                     return false;
                 }
 
@@ -40,7 +39,7 @@ namespace SyntacticAnalysis.CLR
         }
 
         public override int GetHashCode() {
-            return this.Ptr.GetHashCode() + this.Rule.TextRepresentation.GetHashCode() + this.Lookahead.Count;
+            return this.Rule.TextRepresentation.GetHashCode() + this.Lookahead.Count;
         }
     }
 }

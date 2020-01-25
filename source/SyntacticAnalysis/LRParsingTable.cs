@@ -47,7 +47,7 @@ namespace SyntacticAnalysis
                 foreach (var groupEntry in stateEntry.Value.GroupRulesBySymbolAfter()) {
                     var symbol = groupEntry.Key;
 
-                    // ACTION?
+                    // SHIFT?
                     if (symbol.Type == SymbolType.Token) {
                         var action = new LRParsingTableAction(ActionType.Shift, kernelLookup[groupEntry.Value]);
                         tableRow.Actions.Add(symbol.ID , action);
@@ -67,7 +67,6 @@ namespace SyntacticAnalysis
             }
 
             table.Rows[1].Actions[Symbol.EndStream.ID] = new LRParsingTableAction(ActionType.Accept, -1);
-            table.Rows[0].GOTO[productionTable.Productions.First().Key.ID] = 1;
 
             return table;
         }

@@ -15,6 +15,10 @@ namespace SyntacticAnalysis
             while (true) {
                 var x = stk.Peek();
 
+                //var arr = stk.ToArray();
+                //Array.Reverse(arr);
+                //Log.WriteLineVerboseClean(string.Join("", arr));
+
                 if (table.Rows[x].Actions.TryGetValue(a.TokenType, out var action)) {
                     if (action.Type == ActionType.Accept) {
                         Log.WriteLineVerboseClean("accept");
@@ -24,10 +28,10 @@ namespace SyntacticAnalysis
                         stk.Push(a.TokenType);
                         stk.Push(action.ID);
                         a = GetNextToken(tokenStream);
-                        Log.WriteLineVerboseClean($"Shift {action.ID}");
+                        //Log.WriteLineVerboseClean($"Shift {action.ID}");
                     } else if (action.Type == ActionType.Reduce) {
                         var prod = table.Productions[action.ID];
-                        int prodCount = prod.   Symbols.Count;
+                        int prodCount = prod.Symbols.Count;
                         for (int i = 0; i < 2 * prodCount; i++) {
                             // TODO: Is this where we construct the AST?
                             stk.Pop();
@@ -35,13 +39,12 @@ namespace SyntacticAnalysis
                         int nextState = stk.Peek();
                         stk.Push(prod.Key.ID);
                         stk.Push(table.Rows[nextState].GOTO[prod.Key.ID]);
-                        Log.WriteLineVerboseClean($"Reduce ({prod.Key.ID + " -> " + prod.TextRepresentation})");
+                        //Log.WriteLineVerboseClean($"Reduce ({prod.Key.ID + " -> " + prod.TextRepresentation})");
                     } else {
                         return false;
                     }
                 } else {
-                    Log.WriteLineVerboseClean($"couldn't retrieve");
-                    Log.WriteLineVerboseClean($"state {x} symbol {a.TokenType}");
+                    Log.WriteLineVerboseClean($"couldn't retrieve: state {x} symbol {a.TokenType}");
                     return false;
                 }
             }
