@@ -32,16 +32,14 @@ namespace SyntacticAnalysis
             var productionsWithEpsilonTransitions = new HashSet<string>(this._productions.Where(entry => entry.Value.CanBeEpsilon).Select(entry => entry.Key));
 
             foreach (var entry in this._productions) {
-                IEnumerable<Rule>? newRules = null;
+                var allNewRules = new List<Rule?>();
                 foreach (var rule in entry.Value.Rules) {
-                    newRules = Permute(rule, 0, productionsWithEpsilonTransitions, false);
+                    foreach (var newRule in Permute(rule, 0, productionsWithEpsilonTransitions, false)) {
+                        allNewRules.Add(newRule);
+                    }
                 }
 
-                if (newRules == null) {
-                    continue;
-                }
-
-                foreach (var newRule in newRules.Where(newRule => newRule != null)) {
+                foreach (var newRule in allNewRules.Where(newRule => newRule != null)) {
                     if (!entry.Value.Rules.Contains(newRule)) {
                         entry.Value.Rules.Add(newRule);
                     }

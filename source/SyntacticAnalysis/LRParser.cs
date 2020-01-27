@@ -64,7 +64,14 @@ namespace SyntacticAnalysis
 
                                 if (tag == this._config.GetRule(SyntacticConfigurationFile.RULE_INLINE_KEY).ToString()) {
                                     foreach (var element in token.ASTNode.Elements) {
-                                        node.Add(element.Key, element.Value);
+                                        if (element.Value is ASTNode astNode) {
+                                            node.Add(element.Key, astNode);
+                                        }
+                                        if (element.Value is List<ASTNode> lst) {
+                                            foreach (var lstItem in lst) {
+                                                node.Add(element.Key, lstItem);
+                                            }
+                                        }
                                     }
                                 } else {
                                     node.Add(tag, token.ASTNode);
