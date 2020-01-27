@@ -73,3 +73,46 @@ $nonzero
 #token integer
 $nonzero $digit*
 ```
+
+## Syntactic Analysis
+
+### Configuration Files
+
+### Rule
+Specifies unique symbols used in the grammar.
+The following rules are the default values used.
+
+```
+#rule start
+S
+
+#rule production_prefix
+$
+```
+### Production
+Specifies a non-terminal in the grammar and its rules.
+
+```
+#producion statement
+id ( ) ;
+id id = id ;
+```
+
+Productions can have epsilon transitions which are denoted by annotation.
+
+```
+#production function epsilon:true
+id id ( ) { }
+```
+is equivalent to 
+```
+function -> id id ( ) { }
+          | Ɛ
+```
+
+### Blacklist
+Specifies tokens to ignore in the token stream.
+```
+#blacklist
+whitespace
+```
