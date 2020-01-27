@@ -114,10 +114,6 @@ namespace GCT
                 var syntaxConfigFile = new SyntacticConfigurationFile(syntaxConfigurationFilePath);
                 var productionTable = new ProductionTable(syntaxConfigFile);
                 report?.AddSection(productionTable.GetReportSection());
-
-                productionTable.ComputeFirst();
-                productionTable.ComputeFollow();
-
                 var clrStates = new CLRStateGenerator(productionTable, syntaxConfigFile);
                 var lrTable = LRParsingTable.From(clrStates, productionTable);
                 report?.AddSection(lrTable.GetReportSection());
