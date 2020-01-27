@@ -71,7 +71,7 @@ namespace SyntacticAnalysis
         }
 
         private string GetTokensForTable(TokenStream tokenStream) {
-            int count = 20;
+            int count = 10;
             var tokens = tokenStream.GetNextFewTokens(count).ToList();
             int actualCount = tokens.Count;
             if (tokens.Count < count) {
@@ -83,6 +83,11 @@ namespace SyntacticAnalysis
         private string GetStackContent(Stack<dynamic> stk) {
             var arr = stk.ToArray();
             Array.Reverse(arr);
+
+            int count = 10;
+            if (arr.Length > count) {
+                return "..." + string.Join("", arr[^10..]);
+            }
             return string.Join("", arr);
         }
 

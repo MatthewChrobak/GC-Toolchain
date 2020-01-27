@@ -1,5 +1,4 @@
 ﻿using Core;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -24,7 +23,7 @@ namespace LexicalAnalysis
             for (int i = 0; i < count; i++) {
                 int ptr = this._ptr + i + 1;
                 if (ptr < this._tokens.Count) {
-                    yield return this._tokens[i];
+                    yield return this._tokens[ptr];
                 }
             }
         }

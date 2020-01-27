@@ -179,7 +179,7 @@ namespace SyntacticAnalysis
                     var visited = new HashSet<Symbol>() { symbol };
                     var set = new HashSet<Symbol>();
                     foreach (var rule in this.GetProduction(symbol.ID).Rules) {
-                        Debug.Assert(rule.Symbols.Count != 0, "Syntactic grammar rules need to have a first that's not epsilon");
+                        Debug.Assert(rule.Symbols.Count != 0, $"Syntactic grammar rule {rule.Key.ID} needs to have a first that's not epsilon");
                         set.Add(rule.Symbols.First());
                     }
 
