@@ -38,6 +38,18 @@ namespace GCT
                 string flagValue = match.Groups[2].Value.Trim();
 
                 switch (flagKey) {
+                    case "f":
+                        MakeSureFolderExists(flagValue);
+                        
+                        tokenConfigurationFilePath = flagValue + "/tokens.config";
+                        syntaxConfigurationFilePath = flagValue + "/syntax.config";
+                        sourcefile = flagValue + "/program.source";
+                        reportName = flagValue + "/report";
+
+                        MakeSureFileExists(tokenConfigurationFilePath);
+                        MakeSureFileExists(syntaxConfigurationFilePath);
+                        MakeSureFileExists(sourcefile);
+                        break;
                     case "v":
                     case "verbose":
                         Debug.Assert(flagValue == string.Empty, "Verbose flag should not trailed by any value");
@@ -102,14 +114,31 @@ namespace GCT
                 var lrTable = LRParsingTable.From(clrStates, productionTable);
                 report.AddSection(lrTable.GetReportSection());
 
-
                 Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream");
-                new LRParser().Parse(lrTable, tokenStream);
+                var parser = new LRParser(syntaxConfigFile, tokenStream);
+                if (!parser.Parse(lrTable, tokenStream)) {
+                    Log.WriteLineError("Failed to parse.");
+                }
+                report?.AddSection(parser.GetReportSection());
             }
 
             report.AddSection(Log.GetReportSections());
             if (reportName != null) {
                 File.WriteAllText($"{reportName}.html", report.ToHTML());
+            }
+        }
+
+        private static void MakeSureFolderExists(string path) {
+            if (!Directory.Exists(path)) {
+                Directory.CreateDirectory(path);
+            }
+        }
+
+        private static void MakeSureFileExists(string path) {
+            if (!File.Exists(path)) {
+                using (var file = File.Create(path)) {
+
+                }
             }
         }
     }

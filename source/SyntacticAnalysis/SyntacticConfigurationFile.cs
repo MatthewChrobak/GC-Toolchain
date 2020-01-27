@@ -16,6 +16,8 @@ namespace SyntacticAnalysis
         public const string SECTION_TAG_PRODUCTION = "production";
         public const char TOKEN_TAG_SEPARATOR = ':';
 
+        public const string SECTION_TAG_BLACKLIST = "blacklist";
+
         public SyntacticConfigurationFile(string path) : base(path) {
             this.DefineDefaultRules();
         }
