@@ -121,10 +121,10 @@ namespace GCT
                 Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream");
                 var parser = new LRParser(syntaxConfigFile, tokenStream);
                 var ast = parser.Parse(lrTable, tokenStream);
+                report?.AddSection(parser.GetReportSection());
                 if (ast == null) {
                     Log.WriteLineError("Failed to parse.");
                 } else {
-                    report?.AddSection(parser.GetReportSection());
                     report?.AddSection(new ASTViewer(ast.ToJSON()));
                 }
             }

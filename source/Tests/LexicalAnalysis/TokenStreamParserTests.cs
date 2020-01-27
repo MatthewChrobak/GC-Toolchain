@@ -19,6 +19,29 @@ namespace Tests.LexicalAnalysis
         }
 
         [Test]
+        public void ReadMultiLines() {
+            string config = @"
+#token number
+1
+
+#token newline
+%D %A
+";
+            string program = @"1
+1
+1
+1";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            int count = 0;
+            while (tokens.HasNext) {
+                var token = tokens.Next;
+                count++;
+            }
+            Assert.AreEqual(program.Replace("\r\n", " ").Length, count);
+        }
+
+        [Test]
         public void TokenWithNoHeader() {
             string config = @"
 #token

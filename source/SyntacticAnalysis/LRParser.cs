@@ -10,10 +10,13 @@ namespace SyntacticAnalysis
     public class LRParser
     {
         private List<(string stack, string nextInputs, string action)> _parsingTrace;
+        private readonly SyntacticConfigurationFile _config;
+
         private static Token EndStream => new Token(Symbol.EndStream.ID, "", 0, 0);
 
         public LRParser(SyntacticConfigurationFile config, TokenStream tokenstream) {
             this._parsingTrace = new List<(string stack, string nextInputs, string action)>();
+            this._config = config;
 
             foreach (var section in config.GetSections(SyntacticConfigurationFile.SECTION_TAG_BLACKLIST)) {
                 foreach (var line in section.Body) {
@@ -56,8 +59,16 @@ namespace SyntacticAnalysis
                             var id = stk.Pop();
                             var token = stk.Pop() as ASTNodeStackElement;
                             string? tag = rule.Symbols[i].Tag;
+                            int number = node.Elements.Count;
                             if (tag != null) {
-                                node.Elements[tag] = token.ASTNode;
+
+                                if (tag == this._config.GetRule(SyntacticConfigurationFile.RULE_INLINE_KEY).ToString()) {
+                                    foreach (var element in token.ASTNode.Elements) {
+                                        node.Add(element.Key, element.Value);
+                                    }
+                                } else {
+                                    node.Add(tag, token.ASTNode);
+                                }
                             }
                         }
                         int nextState = stk.Peek() as StateStackElement;

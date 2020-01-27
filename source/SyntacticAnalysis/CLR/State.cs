@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Core;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SyntacticAnalysis.CLR
@@ -29,6 +30,7 @@ namespace SyntacticAnalysis.CLR
                 if (symbolAfter?.Type == SymbolType.Production) {
 
                     var production = productionTable.GetProduction(symbolAfter.ID);
+                    Debug.Assert(production != null, $"Unable to find production rule {symbolAfter.ID}");
                     foreach (var rule in production.Rules) {
 
                         // Generate the new itemset for the closure.

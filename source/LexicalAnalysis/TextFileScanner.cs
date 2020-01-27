@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 
 namespace LexicalAnalysis
 {
@@ -18,7 +19,7 @@ namespace LexicalAnalysis
         public TextFileScanner(string sourcefile) {
             this.Line = 0;
             this.Column = 0;
-            this._contents = File.ReadAllLines(sourcefile);
+            this._contents = File.ReadAllLines(sourcefile).Where(line => !string.IsNullOrEmpty(line)).ToArray();
         }
 
         public TextFileScanner(string[] lines) {

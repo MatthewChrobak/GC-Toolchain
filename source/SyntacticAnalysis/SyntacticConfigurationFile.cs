@@ -10,6 +10,9 @@ namespace SyntacticAnalysis
         public const string RULE_PRODUCTION_PREFIX_KEY = "production_prefix";
         public const char RULE_PRODUCTION_PREFIX_VALUE = '$';
 
+        public const string RULE_INLINE_KEY = "inline";
+        public const char RULE_INLINE_VALUE = '^';
+
         public const string SECTION_TAG_PRODUCTION = "production";
         public const char TOKEN_TAG_SEPARATOR = ':';
 
@@ -27,6 +30,7 @@ namespace SyntacticAnalysis
 
         private void DefineDefaultRules() {
             this.SetRuleIfNotExists(RULE_START_KEY, RULE_START_VALUE);
+            this.SetRuleIfNotExists(RULE_INLINE_KEY, RULE_INLINE_VALUE);
             this.SetRuleIfNotExists(RULE_PRODUCTION_PREFIX_KEY, RULE_PRODUCTION_PREFIX_VALUE);
         }
     }
