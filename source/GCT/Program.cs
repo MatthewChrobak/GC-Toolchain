@@ -11,16 +11,21 @@ namespace GCT
 {
     public static class Program
     {
+        private static Report report;
+
         public static void Main(string[] args) {
             // If no args are given, take some.
             if (args.Length == 0) {
                 Main(Console.ReadLine().Split(' '));
+                return;
             }
 
             try {
                 RealMain(args);
             } catch (AssertionFailedException e) {
                 Log.WriteLineError($"Unable to continue due to exception of type {e.GetType()} being thrown during lexical analysis. Exiting.");
+            } finally {
+                report.Save();
             }
         }
 
@@ -40,7 +45,7 @@ namespace GCT
                 switch (flagKey) {
                     case "f":
                         MakeSureFolderExists(flagValue);
-                        
+
                         tokenConfigurationFilePath = flagValue + "/tokens.config";
                         syntaxConfigurationFilePath = flagValue + "/syntax.config";
                         sourcefile = flagValue + "/program.source";
@@ -81,7 +86,7 @@ namespace GCT
             Log.SetState("Lexical-Analysis");
             TokenParser? tokenParser = null;
             TokenStream? tokenStream = null;
-            var report = new Report();
+            report = new Report($"{reportName}.html");
 
             // Build the parser table
             if (tokenConfigurationFilePath != null) {
@@ -103,30 +108,32 @@ namespace GCT
                 report.AddSection(tokenParser.GetReportSections());
             }
 
-
-
             Log.SetState("Syntactic-Analysis");
             if (syntaxConfigurationFilePath != null) {
 
                 var syntaxConfigFile = new SyntacticConfigurationFile(syntaxConfigurationFilePath);
                 var productionTable = new ProductionTable(syntaxConfigFile);
+                report?.AddSection(productionTable.GetReportSection());
+
+                productionTable.ComputeFirst();
+                productionTable.ComputeFollow();
+
                 var clrStates = new CLRStateGenerator(productionTable, syntaxConfigFile);
                 var lrTable = LRParsingTable.From(clrStates, productionTable);
-                report.AddSection(productionTable.GetReportSection());
-                report.AddSection(lrTable.GetReportSection());
+                report?.AddSection(lrTable.GetReportSection());
 
                 Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream");
                 var parser = new LRParser(syntaxConfigFile, tokenStream);
-                if (!parser.Parse(lrTable, tokenStream)) {
+                var ast = parser.Parse(lrTable, tokenStream);
+                if (ast == null) {
                     Log.WriteLineError("Failed to parse.");
+                } else {
+                    report?.AddSection(parser.GetReportSection());
+                    report?.AddSection(new ASTViewer(ast.ToJSON()));
                 }
-                report?.AddSection(parser.GetReportSection());
             }
 
             report.AddSection(Log.GetReportSections());
-            if (reportName != null) {
-                File.WriteAllText($"{reportName}.html", report.ToHTML());
-            }
         }
 
         private static void MakeSureFolderExists(string path) {

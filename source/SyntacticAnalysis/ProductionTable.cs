@@ -1,7 +1,6 @@
 ﻿using Core;
 using Core.Config;
 using Core.ReportGeneration;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,13 +12,11 @@ namespace SyntacticAnalysis
         public IEnumerable<Production> Productions => this._productions.Values;
         public const string START_PRIME = "'";
 
-        private readonly Dictionary<Symbol, HashSet<Symbol>> _first;
-        private readonly Dictionary<Symbol, HashSet<Symbol>> _follow;
+        private readonly Dictionary<string, HashSet<Symbol>> _first;
 
         public ProductionTable(SyntacticConfigurationFile config) {
             this._productions = new Dictionary<string, Production>();
-            this._first = new Dictionary<Symbol, HashSet<Symbol>>();
-            this._follow = new Dictionary<Symbol, HashSet<Symbol>>();
+            this._first = new Dictionary<string, HashSet<Symbol>>();
 
             this.AddExtraStartProduction(config);
 
@@ -28,9 +25,6 @@ namespace SyntacticAnalysis
             }
 
             this.TransformEpsilonTransitions(config);
-
-            this.ComputeFirst();
-            this.ComputeFollow();
         }
 
         private void TransformEpsilonTransitions(SyntacticConfigurationFile config) {
@@ -80,11 +74,7 @@ namespace SyntacticAnalysis
         }
 
         public HashSet<Symbol> GetFirst(Symbol key) {
-            return this._first[key];
-        }
-
-        public HashSet<Symbol> GetFollow(Symbol key) {
-            return this._follow[key];
+            return this._first[key.ID];
         }
 
         private HashSet<Symbol>? ComputeFollow(Symbol symbol) {
@@ -117,7 +107,7 @@ namespace SyntacticAnalysis
 
                                 // add FOLLOW(A) = FIRST(B)
                                 if (after.Type == SymbolType.Production) {
-                                    foreach (var s in this._first[after]) {
+                                    foreach (var s in this._first[after.ID]) {
                                         set.Add(s);
                                     }
                                 } else {
@@ -136,35 +126,7 @@ namespace SyntacticAnalysis
             return new SyntacticGrammarReportSection(this._productions);
         }
 
-        private void ComputeFollow() {
-            var pendingFollow = new Queue<Symbol>(this._productions.Values.Select(production => production.Key));
-
-            // Keep going until there's no more symbols left to process
-            while (pendingFollow.Count != 0) {
-                int count = pendingFollow.Count;
-
-                // Make a pass
-                for (int i = 0; i < count; i++) {
-
-                    // Try and construct the symbol's follow
-                    var symbol = pendingFollow.Dequeue();
-                    var set = ComputeFollow(symbol);
-
-                    if (set != null) {
-                        Log.WriteLineVerboseClean("Setting " + symbol.ID);
-                        this._follow[symbol] = set;
-                    } else {
-                        pendingFollow.Enqueue(symbol);
-                    }
-                }
-
-                if (pendingFollow.Count == count) {
-                    Debug.Assert(count != pendingFollow.Count, $"Unable to calculate follow set.");
-                }
-            }
-        }
-
-        private void ComputeFirst() {
+        public void ComputeFirstOld() {
             var pendingFirsts = new Queue<Symbol>(this._productions.Values.Select(production => production.Key));
 
             // Keep going until there's no more symbols left to process
@@ -178,6 +140,7 @@ namespace SyntacticAnalysis
                     var symbol = pendingFirsts.Dequeue();
                     var visited = new HashSet<Symbol>() { symbol };
                     var set = new HashSet<Symbol>();
+
                     foreach (var rule in this.GetProduction(symbol.ID).Rules) {
                         Debug.Assert(rule.Symbols.Count != 0, $"Syntactic grammar rule {rule.Key.ID} needs to have a first that's not epsilon");
                         set.Add(rule.Symbols.First());
@@ -186,7 +149,7 @@ namespace SyntacticAnalysis
                     while (true) {
                         // Is everything a token?
                         if (!set.Any(s => s.Type == SymbolType.Production)) {
-                            this._first[symbol] = set;
+                            this._first[symbol.ID] = set;
                             break;
                         }
 
@@ -199,11 +162,11 @@ namespace SyntacticAnalysis
                             }
                             visited.Add(s);
 
-                            if (!this._first.ContainsKey(s)) {
+                            if (!this._first.ContainsKey(s.ID)) {
                                 exit = true;
                                 break;
                             }
-                            foreach (var first in this._first[s]) {
+                            foreach (var first in this._first[s.ID]) {
                                 set.Add(first);
                             }
                             set.Remove(s);
@@ -213,7 +176,7 @@ namespace SyntacticAnalysis
                         }
                     }
 
-                    if (!this._first.ContainsKey(symbol)) {
+                    if (!this._first.ContainsKey(symbol.ID)) {
                         pendingFirsts.Enqueue(symbol);
                     }
                 }

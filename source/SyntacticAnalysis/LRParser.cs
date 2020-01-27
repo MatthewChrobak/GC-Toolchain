@@ -14,7 +14,7 @@ namespace SyntacticAnalysis
 
         public LRParser(SyntacticConfigurationFile config, TokenStream tokenstream) {
             this._parsingTrace = new List<(string stack, string nextInputs, string action)>();
-         
+
             foreach (var section in config.GetSections(SyntacticConfigurationFile.SECTION_TAG_BLACKLIST)) {
                 foreach (var line in section.Body) {
                     string tokenType = line.Trim();
@@ -26,13 +26,14 @@ namespace SyntacticAnalysis
             }
         }
 
-        public bool Parse(LRParsingTable table, TokenStream tokenStream) {
-            var stk = new Stack<dynamic>();
-            stk.Push(0);
+        public ASTNode? Parse(LRParsingTable table, TokenStream tokenStream) {
+            var stk = new Stack<StackElement>();
+            stk.Push(new StateStackElement(0));
             var a = GetNextToken(tokenStream);
 
             while (true) {
-                var x = stk.Peek();
+                var x = stk.Peek() as StateStackElement;
+                Debug.Assert(x != null, $"Expected {nameof(StateStackElement)} on the stack.");
                 string parseAction = "Invalid";
                 string stackContents = GetStackContent(stk);
                 string lookaheadTokens = this.GetTokensForTable(tokenStream);
@@ -41,31 +42,40 @@ namespace SyntacticAnalysis
                     if (action.Type == ActionType.Accept) {
                         parseAction = "accept";
                     } else if (action.Type == ActionType.Shift) {
-                        stk.Push(a.TokenType);
-                        stk.Push(action.ID);
+                        stk.Push(new ASTNodeStackElement(a));
+                        stk.Push(new StateStackElement(action.ID));
                         a = GetNextToken(tokenStream);
                         parseAction = $"Shift {action.ID}";
                     } else if (action.Type == ActionType.Reduce) {
-                        var prod = table.Productions[action.ID];
-                        int prodCount = prod.Symbols.Count;
-                        for (int i = 0; i < 2 * prodCount; i++) {
-                            // TODO: Is this where we construct the AST?
-                            stk.Pop();
+                        var rule = table.Productions[action.ID];
+                        int ruleCount = rule.Symbols.Count;
+
+                        var node = new ASTNode();
+
+                        for (int i = ruleCount - 1; i >= 0; i--) {
+                            var id = stk.Pop();
+                            var token = stk.Pop() as ASTNodeStackElement;
+                            string? tag = rule.Symbols[i].Tag;
+                            if (tag != null) {
+                                node.Elements[tag] = token.ASTNode;
+                            }
                         }
-                        int nextState = stk.Peek();
-                        stk.Push(prod.Key.ID);
-                        stk.Push(table.Rows[nextState].GOTO[prod.Key.ID]);
-                        parseAction = $"Reduce ({prod.Key.ID + " -> " + prod.TextRepresentation})";
+                        int nextState = stk.Peek() as StateStackElement;
+                        stk.Push(new ASTNodeStackElement(node, rule.Key.ID));
+                        stk.Push(new StateStackElement(table.Rows[nextState].GOTO[rule.Key.ID]));
+                        parseAction = $"Reduce ({rule.Key.ID + " -> " + rule.TextRepresentation})";
                     }
 
                     this._parsingTrace.Add((stackContents, lookaheadTokens, parseAction));
 
                     if (parseAction == "accept") {
-                        return true;
+                        stk.Pop();
+                        var element = stk.Pop() as ASTNodeStackElement;
+                        return element?.ASTNode;
                     }
                 } else {
                     Log.WriteLineVerboseClean($"couldn't retrieve: state {x} symbol {a.TokenType}");
-                    return false;
+                    return null;
                 }
             }
         }
@@ -80,15 +90,15 @@ namespace SyntacticAnalysis
             return string.Join("", tokens.Select(val => val.TokenType)) + (actualCount >= count ? "..." : "");
         }
 
-        private string GetStackContent(Stack<dynamic> stk) {
+        private string GetStackContent(Stack<StackElement> stk) {
             var arr = stk.ToArray();
             Array.Reverse(arr);
 
             int count = 10;
             if (arr.Length > count) {
-                return "..." + string.Join("", arr[^10..]);
+                return "..." + string.Join("", arr[^10..].Select(val => val.ToString()));
             }
-            return string.Join("", arr);
+            return string.Join("", arr.Select(val => val.ToString()));
         }
 
         private Token GetNextToken(TokenStream tokenStream) {
