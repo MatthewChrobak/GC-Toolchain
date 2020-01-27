@@ -30,10 +30,6 @@
                 this.Type = SymbolType.Token;
             }
 
-            if (id == config.GetRule(SyntacticConfigurationFile.RULE_EPSILON_KEY).ToString()) {
-                id = System.String.Empty;
-            }
-
             this.ID = id;
             this.Tag = tag;
         }

@@ -1,5 +1,6 @@
 ﻿using Core;
 using Core.Config;
+using Core.ReportGeneration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,18 +27,56 @@ namespace SyntacticAnalysis
                 ProcessSection(section, config);
             }
 
+            this.TransformEpsilonTransitions(config);
+
             this.ComputeFirst();
-            //this.ComputeFollow();
+            this.ComputeFollow();
+        }
 
-            Log.WriteLineVerbose("first:");
-            foreach (var first in this._first) {
-                Log.WriteLineVerbose($"{first.Key.ID} => {string.Join(',', first.Value.Select(val => val.ID))}");
+        private void TransformEpsilonTransitions(SyntacticConfigurationFile config) {
+            var productionsWithEpsilonTransitions = new HashSet<string>(this._productions.Where(entry => entry.Value.CanBeEpsilon).Select(entry => entry.Key));
+
+            foreach (var entry in this._productions) {
+                IEnumerable<Rule>? newRules = null;
+                foreach (var rule in entry.Value.Rules) {
+                    newRules = Permute(rule, 0, productionsWithEpsilonTransitions, false);
+                }
+
+                if (newRules == null) {
+                    continue;
+                }
+
+                foreach (var newRule in newRules.Where(newRule => newRule != null)) {
+                    if (!entry.Value.Rules.Contains(newRule)) {
+                        entry.Value.Rules.Add(newRule);
+                    }
+                }
             }
+        }
 
-            //Log.WriteLineVerbose("Follow:");
-            //foreach (var follow in this._follow) {
-            //    Log.WriteLineVerbose($"{follow.Key.ID} => {string.Join(',', follow.Value.Select(val => val.ID))}");
-            //}
+        private IEnumerable<Rule?> Permute(Rule rule, int ptr, HashSet<string> productionsWithEpsilonTransitions, bool isDifferent) {
+            var symbol = rule.SymbolAfter(ptr);
+
+            if (symbol == null) {
+                if (isDifferent) {
+                    yield return rule;
+                } else {
+                    yield return null;
+                }
+            } else if (symbol.Type == SymbolType.Production && productionsWithEpsilonTransitions.Contains(symbol.ID)) {
+                var copy = rule.CopyWithoutSymbolAt(ptr);
+                foreach (var result in Permute(copy, ptr + 1, productionsWithEpsilonTransitions, true)) {
+                    yield return result;
+                }
+                foreach (var result in Permute(rule, ptr + 1, productionsWithEpsilonTransitions, isDifferent)) {
+                    yield return result;
+                }
+
+            } else {
+                foreach (var result in Permute(rule, ptr + 1, productionsWithEpsilonTransitions, isDifferent)) {
+                    yield return result;
+                }
+            }
         }
 
         public HashSet<Symbol> GetFirst(Symbol key) {
@@ -93,6 +132,10 @@ namespace SyntacticAnalysis
             return set;
         }
 
+        public ReportSection GetReportSection() {
+            return new SyntacticGrammarReportSection(this._productions);
+        }
+
         private void ComputeFollow() {
             var pendingFollow = new Queue<Symbol>(this._productions.Values.Select(production => production.Key));
 
@@ -136,6 +179,7 @@ namespace SyntacticAnalysis
                     var visited = new HashSet<Symbol>() { symbol };
                     var set = new HashSet<Symbol>();
                     foreach (var rule in this.GetProduction(symbol.ID).Rules) {
+                        Debug.Assert(rule.Symbols.Count != 0, "Syntactic grammar rules need to have a first that's not epsilon");
                         set.Add(rule.Symbols.First());
                     }
 

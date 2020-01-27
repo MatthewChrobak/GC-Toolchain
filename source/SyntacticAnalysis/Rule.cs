@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace SyntacticAnalysis
@@ -8,6 +9,19 @@ namespace SyntacticAnalysis
         public readonly Symbol Key;
         public readonly List<Symbol> Symbols;
         public readonly string TextRepresentation;
+
+        // Used for CopyWithoutSymbolAt function
+        private Rule(Rule copy, int ptr) {
+            this.Key = copy.Key;
+            this.Symbols = new List<Symbol>();
+            for (int i = 0; i < copy.Symbols.Count; i++) {
+                if (i == ptr) {
+                    continue;
+                }
+                this.Symbols.Add(copy.Symbols[i]);
+            }
+            this.TextRepresentation = string.Join("", this.Symbols.Select(symbol => symbol.ID));
+        }
 
         public Rule(Symbol key, string line, SyntacticConfigurationFile config) {
             this.Key = key;
@@ -59,6 +73,10 @@ namespace SyntacticAnalysis
 
         public override int GetHashCode() {
             return this.Key.GetHashCode() + this.TextRepresentation.GetHashCode();
+        }
+
+        public Rule CopyWithoutSymbolAt(int ptr) {
+            return new Rule(this, ptr);
         }
     }
 }
