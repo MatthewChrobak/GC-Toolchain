@@ -50,7 +50,8 @@ namespace SyntacticAnalysis
                     // SHIFT?
                     if (symbol.Type == SymbolType.Token) {
                         var action = new LRParsingTableAction(ActionType.Shift, kernelLookup[groupEntry.Value]);
-                        tableRow.Actions.Add(symbol.ID , action);
+                        Debug.Assert(!tableRow.Actions.ContainsKey(symbol.ID) || tableRow.Actions[symbol.ID].Type != ActionType.Reduce, $"Shift/reduce conflict in the syntax grammar");
+                        tableRow.Actions.Add(symbol.ID, action);
                     }
                     // GOTO?
                     if (symbol.Type == SymbolType.Production) {
@@ -61,6 +62,7 @@ namespace SyntacticAnalysis
                 // REDUCE?
                 foreach (var itemset in stateEntry.Value.Closure.Where(s => s.SymbolAfter == null)) {
                     foreach (var lookahead in itemset.Lookahead) {
+                        Debug.Assert(!tableRow.Actions.ContainsKey(lookahead.ID) || tableRow.Actions[lookahead.ID].Type != ActionType.Shift, $"Shift/reduce conflict in the syntax grammar");
                         tableRow.Actions.Add(lookahead.ID, new LRParsingTableAction(ActionType.Reduce, ruleLookup[itemset.Rule]));
                     }
                 }

@@ -40,14 +40,14 @@
                     return true;
                 }
 
-                return this.ID == s.ID && this.Type == s.Type && s?.Tag == s?.Tag;
+                return this.ID == s.ID && this.Type == s.Type;
             }
 
             return false;
         }
 
         public override int GetHashCode() {
-            return this.Type.GetHashCode() + this.ID.GetHashCode() + (this.Tag ?? string.Empty).GetHashCode();
+            return this.Type.GetHashCode() + this.ID.GetHashCode();
         }
     }
 

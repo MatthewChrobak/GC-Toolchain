@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using Core.ReportGeneration;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,16 +18,6 @@ namespace SyntacticAnalysis.CLR
             var startRule = startProduction.Rules.First();
 
             CreateState("", new Kernel(new ItemSet(startRule, 0)));
-
-            //Log.WriteLineVerboseClean("");
-            //Log.WriteLineVerboseClean($"Num states: {States.Count}");
-            //foreach (var state in this.States) {
-            //    Log.WriteLineVerboseClean("");
-            //    Log.WriteLineVerboseClean($"[{state.Value.ID}]");
-            //    foreach (var itemset in state.Value.Closure) {
-            //        Log.WriteLineVerboseClean($"{itemset.Rule.Key.ID} -> {itemset.Rule.ToStringWithSymbol(itemset.Ptr)}, {string.Join(',', itemset.Lookahead.Select(l => l.ID))}");
-            //    }
-            //}
         }
 
         private void CreateState(string id, Kernel kernel) {
@@ -44,6 +34,10 @@ namespace SyntacticAnalysis.CLR
             foreach (var group in state.GroupRulesBySymbolAfter()) {
                 CreateState(id + group.Key.ID, group.Value);
             }
+        }
+
+        public ReportSection GetReportSection() {
+            return new CLRStatesReportSection(this.States);
         }
     }
 }
