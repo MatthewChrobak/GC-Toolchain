@@ -1,6 +1,7 @@
 ﻿using Automata;
 using Automata.NonDeterministic;
 using Core.ReportGeneration;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -66,9 +67,9 @@ namespace LexicalAnalysis.ReportGeneration
                         ub = c;
                     } else {
                         if (lb == ub) {
-                            results.Add($"{lb}");
+                            results.Add(EscapeSpecialCharacters(lb));
                         } else {
-                            results.Add($"{lb}-{ub}");
+                            results.Add($"{EscapeSpecialCharacters(lb)}-{EscapeSpecialCharacters(ub)}");
                         }
                         lb = null;
                         ub = null;
@@ -77,9 +78,9 @@ namespace LexicalAnalysis.ReportGeneration
                 } else {
                     if (lb != null && ub != null) {
                         if (lb == ub) {
-                            results.Add($"{lb}");
+                            results.Add(EscapeSpecialCharacters(lb));
                         } else {
-                            results.Add($"{lb}-{ub}");
+                            results.Add($"{EscapeSpecialCharacters(lb)}-{EscapeSpecialCharacters(ub)}");
                         }
                         lb = null;
                         ub = null;
@@ -88,15 +89,37 @@ namespace LexicalAnalysis.ReportGeneration
                 }
             }
 
-            if (lb != null && ub != null) {
-                if (lb == ub) {
-                    results.Add($"{lb}");
+            string? strlb = EscapeSpecialCharacters(lb);
+            string? strub = EscapeSpecialCharacters(ub);
+
+            if (strlb != null && strub != null) {
+                if (strlb == strub) {
+                    results.Add($"{strlb}");
                 } else {
-                    results.Add($"{lb}-{ub}");
+                    results.Add($"{strlb}-{strub}");
                 }
             }
 
             return string.Join(", ", results).Replace("\"", "\\\"").Replace("'", "\\'");
+        }
+
+        private string? EscapeSpecialCharacters(char? val) {
+            if (val == null) {
+                return null;
+            }
+
+            switch (val) {
+                case '\r':
+                    return "/r";
+                case '\n':
+                    return "/n";
+                case '\t':
+                    return "/t ";
+                case ' ':
+                    return "' '";
+                default:
+                    return val.ToString();
+            }
         }
 
         private object ToInt(string val) {

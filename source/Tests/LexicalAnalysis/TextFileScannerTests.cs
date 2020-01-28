@@ -91,5 +91,25 @@ namespace Tests.LexicalAnalysis
             }
             File.Delete(path);
         }
+
+        [Test]
+        public void ReadMultiLine() {
+            string fileContent = @"1
+2
+3
+4";
+            string path = $"{nameof(ReadMultiLine)}.txt";
+            File.WriteAllText(path, fileContent);
+
+            int count = 0;
+            using (var fr = new TextFileScanner(path)) {
+                while (fr.CanRead) {
+                    fr.Read();
+                    count++;
+                }
+            }
+            File.Delete(path);
+            Assert.AreEqual(fileContent.Replace("\r\n", "").Length, count);
+        }
     }
 }
