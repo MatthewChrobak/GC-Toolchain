@@ -136,7 +136,7 @@ namespace GCT
             Log.SetState("Semantic-Analysis");
             if (semanticsFolder != null) {
                 foreach (var file in Directory.GetFiles(semanticsFolder, "*.py")) {
-                    new SemanticVisiter(file).Traverse(ast);
+                    new SemanticVisitor(file).Traverse(ast);
                 }
             }
 

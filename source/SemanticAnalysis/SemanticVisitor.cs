@@ -8,7 +8,7 @@ using System.Dynamic;
 
 namespace SemanticAnalysis
 {
-    public class SemanticVisiter
+    public class SemanticVisitor
     {
         private readonly string _pythonPluginPath;
         private readonly ScriptEngine _engine;
@@ -16,7 +16,7 @@ namespace SemanticAnalysis
         private readonly ScriptSource _source;
         private readonly CompiledCode _compiled;
 
-        public SemanticVisiter(string pythonPluginPath) {
+        public SemanticVisitor(string pythonPluginPath) {
             Log.WriteLineVerbose($"Creating visitor for {this._pythonPluginPath}.");
 
             this._pythonPluginPath = pythonPluginPath;
