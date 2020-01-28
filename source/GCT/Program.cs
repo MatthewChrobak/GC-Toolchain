@@ -1,6 +1,7 @@
 ﻿using Core;
 using Core.ReportGeneration;
 using LexicalAnalysis;
+using SemanticAnalysis;
 using SyntacticAnalysis;
 using SyntacticAnalysis.CLR;
 using System;
@@ -34,6 +35,7 @@ namespace GCT
             string? syntaxConfigurationFilePath = null;
             string? reportName = null;
             string? sourcefile = null;
+            string? semanticsFolder = null;
 
             // Extract arguments.
             var match = Regex.Match(string.Join(' ', args), @"\-(\w+)(\s+([^\-\r\n]+|\"".+?\""|\'.+?\'))?");
@@ -50,10 +52,12 @@ namespace GCT
                         syntaxConfigurationFilePath = flagValue + "/syntax.config";
                         sourcefile = flagValue + "/program.source";
                         reportName = flagValue + "/report";
+                        semanticsFolder = flagValue + "/semantics/";
 
                         MakeSureFileExists(tokenConfigurationFilePath);
                         MakeSureFileExists(syntaxConfigurationFilePath);
                         MakeSureFileExists(sourcefile);
+                        MakeSureFolderExists(semanticsFolder);
                         break;
                     case "v":
                     case "verbose":
@@ -108,6 +112,7 @@ namespace GCT
                 report.AddSection(tokenParser.GetReportSections());
             }
 
+            ASTNode? ast = null;
             Log.SetState("Syntactic-Analysis");
             if (syntaxConfigurationFilePath != null) {
 
@@ -121,12 +126,17 @@ namespace GCT
 
                 Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream");
                 var parser = new LRParser(syntaxConfigFile, tokenStream);
-                var ast = parser.Parse(lrTable, tokenStream);
+                ast = parser.Parse(lrTable, tokenStream);
                 report?.AddSection(parser.GetReportSection());
-                if (ast == null) {
-                    Log.WriteLineError("Failed to parse.");
-                } else {
-                    report?.AddSection(new ASTViewer(ast.ToJSON()));
+
+                Debug.Assert(ast != null, $"Failed to parse");
+                report?.AddSection(new ASTViewer(ast.ToJSON()));
+            }
+
+            Log.SetState("Semantic-Analysis");
+            if (semanticsFolder != null) {
+                foreach (var file in Directory.GetFiles(semanticsFolder, "*.py")) {
+                    new SemanticVisiter(file).Traverse(ast);
                 }
             }
 
