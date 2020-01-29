@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ASTVisitor\ASTVisitor.csproj" />
     <ProjectReference Include="..\PyVisitor\ASTVisitor.csproj" />
   </ItemGroup>
 
