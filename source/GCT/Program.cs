@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using ASTVisitor;
+using Core;
 using Core.ReportGeneration;
 using LexicalAnalysis;
 using SemanticAnalysis;
@@ -24,7 +25,7 @@ namespace GCT
             try {
                 RealMain(args);
             } catch (AssertionFailedException e) {
-                Log.WriteLineError($"Unable to continue due to exception of type {e.GetType()} being thrown during lexical analysis. Exiting.");
+                Console.WriteLine($"\r\nUnable to continue due to exception of type {e.GetType()} being thrown during {Log.State}. Exiting.");
             } finally {
                 report.Save();
             }

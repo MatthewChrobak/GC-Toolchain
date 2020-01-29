@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ASTVisitor\ASTVisitor.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\LexicalAnalysis\LexicalAnalysis.csproj" />
   </ItemGroup>

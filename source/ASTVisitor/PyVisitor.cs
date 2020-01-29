@@ -1,7 +1,6 @@
 ﻿using Core;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
-using SyntacticAnalysis;
 using System;
 using System.Collections.Generic;
 
@@ -16,8 +15,8 @@ namespace ASTVisitor
         private readonly CompiledCode _compiled;
         private readonly Dictionary<string, dynamic> _cachedVariables;
 
-        private const string PRE_ORDER_PREFIX = "preorder_visit_";
-        private const string POST_ORDER_PREFIX = "postorder_visit_";
+        private const string PRE_ORDER_PREFIX = "preorder_";
+        private const string POST_ORDER_PREFIX = "postorder_";
 
         public PyVisitor(string pythonPluginPath) {
             this._pythonPluginPath = pythonPluginPath;
@@ -47,15 +46,16 @@ namespace ASTVisitor
                 (string key, var node, bool elementsVisited) = stk.Pop();
 
                 // Figure out what visit function to call.
-                if (elementsVisited) {
+                if (!elementsVisited) {
                     string pre_visit_id = $"{PRE_ORDER_PREFIX}{key}";
                     this.TryInvoke(pre_visit_id, node);
-                } else {
-                    string visit_id = $"{POST_ORDER_PREFIX}{key}";
-                    this.TryInvoke(visit_id, node);
 
                     // If we didn't visit it yet, put it back on for postorder visit.
                     stk.Push((key, node, true));
+                } else {
+                    string post_visit_id = $"{POST_ORDER_PREFIX}{key}";
+                    this.TryInvoke(post_visit_id, node);
+                    continue;
                 }
 
                 foreach (var element in node.Elements) {
@@ -79,7 +79,12 @@ namespace ASTVisitor
 
         private void TryInvoke(string id, ASTNode node) {
             if (this._cachedVariables.TryGetValue(id, out var variable)) {
-                this._engine.Operations.Invoke(variable, node);
+                try {
+                    this._engine.Operations.Invoke(variable, node);
+                }
+                catch (Exception e) {
+                    Debug.Assert(false, e.Message);
+                }
             }
         }
     }
