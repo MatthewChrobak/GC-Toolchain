@@ -6,11 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IronPython" Version="2.7.9" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SyntacticAnalysis\SyntacticAnalysis.csproj" />
+    <ProjectReference Include="..\PyVisitor\ASTVisitor.csproj" />
   </ItemGroup>
 
 </Project>
