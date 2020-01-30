@@ -62,7 +62,9 @@ namespace SyntacticAnalysis
                 // REDUCE?
                 foreach (var itemset in stateEntry.Value.Closure.Where(s => s.SymbolAfter == null)) {
                     foreach (var lookahead in itemset.Lookahead) {
-                        Debug.Assert(!tableRow.Actions.ContainsKey(lookahead.ID) || tableRow.Actions[lookahead.ID].Type != ActionType.Shift, $"Shift/reduce conflict in the syntax grammar");
+                        if (tableRow.Actions.ContainsKey(lookahead.ID)) {
+                            Debug.Assert(false, $"{tableRow.Actions[lookahead.ID].Type.ToString()}/Reduce conflict in the syntax grammar");
+                        }
                         tableRow.Actions.Add(lookahead.ID, new LRParsingTableAction(ActionType.Reduce, ruleLookup[itemset.Rule]));
                     }
                 }

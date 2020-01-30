@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Core.ReportGeneration;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace ASTVisitor
@@ -23,6 +25,8 @@ namespace ASTVisitor
         }
 
         private List<AssociativeArray> _rows;
+        public IEnumerable<AssociativeArray> Rows => this._rows;
+
 
         public SymbolTable() {
             this._rows = new List<AssociativeArray>();
@@ -40,6 +44,10 @@ namespace ASTVisitor
 
         public IEnumerable<AssociativeArray> GetRowsWhere(string column, dynamic value) {
             return this._rows.Where(row => row[column].Equals(value));
+        }
+
+        public static ReportSection GetReportSection() {
+            return new SymbolTableReportSection(GlobalScope);
         }
     }
 }

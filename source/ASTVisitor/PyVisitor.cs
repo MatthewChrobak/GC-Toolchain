@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace ASTVisitor
 {
     public abstract class PyVisitor
-    {
+    {           
         private readonly string _pythonPluginPath;
         private readonly ScriptEngine _engine;
         protected readonly dynamic _scope;

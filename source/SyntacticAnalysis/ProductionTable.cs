@@ -93,6 +93,8 @@ namespace SyntacticAnalysis
                         set.Add(rule.Symbols.First());
                     }
                 }
+
+                set.RemoveWhere(symbol => symbol.Type == SymbolType.Production && symbol.ID == entry.Key);
             }
 
             while (true) {

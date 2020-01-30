@@ -139,6 +139,7 @@ namespace GCT
                 foreach (var file in Directory.GetFiles(semanticsFolder, "*.py")) {
                     new SemanticVisitor(file).Traverse(ast);
                 }
+                report?.AddSection(SymbolTable.GetReportSection());
             }
 
             report.AddSection(Log.GetReportSections());
