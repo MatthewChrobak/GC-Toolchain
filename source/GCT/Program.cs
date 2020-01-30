@@ -38,6 +38,16 @@ namespace GCT
             string? sourcefile = null;
             string? semanticsFolder = null;
 
+            bool includeAST = false;
+            bool includeStateMachine = false;
+            bool includeTokenStream = false;
+            bool includeGrammar = false;
+            bool includeLRTable = false;
+            bool includeLRTrace = false;
+            bool includeLRStates = false;
+            bool includeSymbolTables = false;
+            bool includeLogs = false;
+
             // Extract arguments.
             var match = Regex.Match(string.Join(' ', args), @"\-(\w+)(\s+([^\-\r\n]+|\"".+?\""|\'.+?\'))?");
             while (match.Success) {
@@ -82,6 +92,44 @@ namespace GCT
                     case "p":
                         sourcefile = flagValue;
                         break;
+                    case "ast":
+                        includeAST = true;
+                        break;
+                    case "nfa":
+                        includeStateMachine = true;
+                        break;
+                    case "tokenstream":
+                        includeTokenStream = true;
+                        break;
+                    case "grammar":
+                        includeGrammar = true;
+                        break;
+                    case "lrtable":
+                        includeLRTable = true;
+                        break;
+                    case "lrtrace":
+                        includeLRTrace = true;
+                        break;
+                    case "lrstates":
+                        includeLRTrace = true;
+                        break;
+                    case "symboltables":
+                        includeSymbolTables = true;
+                        break;
+                    case "logs":
+                        includeLogs = true;
+                        break;
+                    case "all":
+                        includeAST = true;
+                        includeGrammar = true;
+                        includeStateMachine = true;
+                        includeLRTable = true;
+                        includeTokenStream = true;
+                        includeLRTrace = true;
+                        includeLRStates = true;
+                        includeSymbolTables = true;
+                        includeLogs = true;
+                        break;
                 }
 
                 match = match.NextMatch();
@@ -100,7 +148,9 @@ namespace GCT
                 Log.WriteLineVerbose($"Done.");
 
                 var tokenParserTableGenerator = new TokenParserTableGenerator(tokenConfigurationFile);
-                report.AddSection(tokenParserTableGenerator.GetReportSections());
+                if (includeStateMachine) {
+                    report.AddSection(tokenParserTableGenerator.GetReportSections());
+                }
 
                 tokenParser = new TokenParser(tokenParserTableGenerator.NFATable);
             }
@@ -108,9 +158,10 @@ namespace GCT
             // Get the token stream
             if (sourcefile != null) {
                 Debug.Assert(tokenParser != null, "TokenParser was not initialized.");
-
                 tokenStream = tokenParser.ParseFile(sourcefile);
-                report.AddSection(tokenParser.GetReportSections());
+                if (includeTokenStream) {
+                    report.AddSection(tokenParser.GetReportSections());
+                }
             }
 
             ASTNode? ast = null;
@@ -119,19 +170,33 @@ namespace GCT
 
                 var syntaxConfigFile = new SyntacticConfigurationFile(syntaxConfigurationFilePath);
                 var productionTable = new ProductionTable(syntaxConfigFile);
-                report?.AddSection(productionTable.GetReportSection());
+                if (includeGrammar) {
+                    report?.AddSection(productionTable.GetReportSection());
+                }
+
                 var clrStates = new CLRStateGenerator(productionTable, syntaxConfigFile);
-                report?.AddSection(clrStates.GetReportSection());
+                if (includeLRStates) {
+                    report?.AddSection(clrStates.GetReportSection());
+                }
+
                 var lrTable = LRParsingTable.From(clrStates, productionTable);
-                report?.AddSection(lrTable.GetReportSection());
+                if (includeLRTable) {
+                    report?.AddSection(lrTable.GetReportSection());
+                }
 
                 Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream");
                 var parser = new LRParser(syntaxConfigFile, tokenStream);
                 ast = parser.Parse(lrTable, tokenStream);
-                report?.AddSection(parser.GetReportSection());
+
+                if (includeLRTrace) {
+                    report?.AddSection(parser.GetReportSection());
+                }
 
                 Debug.Assert(ast != null, $"Failed to parse");
-                report?.AddSection(new ASTViewer(ast.ToJSON()));
+
+                if (includeAST) {
+                    report?.AddSection(new ASTViewer(ast.ToJSON()));
+                }
             }
 
             Log.SetState("Semantic-Analysis");
@@ -139,10 +204,14 @@ namespace GCT
                 foreach (var file in Directory.GetFiles(semanticsFolder, "*.py")) {
                     new SemanticVisitor(file).Traverse(ast);
                 }
-                report?.AddSection(SymbolTable.GetReportSection());
+                if (includeSymbolTables) {
+                    report?.AddSection(SymbolTable.GetReportSection());
+                }
             }
 
-            report.AddSection(Log.GetReportSections());
+            if (includeLogs) {
+                report.AddSection(Log.GetReportSections());
+            }
         }
 
         private static void MakeSureFolderExists(string path) {

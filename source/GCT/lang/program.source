@@ -1,0 +1,8 @@
+namespace FirstApplication {
+    public class Test {
+
+    }
+    private static class Person {
+
+    }
+}

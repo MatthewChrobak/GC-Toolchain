@@ -13,4 +13,19 @@
     <ProjectReference Include="..\SyntacticAnalysis\SyntacticAnalysis.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="lang\program.source">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="lang\semantics\1-SymbolTablePopulation.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="lang\syntax.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="lang\tokens.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

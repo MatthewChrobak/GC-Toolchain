@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace ASTVisitor
 {
     public abstract class PyVisitor
-    {           
+    {
         private readonly string _pythonPluginPath;
         private readonly ScriptEngine _engine;
         protected readonly dynamic _scope;
@@ -81,8 +81,7 @@ namespace ASTVisitor
             if (this._cachedVariables.TryGetValue(id, out var variable)) {
                 try {
                     this._engine.Operations.Invoke(variable, node);
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     Debug.Assert(false, e.Message);
                 }
             }
