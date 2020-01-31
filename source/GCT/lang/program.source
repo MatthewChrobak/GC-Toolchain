@@ -1,6 +1,8 @@
 namespace FirstApplication {
     public class Test {
-
+        public int Name_Num;
+        private string ID;
+        string id;
     }
     private static class Person {
 
