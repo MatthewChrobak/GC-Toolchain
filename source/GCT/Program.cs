@@ -1,4 +1,5 @@
 ﻿using ASTVisitor;
+using CodeGeneration;
 using Core;
 using Core.ReportGeneration;
 using LexicalAnalysis;
@@ -37,6 +38,10 @@ namespace GCT
             string? reportName = null;
             string? sourcefile = null;
             string? semanticsFolder = null;
+            string? codeGeneratorFolder = null;
+            string? postBuildScript = null;
+            string? instructionStreamFilepath = null;
+            string? cwd = AppDomain.CurrentDomain.BaseDirectory;
 
             bool includeAST = false;
             bool includeStateMachine = false;
@@ -64,11 +69,18 @@ namespace GCT
                         sourcefile = flagValue + "/program.source";
                         reportName = flagValue + "/report";
                         semanticsFolder = flagValue + "/semantics/";
+                        codeGeneratorFolder = flagValue + "/codegeneration/";
+                        postBuildScript = Path.Combine(cwd, flagValue + "/build.ps1");
+                        instructionStreamFilepath = flagValue + "/output.ir";
 
                         MakeSureFileExists(tokenConfigurationFilePath);
                         MakeSureFileExists(syntaxConfigurationFilePath);
                         MakeSureFileExists(sourcefile);
                         MakeSureFolderExists(semanticsFolder);
+                        MakeSureFolderExists(codeGeneratorFolder);
+                        MakeSureFileExists(postBuildScript);
+
+                        cwd = Path.Combine(cwd, flagValue);
                         break;
                     case "v":
                     case "verbose":
@@ -91,6 +103,9 @@ namespace GCT
                     case "program":
                     case "p":
                         sourcefile = flagValue;
+                        break;
+                    case "i":
+                        instructionStreamFilepath = flagValue;
                         break;
                     case "ast":
                         includeAST = true;
@@ -207,6 +222,26 @@ namespace GCT
                 if (includeSymbolTables) {
                     report?.AddSection(SymbolTable.GetReportSection());
                 }
+            }
+
+            Log.SetState("Code-Generation");
+            if (codeGeneratorFolder != null) {
+                var instructionStream = new InstructionStream();
+                foreach (var file in Directory.GetFiles(codeGeneratorFolder, "*.py")) {
+                    new CodeGeneratorVisiter(file, instructionStream).Traverse(ast);
+                }
+                File.WriteAllText(instructionStreamFilepath, instructionStream.ToString());
+            }
+
+            Log.SetState("Post-Build");
+            if (postBuildScript != null) {
+                var process = new System.Diagnostics.Process();
+                process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
+                    FileName = "powershell",
+                    Arguments = postBuildScript,
+                    WorkingDirectory = cwd
+                };
+                process.Start();
             }
 
             if (includeLogs) {
