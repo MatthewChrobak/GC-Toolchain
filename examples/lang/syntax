@@ -36,7 +36,7 @@ $function:function
 $access_modifier:^ $static:^ id:field_type id:field_name ;
 
 #production function
-$access_modifier:^ $static:^ id:return_type id:function_name ( $function_parameters:^ ) { }
+$access_modifier:^ $static:^ id:return_type id:function_name ( $function_parameters:^ ) { $statements:^ }
 
 #production function_parameters epsilon:true
 $function_parameter:function_parameter $function_parameters_tail:^
@@ -46,3 +46,50 @@ $function_parameter:function_parameter $function_parameters_tail:^
 
 #production function_parameter
 id:parameter_type id:parameter_name
+
+#production statements epsilon:true
+$statement:statement $statements:^
+
+#production statement
+$variable_declaration:variable_declaration
+$assignment:assignment
+
+#production variable_declaration
+id:variable_type id:variable_name ;
+id:variable_type id:variable_name = $rvalue:rvalue ;
+
+#production assignment
+$lvalue:lvalue = $rvalue:rvalue ;
+
+#production indice epsilon:true
+[ $rvalue ] $indice
+
+#production lvalue
+$lvalue_no_indices $indice $lvalue_list
+$lvalue_no_indices ( $function_arguments ) $lvalue_list
+
+#production lvalue_no_indices
+id
+
+#production function_call
+id $idlist ( $function_arguments )
+
+#production function_arguments epsilon:true
+$function_argument $function_arguments_tail
+
+#production function_arguments_tail epsilon:true
+, $function_argument $function_arguments_tail
+
+#production function_argument
+$rvalue
+
+#production idlist epsilon:true
+. id $idlist
+
+#production lvalue_list epsilon:true
+. $lvalue
+scopeOperator $lvalue
+
+#production rvalue
+$lvalue
+integer

@@ -16,7 +16,15 @@ namespace FirstApplication {
 
         }
         int test3(int a, int b) {
+            int x = f;
+            string y = c[a[b[c[5][5][a[5][5]]]]];
+            Test bb = null;
 
+
+            people().name = 50;
+
+            people.GetName().value = 50;
+            People.AllPeople[index][50][a[50]].Age[2] = 20;
         }
     }
 }

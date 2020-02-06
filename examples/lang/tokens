@@ -19,8 +19,14 @@ $digit
 #token id
 $valid_head_id $valid_tail_id*
 
+#token .
+.
+
 #token ,
 ,
+
+#token scopeOperator
+::
 
 #token ;
 ;
@@ -39,6 +45,12 @@ $valid_head_id $valid_tail_id*
 
 #token }
 }
+
+#token [
+[
+
+#token ]
+]
 
 #token class priority:1
 class
