@@ -3,6 +3,7 @@ using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace ASTVisitor
 {
@@ -22,7 +23,11 @@ namespace ASTVisitor
             this._pythonPluginPath = pythonPluginPath;
             Log.WriteLineVerbose($"Creating visitor for {this._pythonPluginPath}");
 
+            var fi = new FileInfo(pythonPluginPath);
+            string folder = fi.Directory.FullName;
+
             this._engine = Python.CreateEngine();
+            this._engine.SetSearchPaths(new string[] { folder });
             this._scope = this._engine.CreateScope();
             this._source = this._engine.CreateScriptSourceFromFile(pythonPluginPath);
             this._compiled = this._source.Compile();

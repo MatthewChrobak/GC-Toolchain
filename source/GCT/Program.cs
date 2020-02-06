@@ -27,7 +27,9 @@ namespace GCT
                 RealMain(args);
             } catch (AssertionFailedException e) {
                 Console.WriteLine($"\r\nUnable to continue due to exception of type {e.GetType()} being thrown during {Log.State}. Exiting.");
+                Console.ReadKey();
             } finally {
+                report.AddSection(Log.GetReportSections());
                 report.Save();
             }
         }
@@ -51,7 +53,6 @@ namespace GCT
             bool includeLRTrace = false;
             bool includeLRStates = false;
             bool includeSymbolTables = false;
-            bool includeLogs = false;
 
             // Extract arguments
             var matches = Regex.Matches(string.Join(' ', args), @"\-(\w+)((\s+\'[^\r\n\']+\')|(\s+\""[^\r\n\""]+\"")|(\s+[^\r\n\s\-]+))?");
@@ -136,9 +137,6 @@ namespace GCT
                     case "symboltables":
                         includeSymbolTables = true;
                         break;
-                    case "logs":
-                        includeLogs = true;
-                        break;
                     case "all":
                         includeAST = true;
                         includeGrammar = true;
@@ -148,7 +146,6 @@ namespace GCT
                         includeLRTrace = true;
                         includeLRStates = true;
                         includeSymbolTables = true;
-                        includeLogs = true;
                         break;
                 }
             }
@@ -245,10 +242,6 @@ namespace GCT
                     WorkingDirectory = cwd
                 };
                 process.Start();
-            }
-
-            if (includeLogs) {
-                report.AddSection(Log.GetReportSections());
             }
         }
 

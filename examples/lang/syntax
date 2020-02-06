@@ -30,6 +30,10 @@ $class_element:^ $class_elements:^
 
 #production class_element
 $field:field
+$function:function
 
 #production field
 $access_modifier:^ $static:^ id:field_type id:field_name ;
+
+#production function
+$access_modifier:^ $static:^ id:return_type id:function_name ( ) { }

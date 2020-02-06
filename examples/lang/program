@@ -3,8 +3,14 @@ namespace FirstApplication {
         public int Name_Num;
         private string ID;
         string id;
-    }
-    private static class Person {
+        public void Test() {
 
+        }
+    }
+
+    private static class Person {
+        public int Test() {
+            
+        }
     }
 }
