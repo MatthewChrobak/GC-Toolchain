@@ -1,0 +1,35 @@
+#blacklist
+whitespace
+
+#rule start
+S
+
+#production S
+$namespaces:^
+
+#production namespaces epsilon:true
+$namespace:namespace $namespaces:^
+
+#production namespace
+namespace id:namespace_name { $namespace_elements:^ }
+
+#production namespace_elements epsilon:true
+$class:class $namespace_elements:^
+
+#production access_modifier epsilon:true
+access_modifier:access_modifier
+
+#production static epsilon:true
+static:static
+
+#production class
+$access_modifier:^ $static:^ class id:class_name { $class_elements:^ }
+
+#production class_elements epsilon:true
+$class_element:^ $class_elements:^
+
+#production class_element
+$field:field
+
+#production field
+$access_modifier:^ $static:^ id:field_type id:field_name ;
