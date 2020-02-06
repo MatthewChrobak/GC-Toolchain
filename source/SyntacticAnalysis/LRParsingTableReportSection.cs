@@ -45,7 +45,7 @@ namespace SyntacticAnalysis
                 sb.Append($"<th scope='col'>{production}</th>");
             }
 
-            sb.Append("</tr>");
+            sb.Append("</tr></thead><tbody>");
 
             for (int i = 0; i < this.rows.Length; i++) {
                 var row = this.rows[i];
@@ -63,7 +63,7 @@ namespace SyntacticAnalysis
             }
 
             sb.Append(@"
-    </thead>
+    </tbody>
 </table>
 ");
 

@@ -19,7 +19,7 @@ namespace LexicalAnalysis
         public TextFileScanner(string sourcefile) {
             this.Line = 0;
             this.Column = 0;
-            this._contents = File.ReadAllLines(sourcefile).Where(line => !string.IsNullOrEmpty(line)).ToArray();
+            this._contents = File.ReadAllLines(sourcefile).Select(line => string.IsNullOrEmpty(line) ? " " : line).ToArray();
         }
 
         public TextFileScanner(string[] lines) {

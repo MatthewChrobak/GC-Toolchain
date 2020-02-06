@@ -1,6 +1,9 @@
-﻿using Core;
+﻿using ASTVisitor;
+using CodeGeneration;
+using Core;
 using Core.ReportGeneration;
 using LexicalAnalysis;
+using SemanticAnalysis;
 using SyntacticAnalysis;
 using SyntacticAnalysis.CLR;
 using System;
@@ -23,7 +26,7 @@ namespace GCT
             try {
                 RealMain(args);
             } catch (AssertionFailedException e) {
-                Log.WriteLineError($"Unable to continue due to exception of type {e.GetType()} being thrown during lexical analysis. Exiting.");
+                Console.WriteLine($"\r\nUnable to continue due to exception of type {e.GetType()} being thrown during {Log.State}. Exiting.");
             } finally {
                 report.Save();
             }
@@ -34,26 +37,55 @@ namespace GCT
             string? syntaxConfigurationFilePath = null;
             string? reportName = null;
             string? sourcefile = null;
+            string? semanticsFolder = null;
+            string? codeGeneratorFolder = null;
+            string? postBuildScript = null;
+            string? instructionStreamFilepath = null;
+            string? cwd = AppDomain.CurrentDomain.BaseDirectory;
 
-            // Extract arguments.
-            var match = Regex.Match(string.Join(' ', args), @"\-(\w+)(\s+([^\-\r\n]+|\"".+?\""|\'.+?\'))?");
+            bool includeAST = false;
+            bool includeStateMachine = false;
+            bool includeTokenStream = false;
+            bool includeGrammar = false;
+            bool includeLRTable = false;
+            bool includeLRTrace = false;
+            bool includeLRStates = false;
+            bool includeSymbolTables = false;
+            bool includeLogs = false;
+
+            // Extract arguments
+            var match = Regex.Match(string.Join(' ', args), @"\-(\w+)\s+((\'[^\r\n\']+\')|(\""[^\r\n\""]+\"")|([^\r\n\s\-]+))");
             while (match.Success) {
 
                 string flagKey = match.Groups[1].Value.Trim();
                 string flagValue = match.Groups[2].Value.Trim();
 
+                if (flagValue.StartsWith('"') && flagValue.EndsWith('"') || flagValue.StartsWith('\'') && flagValue.EndsWith('\'')) {
+                    flagValue = flagValue[1..^1];
+                }
+
                 switch (flagKey) {
                     case "f":
                         MakeSureFolderExists(flagValue);
 
-                        tokenConfigurationFilePath = flagValue + "/tokens.config";
-                        syntaxConfigurationFilePath = flagValue + "/syntax.config";
-                        sourcefile = flagValue + "/program.source";
+                        tokenConfigurationFilePath = flagValue + "/tokens";
+                        syntaxConfigurationFilePath = flagValue + "/syntax";
+                        sourcefile = flagValue + "/program";
                         reportName = flagValue + "/report";
+                        semanticsFolder = flagValue + "/semantics/";
+                        codeGeneratorFolder = flagValue + "/codegeneration/";
+                        postBuildScript = flagValue + "/build.ps1";
+                        instructionStreamFilepath = flagValue + "/output.ir";
 
+                        MakeSureFileExists(instructionStreamFilepath);
                         MakeSureFileExists(tokenConfigurationFilePath);
                         MakeSureFileExists(syntaxConfigurationFilePath);
                         MakeSureFileExists(sourcefile);
+                        MakeSureFolderExists(semanticsFolder);
+                        MakeSureFolderExists(codeGeneratorFolder);
+                        MakeSureFileExists(postBuildScript);
+
+                        cwd = flagValue;
                         break;
                     case "v":
                     case "verbose":
@@ -77,6 +109,47 @@ namespace GCT
                     case "p":
                         sourcefile = flagValue;
                         break;
+                    case "i":
+                        instructionStreamFilepath = flagValue;
+                        break;
+                    case "ast":
+                        includeAST = true;
+                        break;
+                    case "nfa":
+                        includeStateMachine = true;
+                        break;
+                    case "tokenstream":
+                        includeTokenStream = true;
+                        break;
+                    case "grammar":
+                        includeGrammar = true;
+                        break;
+                    case "lrtable":
+                        includeLRTable = true;
+                        break;
+                    case "lrtrace":
+                        includeLRTrace = true;
+                        break;
+                    case "lrstates":
+                        includeLRTrace = true;
+                        break;
+                    case "symboltables":
+                        includeSymbolTables = true;
+                        break;
+                    case "logs":
+                        includeLogs = true;
+                        break;
+                    case "all":
+                        includeAST = true;
+                        includeGrammar = true;
+                        includeStateMachine = true;
+                        includeLRTable = true;
+                        includeTokenStream = true;
+                        includeLRTrace = true;
+                        includeLRStates = true;
+                        includeSymbolTables = true;
+                        includeLogs = true;
+                        break;
                 }
 
                 match = match.NextMatch();
@@ -95,7 +168,9 @@ namespace GCT
                 Log.WriteLineVerbose($"Done.");
 
                 var tokenParserTableGenerator = new TokenParserTableGenerator(tokenConfigurationFile);
-                report.AddSection(tokenParserTableGenerator.GetReportSections());
+                if (includeStateMachine) {
+                    report.AddSection(tokenParserTableGenerator.GetReportSections());
+                }
 
                 tokenParser = new TokenParser(tokenParserTableGenerator.NFATable);
             }
@@ -103,34 +178,80 @@ namespace GCT
             // Get the token stream
             if (sourcefile != null) {
                 Debug.Assert(tokenParser != null, "TokenParser was not initialized.");
-
                 tokenStream = tokenParser.ParseFile(sourcefile);
-                report.AddSection(tokenParser.GetReportSections());
+                if (includeTokenStream) {
+                    report.AddSection(tokenParser.GetReportSections());
+                }
             }
 
+            ASTNode? ast = null;
             Log.SetState("Syntactic-Analysis");
             if (syntaxConfigurationFilePath != null) {
 
                 var syntaxConfigFile = new SyntacticConfigurationFile(syntaxConfigurationFilePath);
                 var productionTable = new ProductionTable(syntaxConfigFile);
-                report?.AddSection(productionTable.GetReportSection());
+                if (includeGrammar) {
+                    report?.AddSection(productionTable.GetReportSection());
+                }
+
                 var clrStates = new CLRStateGenerator(productionTable, syntaxConfigFile);
-                report?.AddSection(clrStates.GetReportSection());
+                if (includeLRStates) {
+                    report?.AddSection(clrStates.GetReportSection());
+                }
+
                 var lrTable = LRParsingTable.From(clrStates, productionTable);
-                report?.AddSection(lrTable.GetReportSection());
+                if (includeLRTable) {
+                    report?.AddSection(lrTable.GetReportSection());
+                }
 
                 Debug.Assert(tokenStream != null, "Unable to perform synactic analysis with an empty or null token stream");
                 var parser = new LRParser(syntaxConfigFile, tokenStream);
-                var ast = parser.Parse(lrTable, tokenStream);
-                report?.AddSection(parser.GetReportSection());
-                if (ast == null) {
-                    Log.WriteLineError("Failed to parse.");
-                } else {
+                ast = parser.Parse(lrTable, tokenStream);
+
+                if (includeLRTrace) {
+                    report?.AddSection(parser.GetReportSection());
+                }
+
+                Debug.Assert(ast != null, $"Failed to parse");
+
+                if (includeAST) {
                     report?.AddSection(new ASTViewer(ast.ToJSON()));
                 }
             }
 
-            report.AddSection(Log.GetReportSections());
+            Log.SetState("Semantic-Analysis");
+            if (semanticsFolder != null) {
+                foreach (var file in Directory.GetFiles(semanticsFolder, "*.py")) {
+                    new SemanticVisitor(file).Traverse(ast);
+                }
+                if (includeSymbolTables) {
+                    report?.AddSection(SymbolTable.GetReportSection());
+                }
+            }
+
+            Log.SetState("Code-Generation");
+            if (codeGeneratorFolder != null) {
+                var instructionStream = new InstructionStream();
+                foreach (var file in Directory.GetFiles(codeGeneratorFolder, "*.py")) {
+                    new CodeGeneratorVisiter(file, instructionStream).Traverse(ast);
+                }
+                File.WriteAllText(instructionStreamFilepath, instructionStream.ToString());
+            }
+
+            Log.SetState("Post-Build");
+            if (postBuildScript != null) {
+                var process = new System.Diagnostics.Process();
+                process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
+                    FileName = "powershell",
+                    Arguments = postBuildScript,
+                    WorkingDirectory = cwd
+                };
+                process.Start();
+            }
+
+            if (includeLogs) {
+                report.AddSection(Log.GetReportSections());
+            }
         }
 
         private static void MakeSureFolderExists(string path) {

@@ -1,4 +1,5 @@
-﻿using Core;
+﻿using ASTVisitor;
+using Core;
 using Core.ReportGeneration;
 using LexicalAnalysis;
 using System;
@@ -60,7 +61,7 @@ namespace SyntacticAnalysis
                             var id = stk.Pop();
                             var token = stk.Pop() as ASTNodeStackElement;
                             string? tag = rule.Symbols[i].Tag;
-                            int number = node.Elements.Count;
+                            int number = node.Length;
                             if (tag != null) {
 
                                 if (tag == this._config.GetRule(SyntacticConfigurationFile.RULE_INLINE_KEY).ToString()) {

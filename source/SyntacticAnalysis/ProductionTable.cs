@@ -58,7 +58,7 @@ namespace SyntacticAnalysis
                 }
             } else if (symbol.Type == SymbolType.Production && productionsWithEpsilonTransitions.Contains(symbol.ID)) {
                 var copy = rule.CopyWithoutSymbolAt(ptr);
-                foreach (var result in Permute(copy, ptr + 1, productionsWithEpsilonTransitions, true)) {
+                foreach (var result in Permute(copy, ptr, productionsWithEpsilonTransitions, true)) {
                     yield return result;
                 }
                 foreach (var result in Permute(rule, ptr + 1, productionsWithEpsilonTransitions, isDifferent)) {
@@ -93,6 +93,8 @@ namespace SyntacticAnalysis
                         set.Add(rule.Symbols.First());
                     }
                 }
+
+                set.RemoveWhere(symbol => symbol.Type == SymbolType.Production && symbol.ID == entry.Key);
             }
 
             while (true) {

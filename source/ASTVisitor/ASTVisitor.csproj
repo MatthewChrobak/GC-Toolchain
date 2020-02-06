@@ -2,13 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>ASTVisitor</AssemblyName>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ASTVisitor\ASTVisitor.csproj" />
+    <PackageReference Include="IronPython" Version="2.7.9" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\LexicalAnalysis\LexicalAnalysis.csproj" />
   </ItemGroup>
 
 </Project>

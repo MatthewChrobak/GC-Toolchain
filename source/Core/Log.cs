@@ -7,7 +7,8 @@ namespace Core
     public static class Log
     {
         private static readonly bool[] AllowedOutputs = new bool[Enum.GetNames(typeof(OutputLevel)).Length];
-        private static string State;
+        private static string _state;
+        public static string State => _state;
         private static Dictionary<string, List<string>> _stateHistory;
 
         static Log() {
@@ -19,7 +20,7 @@ namespace Core
         }
 
         public static void SetState(string state) {
-            State = state;
+            _state = state;
             if (!_stateHistory.ContainsKey(state)) {
                 _stateHistory[state] = new List<string>();
             }
@@ -46,7 +47,7 @@ namespace Core
             if (!AllowedOutputs[(int)level]) {
                 return;
             }
-            _stateHistory[State].Add(message);
+            _stateHistory[_state].Add(message);
             Console.Write(message);
         }
 

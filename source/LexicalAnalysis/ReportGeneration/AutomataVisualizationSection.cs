@@ -103,7 +103,7 @@ namespace LexicalAnalysis.ReportGeneration
             return string.Join(", ", results).Replace("\"", "\\\"").Replace("'", "\\'");
         }
 
-        private string? EscapeSpecialCharacters(char? val) {
+        private string EscapeSpecialCharacters(char? val) {
             if (val == null) {
                 return null;
             }
