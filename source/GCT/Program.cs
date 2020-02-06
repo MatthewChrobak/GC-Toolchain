@@ -53,26 +53,31 @@ namespace GCT
             bool includeSymbolTables = false;
             bool includeLogs = false;
 
-            // Extract arguments.
-            var match = Regex.Match(string.Join(' ', args), @"\-(\w+)(\s+([^\-\r\n]+|\"".+?\""|\'.+?\'))?");
+            // Extract arguments
+            var match = Regex.Match(string.Join(' ', args), @"\-(\w+)\s+((\'[^\r\n\']+\')|(\""[^\r\n\""]+\"")|([^\r\n\s\-]+))");
             while (match.Success) {
 
                 string flagKey = match.Groups[1].Value.Trim();
                 string flagValue = match.Groups[2].Value.Trim();
 
+                if (flagValue.StartsWith('"') && flagValue.EndsWith('"') || flagValue.StartsWith('\'') && flagValue.EndsWith('\'')) {
+                    flagValue = flagValue[1..^1];
+                }
+
                 switch (flagKey) {
                     case "f":
                         MakeSureFolderExists(flagValue);
 
-                        tokenConfigurationFilePath = flagValue + "/tokens.config";
-                        syntaxConfigurationFilePath = flagValue + "/syntax.config";
-                        sourcefile = flagValue + "/program.source";
+                        tokenConfigurationFilePath = flagValue + "/tokens";
+                        syntaxConfigurationFilePath = flagValue + "/syntax";
+                        sourcefile = flagValue + "/program";
                         reportName = flagValue + "/report";
                         semanticsFolder = flagValue + "/semantics/";
                         codeGeneratorFolder = flagValue + "/codegeneration/";
-                        postBuildScript = Path.Combine(cwd, flagValue + "/build.ps1");
+                        postBuildScript = flagValue + "/build.ps1";
                         instructionStreamFilepath = flagValue + "/output.ir";
 
+                        MakeSureFileExists(instructionStreamFilepath);
                         MakeSureFileExists(tokenConfigurationFilePath);
                         MakeSureFileExists(syntaxConfigurationFilePath);
                         MakeSureFileExists(sourcefile);
@@ -80,7 +85,7 @@ namespace GCT
                         MakeSureFolderExists(codeGeneratorFolder);
                         MakeSureFileExists(postBuildScript);
 
-                        cwd = Path.Combine(cwd, flagValue);
+                        cwd = flagValue;
                         break;
                     case "v":
                     case "verbose":
