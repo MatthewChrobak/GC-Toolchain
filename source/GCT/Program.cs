@@ -54,9 +54,9 @@ namespace GCT
             bool includeLogs = false;
 
             // Extract arguments
-            var match = Regex.Match(string.Join(' ', args), @"\-(\w+)\s+((\'[^\r\n\']+\')|(\""[^\r\n\""]+\"")|([^\r\n\s\-]+))");
-            while (match.Success) {
-
+            var matches = Regex.Matches(string.Join(' ', args), @"\-(\w+)((\s+\'[^\r\n\']+\')|(\s+\""[^\r\n\""]+\"")|(\s+[^\r\n\s\-]+))?");
+            for (int i = 0; i < matches.Count; i++) {
+                var match = matches[i];
                 string flagKey = match.Groups[1].Value.Trim();
                 string flagValue = match.Groups[2].Value.Trim();
 
@@ -151,8 +151,6 @@ namespace GCT
                         includeLogs = true;
                         break;
                 }
-
-                match = match.NextMatch();
             }
 
             LexicalConfigurationFile tokenConfigurationFile;
