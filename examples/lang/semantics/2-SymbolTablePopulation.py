@@ -77,6 +77,7 @@ def preorder_function(node):
     column = node["function_name"]["column"]
 
     class_symboltable = currentSymbolTable()
+    enterNamespace(function_name)
 
     if class_symboltable.RowExistsWhere("name", function_name, "type", return_type):
         raise Exception("Function {0}-{1} at {2!s}:{3!s} is already defined in {4}", return_type, function_name, row, column, currentNamespaceID())
@@ -93,3 +94,22 @@ def preorder_function(node):
     access_modifier_key = "access_modifier"
     access_modifier_value = getPropertyValueIfExists(node, access_modifier_key, "default")
     row[access_modifier_key] = access_modifier_value
+
+def postorder_function(node):
+    leaveNamespace()
+
+def preorder_function_parameter(node):
+    parameter_name = node["parameter_name"]["value"]
+    parameter_type = node["parameter_type"]["value"]
+
+    row = node["parameter_name"]["row"]
+    column = node["parameter_name"]["column"]
+
+    function_symboltable = currentSymbolTable()
+
+    if function_symboltable.RowExistsWhere("name", parameter_name, "type", parameter_type):
+        raise Exception("Function parameter {0}-{1} in {2} at {3!s}:{4!s} already exists", parameter_type, parameter_name, currentNamespaceID(), row, column)
+
+    row = function_symboltable.CreateRow()
+    row["name"] = parameter_name
+    row["type"] = parameter_type

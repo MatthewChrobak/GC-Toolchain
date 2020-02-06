@@ -36,4 +36,13 @@ $function:function
 $access_modifier:^ $static:^ id:field_type id:field_name ;
 
 #production function
-$access_modifier:^ $static:^ id:return_type id:function_name ( ) { }
+$access_modifier:^ $static:^ id:return_type id:function_name ( $function_parameters:^ ) { }
+
+#production function_parameters epsilon:true
+$function_parameter:function_parameter $function_parameters_tail:^
+
+#production function_parameters_tail epsilon:true
+, $function_parameter:function_parameter $function_parameters_tail:^
+
+#production function_parameter
+id:parameter_type id:parameter_name

@@ -19,6 +19,9 @@ $digit
 #token id
 $valid_head_id $valid_tail_id*
 
+#token ,
+,
+
 #token ;
 ;
 

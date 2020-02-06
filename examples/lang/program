@@ -10,7 +10,13 @@ namespace FirstApplication {
 
     private static class Person {
         public int Test() {
-            
+
+        }
+        public int test2(int a) {
+
+        }
+        int test3(int a, int b) {
+
         }
     }
 }
