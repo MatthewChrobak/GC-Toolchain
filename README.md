@@ -2,7 +2,7 @@
 
 GC-Toolchain is a compiler development toolchain that is responsible for front-end validation and analysis, and offers a framework for back-end code-generation. A comprehensive compilation report can be generated on each run to give detailed information of the mechanisms involved in the compilation process.
 
-![img](https://i.imgur.com/PaHNRsx.png)
+![img](https://i.imgur.com/lwjLdHn.png)
 
 ## Usage
 
