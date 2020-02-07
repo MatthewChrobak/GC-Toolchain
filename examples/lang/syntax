@@ -12,6 +12,7 @@ $namespace:namespace $namespaces:^
 
 #production namespace
 namespace id:namespace_name { $namespace_elements:^ }
+$class:class
 
 #production namespace_elements epsilon:true
 $class:class $namespace_elements:^
@@ -52,44 +53,40 @@ $statement:statement $statements:^
 
 #production statement
 $variable_declaration:variable_declaration
-$assignment:assignment
+$lvalue_statement:lvalue_statement
 
 #production variable_declaration
 id:variable_type id:variable_name ;
 id:variable_type id:variable_name = $rvalue:rvalue ;
 
-#production assignment
-$lvalue:lvalue = $rvalue:rvalue ;
+#production lvalue_statement
+$lvalue:lvalue $lvalue_statement_assignment ;
 
-#production indice epsilon:true
-[ $rvalue ] $indice
-
-#production lvalue
-$lvalue_no_indices $indice $lvalue_list
-$lvalue_no_indices ( $function_arguments ) $lvalue_list
-
-#production lvalue_no_indices
-id
-
-#production function_call
-id $idlist ( $function_arguments )
-
-#production function_arguments epsilon:true
-$function_argument $function_arguments_tail
-
-#production function_arguments_tail epsilon:true
-, $function_argument $function_arguments_tail
-
-#production function_argument
-$rvalue
-
-#production idlist epsilon:true
-. id $idlist
-
-#production lvalue_list epsilon:true
-. $lvalue
-scopeOperator $lvalue
+#production lvalue_statement_assignment epsilon:true
+= $rvalue:rvalue
 
 #production rvalue
-$lvalue
-integer
+$lvalue:lvalue
+integer:integer
+
+#production lvalue
+$lvalue_component:component $lvalue_list:^
+
+#production lvalue_component
+id:identifier $indice:^
+id:function_identifier ( $function_arguments:^ )
+
+#production lvalue_list epsilon:true
+. $lvalue:^
+
+#production indice epsilon:true
+[ $rvalue:indice ] $indice:^
+
+#production function_arguments epsilon:true
+$function_argument:function_argument $function_arguments_tail:^
+
+#production function_arguments_tail epsilon:true
+, $function_argument:function_argument $function_arguments_tail:^
+
+#production function_argument
+$rvalue:rvalue
