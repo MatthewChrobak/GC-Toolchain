@@ -13,7 +13,7 @@ namespace SyntacticAnalysis
 
         public LRParsingTableReportSection(LRParsingTable lRParsingTable) : base("LR-Parsing-Table") {
             var terminals = new HashSet<string>();
-            var productions = new HashSet<string>();
+            var productions = new HashSet<string>() { "S'" };
 
             foreach (var row in lRParsingTable.Rows) {
                 foreach (var gt in row.GOTO) {
@@ -66,6 +66,25 @@ namespace SyntacticAnalysis
     </tbody>
 </table>
 ");
+
+            return sb.ToString();
+        }
+
+        public string ToTestString() {
+            var sb = new StringBuilder();
+            sb.Append("State\t");
+            sb.Append(string.Join('\t', this.terminals));
+            sb.Append("\t");
+            sb.Append(string.Join('\t', this.productions));
+
+            for (int i = 0; i < this.rows.Length; i++) {
+                var row = this.rows[i];
+                sb.AppendLine();
+                sb.Append($"{i}\t");
+                sb.Append(string.Join('\t', this.terminals.Select(val => row.GetAction(val))));
+                sb.Append("\t");
+                sb.Append(string.Join('\t', this.productions.Select(val => row.GetGOTO(val))));
+            }
 
             return sb.ToString();
         }

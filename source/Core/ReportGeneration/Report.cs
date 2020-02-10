@@ -21,8 +21,10 @@ namespace Core.ReportGeneration
 
             string head = $"<head>{bootstrapCSS}{visJs}{jsonTreeView}</head>";
             string tableOfContents = new TableOfContents(this).ToHTML();
+            string backtotop = "<div style='position:fixed;top:0px;left:0px;padding:10px;'><a href='#' style='display:block;border:1px solid black;border-radius:10px;padding:10px;' onclick=\"$('html,body').animate({scrollTop:0}, 'fast');\">Back to top</a></div>";
+            backtotop = "<div style='position:fixed;top:0px;left:0px;padding:10px;'><button type='button' class='btn btn-light' onclick=\"$('html,body').animate({scrollTop:0}, 'fast');\">Scroll to top</button></div>";
 
-            string body = $"<body>{tableOfContents}{string.Join("", this.Sections.Select(Section => Section.ToHTML()))}</body>";
+            string body = $"<body>{tableOfContents}{string.Join("", this.Sections.Select(Section => Section.ToHTML()))}{backtotop}</body>";
             string html = $"<!doctype HTML><html>{head}{body}</html>";  
 
             return html;
