@@ -144,7 +144,163 @@ id:id
 41	 	 	r2	 	 	r2	r2	s20	s21	 	 	 	 	 	 	 	 	 	37	 
 42	 	 	r4	 	 	r4	r4	r4	r4	 	 	 	 	 	 	 	 	 	 	 
 43	 	 	r6	 	 	r6	r6	r6	r6	 	 	 	 	 	 	 	 	 	 	 ";
-            string solutionStates = @"";
+            string solutionStates = @"	{[S' -> .S, $]}	0	{[S' -> .S, $]; [S -> .lvalue = expression, $]; [lvalue -> .id, =]}
+goto(0, S)	{[S' -> S., $]}	1	{[S' -> S., $]}
+goto(0, lvalue)	{[S -> lvalue.= expression, $]}	2	{[S -> lvalue.= expression, $]}
+goto(0, id)	{[lvalue -> id., =]}	3	{[lvalue -> id., =]}
+goto(2, =)	{[S -> lvalue =.expression, $]}	4	{[S -> lvalue =.expression, $]; [expression -> .expression p10_operator p9_expression, $/+/-]; [expression -> .p9_expression, $/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, $/+/-/*//]; [p9_expression -> .rvalue, $/+/-/*//]; [rvalue -> .( expression ), $/+/-/*//]; [rvalue -> .lvalue, $/+/-/*//]; [rvalue -> .integer, $/+/-/*//]; [rvalue -> .pointer_operator rvalue, $/+/-/*//]; [rvalue -> .p10_operator rvalue, $/+/-/*//]; [lvalue -> .id, $/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(4, expression)	{[S -> lvalue = expression., $]; [expression -> expression.p10_operator p9_expression, $/+/-]}	5	{[S -> lvalue = expression., $]; [expression -> expression.p10_operator p9_expression, $/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(4, p9_expression)	{[expression -> p9_expression., $/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, $/+/-/*//]}	6	{[expression -> p9_expression., $/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, $/+/-/*//]; [p9_operator -> .*, (/integer/id/&/*/+/-]; [p9_operator -> ./, (/integer/id/&/*/+/-]}
+goto(4, rvalue)	{[p9_expression -> rvalue., $/+/-/*//]}	7	{[p9_expression -> rvalue., $/+/-/*//]}
+goto(4, ()	{[rvalue -> (.expression ), $/+/-/*//]}	8	{[rvalue -> (.expression ), $/+/-/*//]; [expression -> .expression p10_operator p9_expression, )/+/-]; [expression -> .p9_expression, )/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, )/+/-/*//]; [p9_expression -> .rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(4, lvalue)	{[rvalue -> lvalue., $/+/-/*//]}	9	{[rvalue -> lvalue., $/+/-/*//]}
+goto(4, integer)	{[rvalue -> integer., $/+/-/*//]}	10	{[rvalue -> integer., $/+/-/*//]}
+goto(4, pointer_operator)	{[rvalue -> pointer_operator.rvalue, $/+/-/*//]}	11	{[rvalue -> pointer_operator.rvalue, $/+/-/*//]; [rvalue -> .( expression ), $/+/-/*//]; [rvalue -> .lvalue, $/+/-/*//]; [rvalue -> .integer, $/+/-/*//]; [rvalue -> .pointer_operator rvalue, $/+/-/*//]; [rvalue -> .p10_operator rvalue, $/+/-/*//]; [lvalue -> .id, $/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(4, p10_operator)	{[rvalue -> p10_operator.rvalue, $/+/-/*//]}	12	{[rvalue -> p10_operator.rvalue, $/+/-/*//]; [rvalue -> .( expression ), $/+/-/*//]; [rvalue -> .lvalue, $/+/-/*//]; [rvalue -> .integer, $/+/-/*//]; [rvalue -> .pointer_operator rvalue, $/+/-/*//]; [rvalue -> .p10_operator rvalue, $/+/-/*//]; [lvalue -> .id, $/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(4, id)	{[lvalue -> id., $/+/-/*//]}	13	{[lvalue -> id., $/+/-/*//]}
+goto(4, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	{[pointer_operator -> &., (/integer/id/&/*/+/-]}
+goto(4, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	{[pointer_operator -> *., (/integer/id/&/*/+/-]}
+goto(4, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	{[p10_operator -> +., (/integer/id/&/*/+/-]}
+goto(4, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	{[p10_operator -> -., (/integer/id/&/*/+/-]}
+goto(5, p10_operator)	{[expression -> expression p10_operator.p9_expression, $/+/-]}	18	{[expression -> expression p10_operator.p9_expression, $/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, $/+/-/*//]; [p9_expression -> .rvalue, $/+/-/*//]; [rvalue -> .( expression ), $/+/-/*//]; [rvalue -> .lvalue, $/+/-/*//]; [rvalue -> .integer, $/+/-/*//]; [rvalue -> .pointer_operator rvalue, $/+/-/*//]; [rvalue -> .p10_operator rvalue, $/+/-/*//]; [lvalue -> .id, $/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(5, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(5, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(6, p9_operator)	{[p9_expression -> p9_expression p9_operator.rvalue, $/+/-/*//]}	19	{[p9_expression -> p9_expression p9_operator.rvalue, $/+/-/*//]; [rvalue -> .( expression ), $/+/-/*//]; [rvalue -> .lvalue, $/+/-/*//]; [rvalue -> .integer, $/+/-/*//]; [rvalue -> .pointer_operator rvalue, $/+/-/*//]; [rvalue -> .p10_operator rvalue, $/+/-/*//]; [lvalue -> .id, $/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(6, *)	{[p9_operator -> *., (/integer/id/&/*/+/-]}	20	{[p9_operator -> *., (/integer/id/&/*/+/-]}
+goto(6, /)	{[p9_operator -> /., (/integer/id/&/*/+/-]}	21	{[p9_operator -> /., (/integer/id/&/*/+/-]}
+goto(8, expression)	{[rvalue -> ( expression.), $/+/-/*//]; [expression -> expression.p10_operator p9_expression, )/+/-]}	22	{[rvalue -> ( expression.), $/+/-/*//]; [expression -> expression.p10_operator p9_expression, )/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(8, p9_expression)	{[expression -> p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]}	23	{[expression -> p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]; [p9_operator -> .*, (/integer/id/&/*/+/-]; [p9_operator -> ./, (/integer/id/&/*/+/-]}
+goto(8, rvalue)	{[p9_expression -> rvalue., )/+/-/*//]}	24	{[p9_expression -> rvalue., )/+/-/*//]}
+goto(8, ()	{[rvalue -> (.expression ), )/+/-/*//]}	25	{[rvalue -> (.expression ), )/+/-/*//]; [expression -> .expression p10_operator p9_expression, )/+/-]; [expression -> .p9_expression, )/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, )/+/-/*//]; [p9_expression -> .rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(8, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	26	{[rvalue -> lvalue., )/+/-/*//]}
+goto(8, integer)	{[rvalue -> integer., )/+/-/*//]}	27	{[rvalue -> integer., )/+/-/*//]}
+goto(8, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	28	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(8, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	29	{[rvalue -> p10_operator.rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(8, id)	{[lvalue -> id., )/+/-/*//]}	30	{[lvalue -> id., )/+/-/*//]}
+goto(8, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(8, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(8, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(8, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(11, rvalue)	{[rvalue -> pointer_operator rvalue., $/+/-/*//]}	31	{[rvalue -> pointer_operator rvalue., $/+/-/*//]}
+goto(11, ()	{[rvalue -> (.expression ), $/+/-/*//]}	8	 
+goto(11, lvalue)	{[rvalue -> lvalue., $/+/-/*//]}	9	 
+goto(11, integer)	{[rvalue -> integer., $/+/-/*//]}	10	 
+goto(11, pointer_operator)	{[rvalue -> pointer_operator.rvalue, $/+/-/*//]}	11	 
+goto(11, p10_operator)	{[rvalue -> p10_operator.rvalue, $/+/-/*//]}	12	 
+goto(11, id)	{[lvalue -> id., $/+/-/*//]}	13	 
+goto(11, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(11, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(11, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(11, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(12, rvalue)	{[rvalue -> p10_operator rvalue., $/+/-/*//]}	32	{[rvalue -> p10_operator rvalue., $/+/-/*//]}
+goto(12, ()	{[rvalue -> (.expression ), $/+/-/*//]}	8	 
+goto(12, lvalue)	{[rvalue -> lvalue., $/+/-/*//]}	9	 
+goto(12, integer)	{[rvalue -> integer., $/+/-/*//]}	10	 
+goto(12, pointer_operator)	{[rvalue -> pointer_operator.rvalue, $/+/-/*//]}	11	 
+goto(12, p10_operator)	{[rvalue -> p10_operator.rvalue, $/+/-/*//]}	12	 
+goto(12, id)	{[lvalue -> id., $/+/-/*//]}	13	 
+goto(12, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(12, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(12, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(12, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(18, p9_expression)	{[expression -> expression p10_operator p9_expression., $/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, $/+/-/*//]}	33	{[expression -> expression p10_operator p9_expression., $/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, $/+/-/*//]; [p9_operator -> .*, (/integer/id/&/*/+/-]; [p9_operator -> ./, (/integer/id/&/*/+/-]}
+goto(18, rvalue)	{[p9_expression -> rvalue., $/+/-/*//]}	7	 
+goto(18, ()	{[rvalue -> (.expression ), $/+/-/*//]}	8	 
+goto(18, lvalue)	{[rvalue -> lvalue., $/+/-/*//]}	9	 
+goto(18, integer)	{[rvalue -> integer., $/+/-/*//]}	10	 
+goto(18, pointer_operator)	{[rvalue -> pointer_operator.rvalue, $/+/-/*//]}	11	 
+goto(18, p10_operator)	{[rvalue -> p10_operator.rvalue, $/+/-/*//]}	12	 
+goto(18, id)	{[lvalue -> id., $/+/-/*//]}	13	 
+goto(18, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(18, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(18, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(18, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(19, rvalue)	{[p9_expression -> p9_expression p9_operator rvalue., $/+/-/*//]}	34	{[p9_expression -> p9_expression p9_operator rvalue., $/+/-/*//]}
+goto(19, ()	{[rvalue -> (.expression ), $/+/-/*//]}	8	 
+goto(19, lvalue)	{[rvalue -> lvalue., $/+/-/*//]}	9	 
+goto(19, integer)	{[rvalue -> integer., $/+/-/*//]}	10	 
+goto(19, pointer_operator)	{[rvalue -> pointer_operator.rvalue, $/+/-/*//]}	11	 
+goto(19, p10_operator)	{[rvalue -> p10_operator.rvalue, $/+/-/*//]}	12	 
+goto(19, id)	{[lvalue -> id., $/+/-/*//]}	13	 
+goto(19, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(19, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(19, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(19, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(22, ))	{[rvalue -> ( expression )., $/+/-/*//]}	35	{[rvalue -> ( expression )., $/+/-/*//]}
+goto(22, p10_operator)	{[expression -> expression p10_operator.p9_expression, )/+/-]}	36	{[expression -> expression p10_operator.p9_expression, )/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, )/+/-/*//]; [p9_expression -> .rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(22, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(22, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(23, p9_operator)	{[p9_expression -> p9_expression p9_operator.rvalue, )/+/-/*//]}	37	{[p9_expression -> p9_expression p9_operator.rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(23, *)	{[p9_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(23, /)	{[p9_operator -> /., (/integer/id/&/*/+/-]}	21	 
+goto(25, expression)	{[rvalue -> ( expression.), )/+/-/*//]; [expression -> expression.p10_operator p9_expression, )/+/-]}	38	{[rvalue -> ( expression.), )/+/-/*//]; [expression -> expression.p10_operator p9_expression, )/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(25, p9_expression)	{[expression -> p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]}	23	 
+goto(25, rvalue)	{[p9_expression -> rvalue., )/+/-/*//]}	24	 
+goto(25, ()	{[rvalue -> (.expression ), )/+/-/*//]}	25	 
+goto(25, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	26	 
+goto(25, integer)	{[rvalue -> integer., )/+/-/*//]}	27	 
+goto(25, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	28	 
+goto(25, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	29	 
+goto(25, id)	{[lvalue -> id., )/+/-/*//]}	30	 
+goto(25, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(25, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(25, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(25, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(28, rvalue)	{[rvalue -> pointer_operator rvalue., )/+/-/*//]}	39	{[rvalue -> pointer_operator rvalue., )/+/-/*//]}
+goto(28, ()	{[rvalue -> (.expression ), )/+/-/*//]}	25	 
+goto(28, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	26	 
+goto(28, integer)	{[rvalue -> integer., )/+/-/*//]}	27	 
+goto(28, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	28	 
+goto(28, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	29	 
+goto(28, id)	{[lvalue -> id., )/+/-/*//]}	30	 
+goto(28, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(28, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(28, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(28, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(29, rvalue)	{[rvalue -> p10_operator rvalue., )/+/-/*//]}	40	{[rvalue -> p10_operator rvalue., )/+/-/*//]}
+goto(29, ()	{[rvalue -> (.expression ), )/+/-/*//]}	25	 
+goto(29, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	26	 
+goto(29, integer)	{[rvalue -> integer., )/+/-/*//]}	27	 
+goto(29, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	28	 
+goto(29, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	29	 
+goto(29, id)	{[lvalue -> id., )/+/-/*//]}	30	 
+goto(29, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(29, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(29, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(29, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(33, p9_operator)	{[p9_expression -> p9_expression p9_operator.rvalue, $/+/-/*//]}	19	 
+goto(33, *)	{[p9_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(33, /)	{[p9_operator -> /., (/integer/id/&/*/+/-]}	21	 
+goto(36, p9_expression)	{[expression -> expression p10_operator p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]}	41	{[expression -> expression p10_operator p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]; [p9_operator -> .*, (/integer/id/&/*/+/-]; [p9_operator -> ./, (/integer/id/&/*/+/-]}
+goto(36, rvalue)	{[p9_expression -> rvalue., )/+/-/*//]}	24	 
+goto(36, ()	{[rvalue -> (.expression ), )/+/-/*//]}	25	 
+goto(36, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	26	 
+goto(36, integer)	{[rvalue -> integer., )/+/-/*//]}	27	 
+goto(36, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	28	 
+goto(36, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	29	 
+goto(36, id)	{[lvalue -> id., )/+/-/*//]}	30	 
+goto(36, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(36, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(36, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(36, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(37, rvalue)	{[p9_expression -> p9_expression p9_operator rvalue., )/+/-/*//]}	42	{[p9_expression -> p9_expression p9_operator rvalue., )/+/-/*//]}
+goto(37, ()	{[rvalue -> (.expression ), )/+/-/*//]}	25	 
+goto(37, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	26	 
+goto(37, integer)	{[rvalue -> integer., )/+/-/*//]}	27	 
+goto(37, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	28	 
+goto(37, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	29	 
+goto(37, id)	{[lvalue -> id., )/+/-/*//]}	30	 
+goto(37, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	14	 
+goto(37, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	15	 
+goto(37, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(37, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(38, ))	{[rvalue -> ( expression )., )/+/-/*//]}	43	{[rvalue -> ( expression )., )/+/-/*//]}
+goto(38, p10_operator)	{[expression -> expression p10_operator.p9_expression, )/+/-]}	36	 
+goto(38, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	16	 
+goto(38, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	17	 
+goto(41, p9_operator)	{[p9_expression -> p9_expression p9_operator.rvalue, )/+/-/*//]}	37	 
+goto(41, *)	{[p9_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(41, /)	{[p9_operator -> /., (/integer/id/&/*/+/-]}	21	 ";
             BuildAndCompare(config, solutionTable, solutionStates);
         }
 
@@ -246,7 +402,174 @@ id:id
 47	 	 	 	r7	 	 	r7	r7	s26	s27	 	 	 	 	 	 	 	 	 	 	 	43	 
 48	 	 	 	r9	 	 	r9	r9	r9	r9	 	 	 	 	 	 	 	 	 	 	 	 	 
 49	 	 	 	r11	 	 	r11	r11	r11	r11	 	 	 	 	 	 	 	 	 	 	 	 	 ";
-            string solutionStates = @"";
+            string solutionStates = @"	{[S' -> .S, $]}	0	{[S' -> .S, $]; [S -> .statement statements, $]; [S -> .statement, $]; [statement -> .lvalue ;, id/$]; [statement -> .lvalue = expression ;, id/$]; [lvalue -> .id, ;/=]}
+goto(0, S)	{[S' -> S., $]}	1	{[S' -> S., $]}
+goto(0, statement)	{[S -> statement.statements, $]; [S -> statement., $]}	2	{[S -> statement.statements, $]; [S -> statement., $]; [statements -> .statement statements, $]; [statements -> .statement, $]; [statement -> .lvalue ;, id/$]; [statement -> .lvalue = expression ;, id/$]; [lvalue -> .id, ;/=]}
+goto(0, lvalue)	{[statement -> lvalue.;, id/$]; [statement -> lvalue.= expression ;, id/$]}	3	{[statement -> lvalue.;, id/$]; [statement -> lvalue.= expression ;, id/$]}
+goto(0, id)	{[lvalue -> id., ;/=]}	4	{[lvalue -> id., ;/=]}
+goto(2, statements)	{[S -> statement statements., $]}	5	{[S -> statement statements., $]}
+goto(2, statement)	{[statements -> statement.statements, $]; [statements -> statement., $]}	6	{[statements -> statement.statements, $]; [statements -> statement., $]; [statements -> .statement statements, $]; [statements -> .statement, $]; [statement -> .lvalue ;, id/$]; [statement -> .lvalue = expression ;, id/$]; [lvalue -> .id, ;/=]}
+goto(2, lvalue)	{[statement -> lvalue.;, id/$]; [statement -> lvalue.= expression ;, id/$]}	3	 
+goto(2, id)	{[lvalue -> id., ;/=]}	4	 
+goto(3, ;)	{[statement -> lvalue ;., id/$]}	7	{[statement -> lvalue ;., id/$]}
+goto(3, =)	{[statement -> lvalue =.expression ;, id/$]}	8	{[statement -> lvalue =.expression ;, id/$]; [expression -> .expression p10_operator p9_expression, ;/+/-]; [expression -> .p9_expression, ;/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, ;/+/-/*//]; [p9_expression -> .rvalue, ;/+/-/*//]; [rvalue -> .( expression ), ;/+/-/*//]; [rvalue -> .lvalue, ;/+/-/*//]; [rvalue -> .integer, ;/+/-/*//]; [rvalue -> .pointer_operator rvalue, ;/+/-/*//]; [rvalue -> .p10_operator rvalue, ;/+/-/*//]; [lvalue -> .id, ;/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(6, statements)	{[statements -> statement statements., $]}	9	{[statements -> statement statements., $]}
+goto(6, statement)	{[statements -> statement.statements, $]; [statements -> statement., $]}	6	 
+goto(6, lvalue)	{[statement -> lvalue.;, id/$]; [statement -> lvalue.= expression ;, id/$]}	3	 
+goto(6, id)	{[lvalue -> id., ;/=]}	4	 
+goto(8, expression)	{[statement -> lvalue = expression.;, id/$]; [expression -> expression.p10_operator p9_expression, ;/+/-]}	10	{[statement -> lvalue = expression.;, id/$]; [expression -> expression.p10_operator p9_expression, ;/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(8, p9_expression)	{[expression -> p9_expression., ;/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, ;/+/-/*//]}	11	{[expression -> p9_expression., ;/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, ;/+/-/*//]; [p9_operator -> .*, (/integer/id/&/*/+/-]; [p9_operator -> ./, (/integer/id/&/*/+/-]}
+goto(8, rvalue)	{[p9_expression -> rvalue., ;/+/-/*//]}	12	{[p9_expression -> rvalue., ;/+/-/*//]}
+goto(8, ()	{[rvalue -> (.expression ), ;/+/-/*//]}	13	{[rvalue -> (.expression ), ;/+/-/*//]; [expression -> .expression p10_operator p9_expression, )/+/-]; [expression -> .p9_expression, )/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, )/+/-/*//]; [p9_expression -> .rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(8, lvalue)	{[rvalue -> lvalue., ;/+/-/*//]}	14	{[rvalue -> lvalue., ;/+/-/*//]}
+goto(8, integer)	{[rvalue -> integer., ;/+/-/*//]}	15	{[rvalue -> integer., ;/+/-/*//]}
+goto(8, pointer_operator)	{[rvalue -> pointer_operator.rvalue, ;/+/-/*//]}	16	{[rvalue -> pointer_operator.rvalue, ;/+/-/*//]; [rvalue -> .( expression ), ;/+/-/*//]; [rvalue -> .lvalue, ;/+/-/*//]; [rvalue -> .integer, ;/+/-/*//]; [rvalue -> .pointer_operator rvalue, ;/+/-/*//]; [rvalue -> .p10_operator rvalue, ;/+/-/*//]; [lvalue -> .id, ;/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(8, p10_operator)	{[rvalue -> p10_operator.rvalue, ;/+/-/*//]}	17	{[rvalue -> p10_operator.rvalue, ;/+/-/*//]; [rvalue -> .( expression ), ;/+/-/*//]; [rvalue -> .lvalue, ;/+/-/*//]; [rvalue -> .integer, ;/+/-/*//]; [rvalue -> .pointer_operator rvalue, ;/+/-/*//]; [rvalue -> .p10_operator rvalue, ;/+/-/*//]; [lvalue -> .id, ;/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(8, id)	{[lvalue -> id., ;/+/-/*//]}	18	{[lvalue -> id., ;/+/-/*//]}
+goto(8, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	{[pointer_operator -> &., (/integer/id/&/*/+/-]}
+goto(8, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	{[pointer_operator -> *., (/integer/id/&/*/+/-]}
+goto(8, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	{[p10_operator -> +., (/integer/id/&/*/+/-]}
+goto(8, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	{[p10_operator -> -., (/integer/id/&/*/+/-]}
+goto(10, ;)	{[statement -> lvalue = expression ;., id/$]}	23	{[statement -> lvalue = expression ;., id/$]}
+goto(10, p10_operator)	{[expression -> expression p10_operator.p9_expression, ;/+/-]}	24	{[expression -> expression p10_operator.p9_expression, ;/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, ;/+/-/*//]; [p9_expression -> .rvalue, ;/+/-/*//]; [rvalue -> .( expression ), ;/+/-/*//]; [rvalue -> .lvalue, ;/+/-/*//]; [rvalue -> .integer, ;/+/-/*//]; [rvalue -> .pointer_operator rvalue, ;/+/-/*//]; [rvalue -> .p10_operator rvalue, ;/+/-/*//]; [lvalue -> .id, ;/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(10, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(10, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(11, p9_operator)	{[p9_expression -> p9_expression p9_operator.rvalue, ;/+/-/*//]}	25	{[p9_expression -> p9_expression p9_operator.rvalue, ;/+/-/*//]; [rvalue -> .( expression ), ;/+/-/*//]; [rvalue -> .lvalue, ;/+/-/*//]; [rvalue -> .integer, ;/+/-/*//]; [rvalue -> .pointer_operator rvalue, ;/+/-/*//]; [rvalue -> .p10_operator rvalue, ;/+/-/*//]; [lvalue -> .id, ;/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(11, *)	{[p9_operator -> *., (/integer/id/&/*/+/-]}	26	{[p9_operator -> *., (/integer/id/&/*/+/-]}
+goto(11, /)	{[p9_operator -> /., (/integer/id/&/*/+/-]}	27	{[p9_operator -> /., (/integer/id/&/*/+/-]}
+goto(13, expression)	{[rvalue -> ( expression.), ;/+/-/*//]; [expression -> expression.p10_operator p9_expression, )/+/-]}	28	{[rvalue -> ( expression.), ;/+/-/*//]; [expression -> expression.p10_operator p9_expression, )/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(13, p9_expression)	{[expression -> p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]}	29	{[expression -> p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]; [p9_operator -> .*, (/integer/id/&/*/+/-]; [p9_operator -> ./, (/integer/id/&/*/+/-]}
+goto(13, rvalue)	{[p9_expression -> rvalue., )/+/-/*//]}	30	{[p9_expression -> rvalue., )/+/-/*//]}
+goto(13, ()	{[rvalue -> (.expression ), )/+/-/*//]}	31	{[rvalue -> (.expression ), )/+/-/*//]; [expression -> .expression p10_operator p9_expression, )/+/-]; [expression -> .p9_expression, )/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, )/+/-/*//]; [p9_expression -> .rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(13, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	32	{[rvalue -> lvalue., )/+/-/*//]}
+goto(13, integer)	{[rvalue -> integer., )/+/-/*//]}	33	{[rvalue -> integer., )/+/-/*//]}
+goto(13, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	34	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(13, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	35	{[rvalue -> p10_operator.rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(13, id)	{[lvalue -> id., )/+/-/*//]}	36	{[lvalue -> id., )/+/-/*//]}
+goto(13, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(13, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(13, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(13, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(16, rvalue)	{[rvalue -> pointer_operator rvalue., ;/+/-/*//]}	37	{[rvalue -> pointer_operator rvalue., ;/+/-/*//]}
+goto(16, ()	{[rvalue -> (.expression ), ;/+/-/*//]}	13	 
+goto(16, lvalue)	{[rvalue -> lvalue., ;/+/-/*//]}	14	 
+goto(16, integer)	{[rvalue -> integer., ;/+/-/*//]}	15	 
+goto(16, pointer_operator)	{[rvalue -> pointer_operator.rvalue, ;/+/-/*//]}	16	 
+goto(16, p10_operator)	{[rvalue -> p10_operator.rvalue, ;/+/-/*//]}	17	 
+goto(16, id)	{[lvalue -> id., ;/+/-/*//]}	18	 
+goto(16, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(16, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(16, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(16, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(17, rvalue)	{[rvalue -> p10_operator rvalue., ;/+/-/*//]}	38	{[rvalue -> p10_operator rvalue., ;/+/-/*//]}
+goto(17, ()	{[rvalue -> (.expression ), ;/+/-/*//]}	13	 
+goto(17, lvalue)	{[rvalue -> lvalue., ;/+/-/*//]}	14	 
+goto(17, integer)	{[rvalue -> integer., ;/+/-/*//]}	15	 
+goto(17, pointer_operator)	{[rvalue -> pointer_operator.rvalue, ;/+/-/*//]}	16	 
+goto(17, p10_operator)	{[rvalue -> p10_operator.rvalue, ;/+/-/*//]}	17	 
+goto(17, id)	{[lvalue -> id., ;/+/-/*//]}	18	 
+goto(17, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(17, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(17, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(17, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(24, p9_expression)	{[expression -> expression p10_operator p9_expression., ;/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, ;/+/-/*//]}	39	{[expression -> expression p10_operator p9_expression., ;/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, ;/+/-/*//]; [p9_operator -> .*, (/integer/id/&/*/+/-]; [p9_operator -> ./, (/integer/id/&/*/+/-]}
+goto(24, rvalue)	{[p9_expression -> rvalue., ;/+/-/*//]}	12	 
+goto(24, ()	{[rvalue -> (.expression ), ;/+/-/*//]}	13	 
+goto(24, lvalue)	{[rvalue -> lvalue., ;/+/-/*//]}	14	 
+goto(24, integer)	{[rvalue -> integer., ;/+/-/*//]}	15	 
+goto(24, pointer_operator)	{[rvalue -> pointer_operator.rvalue, ;/+/-/*//]}	16	 
+goto(24, p10_operator)	{[rvalue -> p10_operator.rvalue, ;/+/-/*//]}	17	 
+goto(24, id)	{[lvalue -> id., ;/+/-/*//]}	18	 
+goto(24, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(24, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(24, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(24, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(25, rvalue)	{[p9_expression -> p9_expression p9_operator rvalue., ;/+/-/*//]}	40	{[p9_expression -> p9_expression p9_operator rvalue., ;/+/-/*//]}
+goto(25, ()	{[rvalue -> (.expression ), ;/+/-/*//]}	13	 
+goto(25, lvalue)	{[rvalue -> lvalue., ;/+/-/*//]}	14	 
+goto(25, integer)	{[rvalue -> integer., ;/+/-/*//]}	15	 
+goto(25, pointer_operator)	{[rvalue -> pointer_operator.rvalue, ;/+/-/*//]}	16	 
+goto(25, p10_operator)	{[rvalue -> p10_operator.rvalue, ;/+/-/*//]}	17	 
+goto(25, id)	{[lvalue -> id., ;/+/-/*//]}	18	 
+goto(25, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(25, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(25, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(25, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(28, ))	{[rvalue -> ( expression )., ;/+/-/*//]}	41	{[rvalue -> ( expression )., ;/+/-/*//]}
+goto(28, p10_operator)	{[expression -> expression p10_operator.p9_expression, )/+/-]}	42	{[expression -> expression p10_operator.p9_expression, )/+/-]; [p9_expression -> .p9_expression p9_operator rvalue, )/+/-/*//]; [p9_expression -> .rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(28, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(28, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(29, p9_operator)	{[p9_expression -> p9_expression p9_operator.rvalue, )/+/-/*//]}	43	{[p9_expression -> p9_expression p9_operator.rvalue, )/+/-/*//]; [rvalue -> .( expression ), )/+/-/*//]; [rvalue -> .lvalue, )/+/-/*//]; [rvalue -> .integer, )/+/-/*//]; [rvalue -> .pointer_operator rvalue, )/+/-/*//]; [rvalue -> .p10_operator rvalue, )/+/-/*//]; [lvalue -> .id, )/+/-/*//]; [pointer_operator -> .&, (/integer/id/&/*/+/-]; [pointer_operator -> .*, (/integer/id/&/*/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(29, *)	{[p9_operator -> *., (/integer/id/&/*/+/-]}	26	 
+goto(29, /)	{[p9_operator -> /., (/integer/id/&/*/+/-]}	27	 
+goto(31, expression)	{[rvalue -> ( expression.), )/+/-/*//]; [expression -> expression.p10_operator p9_expression, )/+/-]}	44	{[rvalue -> ( expression.), )/+/-/*//]; [expression -> expression.p10_operator p9_expression, )/+/-]; [p10_operator -> .+, (/integer/id/&/*/+/-]; [p10_operator -> .-, (/integer/id/&/*/+/-]}
+goto(31, p9_expression)	{[expression -> p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]}	29	 
+goto(31, rvalue)	{[p9_expression -> rvalue., )/+/-/*//]}	30	 
+goto(31, ()	{[rvalue -> (.expression ), )/+/-/*//]}	31	 
+goto(31, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	32	 
+goto(31, integer)	{[rvalue -> integer., )/+/-/*//]}	33	 
+goto(31, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	34	 
+goto(31, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	35	 
+goto(31, id)	{[lvalue -> id., )/+/-/*//]}	36	 
+goto(31, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(31, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(31, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(31, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(34, rvalue)	{[rvalue -> pointer_operator rvalue., )/+/-/*//]}	45	{[rvalue -> pointer_operator rvalue., )/+/-/*//]}
+goto(34, ()	{[rvalue -> (.expression ), )/+/-/*//]}	31	 
+goto(34, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	32	 
+goto(34, integer)	{[rvalue -> integer., )/+/-/*//]}	33	 
+goto(34, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	34	 
+goto(34, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	35	 
+goto(34, id)	{[lvalue -> id., )/+/-/*//]}	36	 
+goto(34, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(34, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(34, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(34, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(35, rvalue)	{[rvalue -> p10_operator rvalue., )/+/-/*//]}	46	{[rvalue -> p10_operator rvalue., )/+/-/*//]}
+goto(35, ()	{[rvalue -> (.expression ), )/+/-/*//]}	31	 
+goto(35, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	32	 
+goto(35, integer)	{[rvalue -> integer., )/+/-/*//]}	33	 
+goto(35, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	34	 
+goto(35, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	35	 
+goto(35, id)	{[lvalue -> id., )/+/-/*//]}	36	 
+goto(35, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(35, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(35, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(35, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(39, p9_operator)	{[p9_expression -> p9_expression p9_operator.rvalue, ;/+/-/*//]}	25	 
+goto(39, *)	{[p9_operator -> *., (/integer/id/&/*/+/-]}	26	 
+goto(39, /)	{[p9_operator -> /., (/integer/id/&/*/+/-]}	27	 
+goto(42, p9_expression)	{[expression -> expression p10_operator p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]}	47	{[expression -> expression p10_operator p9_expression., )/+/-]; [p9_expression -> p9_expression.p9_operator rvalue, )/+/-/*//]; [p9_operator -> .*, (/integer/id/&/*/+/-]; [p9_operator -> ./, (/integer/id/&/*/+/-]}
+goto(42, rvalue)	{[p9_expression -> rvalue., )/+/-/*//]}	30	 
+goto(42, ()	{[rvalue -> (.expression ), )/+/-/*//]}	31	 
+goto(42, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	32	 
+goto(42, integer)	{[rvalue -> integer., )/+/-/*//]}	33	 
+goto(42, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	34	 
+goto(42, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	35	 
+goto(42, id)	{[lvalue -> id., )/+/-/*//]}	36	 
+goto(42, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(42, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(42, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(42, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(43, rvalue)	{[p9_expression -> p9_expression p9_operator rvalue., )/+/-/*//]}	48	{[p9_expression -> p9_expression p9_operator rvalue., )/+/-/*//]}
+goto(43, ()	{[rvalue -> (.expression ), )/+/-/*//]}	31	 
+goto(43, lvalue)	{[rvalue -> lvalue., )/+/-/*//]}	32	 
+goto(43, integer)	{[rvalue -> integer., )/+/-/*//]}	33	 
+goto(43, pointer_operator)	{[rvalue -> pointer_operator.rvalue, )/+/-/*//]}	34	 
+goto(43, p10_operator)	{[rvalue -> p10_operator.rvalue, )/+/-/*//]}	35	 
+goto(43, id)	{[lvalue -> id., )/+/-/*//]}	36	 
+goto(43, &)	{[pointer_operator -> &., (/integer/id/&/*/+/-]}	19	 
+goto(43, *)	{[pointer_operator -> *., (/integer/id/&/*/+/-]}	20	 
+goto(43, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(43, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(44, ))	{[rvalue -> ( expression )., )/+/-/*//]}	49	{[rvalue -> ( expression )., )/+/-/*//]}
+goto(44, p10_operator)	{[expression -> expression p10_operator.p9_expression, )/+/-]}	42	 
+goto(44, +)	{[p10_operator -> +., (/integer/id/&/*/+/-]}	21	 
+goto(44, -)	{[p10_operator -> -., (/integer/id/&/*/+/-]}	22	 
+goto(47, p9_operator)	{[p9_expression -> p9_expression p9_operator.rvalue, )/+/-/*//]}	43	 
+goto(47, *)	{[p9_operator -> *., (/integer/id/&/*/+/-]}	26	 
+goto(47, /)	{[p9_operator -> /., (/integer/id/&/*/+/-]}	27	 ";
             BuildAndCompare(config, solutionTable, solutionStates);
         }
 
