@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SyntacticAnalysis.CLR
 {
@@ -28,6 +27,9 @@ namespace SyntacticAnalysis.CLR
         public override bool Equals(object? obj) {
             if (obj is ItemSet itemset) {
 
+                if (this.Rule.Key != itemset.Rule.Key) {
+                    return false;
+                }
 
                 if (this.Rule.ToStringWithSymbol(this.Ptr) != itemset.Rule.ToStringWithSymbol(itemset.Ptr)) {
                     return false;
