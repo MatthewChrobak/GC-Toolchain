@@ -19,6 +19,106 @@ namespace Tests.LexicalAnalysis
         }
 
         [Test]
+        public void RangeLiteral_NoRHS() {
+            string config = @"
+#rule range_inclusive
+:
+
+#rule literal_prefix
+\
+
+#token :
+\:
+";
+            string program = @":";
+            var tokens = GetTokenStreamFromConfig(config, program);
+            Assert.AreEqual(tokens.Next.TokenType, ":");
+            Assert.AreEqual(tokens.Current.Content, ":");
+        }
+
+        [Test]
+        public void RangeLiteral_RHS() {
+            string config = @"
+#rule range_inclusive
+:
+
+#rule literal_prefix
+\
+
+#token :1
+\:1
+";
+            string program = @":1";
+            var tokens = GetTokenStreamFromConfig(config, program);
+            Assert.AreEqual(tokens.Next.TokenType, ":1");
+            Assert.AreEqual(tokens.Current.Content, ":1");
+        }
+
+        [Test]
+        public void Range_Hex_Val() {
+            string config = @"
+#rule range_inclusive
+-
+
+#token range2
+%43-D
+";
+            string program = @"CD";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Next.TokenType, "range2");
+            Assert.AreEqual(tokens.Next.TokenType, "range2");
+        }
+
+        [Test]
+        public void Range_Val_Hex() {
+            string config = @"
+#rule range_inclusive
+-
+
+#token range3
+E-%46
+";
+            string program = @"EF";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Next.TokenType, "range3");
+            Assert.AreEqual(tokens.Next.TokenType, "range3");
+        }
+
+        [Test]
+        public void Range_Val_Val() {
+            string config = @"
+#rule range_inclusive
+-
+
+#token range4
+G-H
+";
+            string program = @"GH";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Next.TokenType, "range4");
+            Assert.AreEqual(tokens.Next.TokenType, "range4");
+        }
+
+        [Test]
+        public void Range_Hex_Hex() {
+            string config = @"
+#rule range_inclusive
+-
+
+#token range1
+%41-%42
+";
+            string program = @"AB";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Next.TokenType, "range1");
+            Assert.AreEqual(tokens.Next.TokenType, "range1");
+        }
+
+        [Test]
         public void ReadMultiLines() {
             string config = @"
 #token number

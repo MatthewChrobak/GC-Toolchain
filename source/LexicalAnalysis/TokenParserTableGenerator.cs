@@ -194,9 +194,10 @@ namespace LexicalAnalysis
 
                     // Hex literal?
                     if (component.StartsWith(this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_HEX_PREFIX_KEY))) {
-                        component = component[1..];
-                        char symbol = (char)Int16.Parse(component, System.Globalization.NumberStyles.HexNumber);
-                        component = $"{this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_LITERAL_PREFIX_KEY)}{symbol}";
+                        var hexval = component.Length >= 3 ? component[1..3] : component[1..];
+                        char symbol = (char)Int16.Parse(hexval, System.Globalization.NumberStyles.HexNumber);
+                        string trail = component.Length >= 3 ? component[3..] : string.Empty;
+                        component = $"{this.ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_LITERAL_PREFIX_KEY)}{symbol}{trail}";
                     }
 
                     // Token?
@@ -210,22 +211,50 @@ namespace LexicalAnalysis
                     } else {
                         // Nope.
 
-                        // Is it a range?
-                        if (component.Length == 3 &&
-                            component[0] != ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_HEX_PREFIX_KEY) &&
-                            component[1] == ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_RANGE_INCLUSIVE_KEY)) {
-
-                            var next = partialRule.CreateNode();
-                            var lb = component[0];
-                            var ub = component[2];
-
-                            for (char i = lb; i <= ub; i++) {
-                                partialRule.AddTransition(ptr, next, $"{i}");
+                        char? extractMeaning(string value) {
+                            // single character
+                            if (value.Length == 1) {
+                                return value[0];
                             }
+                            // literal prefix
+                            if (value.Length == 2 && value[0] == ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_LITERAL_PREFIX_KEY)) {
+                                return value[1];
+                            }
+                            // Hex
+                            if (value[0] == ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_HEX_PREFIX_KEY) && value.Length < 4) {
+                                return (char)Int16.Parse(value[1..], System.Globalization.NumberStyles.HexNumber);
+                            }
+                            Debug.Assert(false, $"Unable to extract range from line {value}");
+                            return null;
+                        };
 
-                            // This will also work with loopback since the origin is saved.
-                            ptr = next;
-                        } else {
+                        bool isRange = false;
+                        int rangeIndex = component.IndexOf(ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_RANGE_INCLUSIVE_KEY));
+                        int numRange = component.Count(val => val == ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_RANGE_INCLUSIVE_KEY));
+                        if (rangeIndex != -1 && numRange == 1) {
+                            Debug.Assert(rangeIndex - 1 >= 0, $"Range specified but nothing was found on the LHS for token {tokenName}");
+                            if (component[rangeIndex - 1] != ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_LITERAL_PREFIX_KEY)) {
+                                Debug.Assert(rangeIndex + 1 < component.Length, $"Range specified but nothing was found on the RHS for {tokenName}");
+                                var lbString = component[..rangeIndex];
+                                var ubString = component[(rangeIndex + 1)..];
+                                isRange = true;
+
+                                // Try and extract value.
+                                var lb = (char)extractMeaning(lbString);
+                                var ub = (char)extractMeaning(ubString);
+
+
+                                var next = partialRule.CreateNode();
+                                for (char i = lb; i <= ub; i++) {
+                                    partialRule.AddTransition(ptr, next, $"{i}");
+                                }
+
+                                // This will also work with loopback since the origin is saved.
+                                ptr = next;
+                            }
+                        } 
+                        
+                        if (!isRange) {
                             // Nope it's a literal.
                             for (int i = 0; i < component.Length; i++) {
                                 if (component[i] == ConfigurationFile.GetRule(LexicalConfigurationFile.RULE_LITERAL_PREFIX_KEY)) {
