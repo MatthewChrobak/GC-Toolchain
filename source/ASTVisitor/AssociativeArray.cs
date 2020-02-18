@@ -31,6 +31,13 @@ namespace ASTVisitor
             }
         }
 
+        public IEnumerable<ASTNode> AsArray(string key) {
+            if (this._elements[key] is List<ASTNode> lst) {
+                return new Stack<ASTNode>(lst);
+            }
+            return new ASTNode[] { this._elements[key] };
+        }
+
         public bool Contains(string key) {
             return this._elements.ContainsKey(key);
         }

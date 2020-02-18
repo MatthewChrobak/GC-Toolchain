@@ -42,6 +42,10 @@ namespace ASTVisitor
             return this._rows.Any(row => row[column].Equals(value));
         }
 
+        public AssociativeArray GetRowWhere(string column1, dynamic value1, string column2, dynamic value2) {
+            return this._rows.Where(row => row[column1].Equals(value1) && row[column2].Equals(value2)).First();
+        }
+
         public bool RowExistsWhere(string column1, dynamic value1, string column2, dynamic value2) {
             return this._rows.Any(row => row[column1].Equals(value1) && row[column2].Equals(value2));
         }

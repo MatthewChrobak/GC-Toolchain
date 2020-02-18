@@ -116,6 +116,7 @@ def preorder_declaration_statement(node):
     column = node["variable_name"]["column"]
 
     function_symboltable = currentSymbolTable()
+    node["stid"] = currentNamespaceID()
 
     if function_symboltable.RowExistsWhere("name", variable_name):
         raise Exception("Variable {0} at {1!s}:{2!s} already exists in the scope", variable_name, row, column)
