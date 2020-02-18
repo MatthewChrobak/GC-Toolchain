@@ -34,10 +34,10 @@ $field:field
 $function:function
 
 #production field
-$access_modifier:^ $static:^ id:field_type id:field_name ;
+$access_modifier:^ $static:^ $type:field_type id:field_name ;
 
 #production function
-$access_modifier:^ $static:^ id:return_type id:function_name ( $function_parameters:^ ) { $statements:^ }
+$access_modifier:^ $static:^ $type:return_type id:function_name ( $function_parameters:^ ) { $statements:^ }
 
 #production function_parameters epsilon:true
 $function_parameter:function_parameter $function_parameters_tail:^
@@ -46,7 +46,7 @@ $function_parameter:function_parameter $function_parameters_tail:^
 , $function_parameter:function_parameter $function_parameters_tail:^
 
 #production function_parameter
-id:parameter_type id:parameter_name
+$type:parameter_type id:parameter_name
 
 #production statements epsilon:true
 $statement:statement $statements:^
@@ -59,7 +59,7 @@ $lvalue_statement:lvalue_statement ;
 $declaration_statement:declaration_statement ;
 
 #production declaration_statement
-id:variable_type $pointer_or_reference_type_modifier:^ id:variable_name $assignment_tail:^
+$type:variable_type id:variable_name $assignment_tail:^
 
 #production pointer_or_reference_type_modifier epsilon:true
 *:pointer
@@ -181,3 +181,6 @@ $expression:function_argument $function_arguments_tail:^
 .:dot
 ->:arrow
 scope_operator:scope
+
+#production type
+$lvalue:lvalue $pointer_or_reference_type_modifier:^

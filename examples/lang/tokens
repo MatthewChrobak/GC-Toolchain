@@ -55,7 +55,7 @@ $valid_head_id $valid_tail_id*
 #token ,
 ,
 
-#token scopeOperator
+#token scope_operator
 ::
 
 #token ;

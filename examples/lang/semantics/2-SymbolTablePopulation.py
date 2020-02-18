@@ -31,7 +31,7 @@ def preorder_class(node):
 
     row = parent_symboltable.CreateRow()
     row["name"] = class_name
-    row["type"] = "class"
+    row["entity_type"] = "class"
 
     access_modifier_key = "access_modifier"
     access_modifier_value = getPropertyValueIfExists(node, access_modifier_key, "default")
@@ -46,20 +46,18 @@ def postorder_class(node):
 
 def preorder_field(node):
     field_name = node["field_name"]["value"]
-    field_type = node["field_type"]["value"]
 
     row = node["field_name"]["row"]
     column = node["field_name"]["column"]
 
     class_symboltable = currentSymbolTable()
 
-    if class_symboltable.RowExistsWhere("name", field_name, "type", field_type):
-        raise Exception("Field {0}-{1} at {2!s}:{3!s} is already defined in {4}", field_type, field_name, row, column, currentNamespaceID())
+    if class_symboltable.RowExistsWhere("name", field_name, "entity_type", "field"):
+        raise Exception("Field {0}-{1} at {2!s}:{3!s} is already defined in {4}", "field", field_name, row, column, currentNamespaceID())
 
     row = class_symboltable.CreateRow()
     row["name"] = field_name
-    row["type"] = field_type
-    row["member_type"] = "field"
+    row["entity_type"] = "field"
 
     static_key = "static"
     static_value = node.Contains(static_key)
@@ -71,7 +69,6 @@ def preorder_field(node):
 
 def preorder_function(node):
     function_name = node["function_name"]["value"]
-    return_type = node["return_type"]["value"]
 
     row = node["function_name"]["value"]
     column = node["function_name"]["column"]
@@ -79,13 +76,12 @@ def preorder_function(node):
     class_symboltable = currentSymbolTable()
     enterNamespace(function_name)
 
-    if class_symboltable.RowExistsWhere("name", function_name, "type", return_type):
-        raise Exception("Function {0}-{1} at {2!s}:{3!s} is already defined in {4}", return_type, function_name, row, column, currentNamespaceID())
+    if class_symboltable.RowExistsWhere("name", function_name, "entity_type", "function"):
+        raise Exception("Function {0}-{1} at {2!s}:{3!s} is already defined in {4}", "function", function_name, row, column, currentNamespaceID())
 
     row = class_symboltable.CreateRow()
     row["name"] = function_name
-    row["type"] = return_type
-    row["member_type"] = "function"
+    row["entity_type"] = "function"
 
     static_key = "static"
     static_value = node.Contains(static_key)
@@ -100,7 +96,6 @@ def postorder_function(node):
 
 def preorder_function_parameter(node):
     parameter_name = node["parameter_name"]["value"]
-    parameter_type = node["parameter_type"]["value"]
 
     row = node["parameter_name"]["row"]
     column = node["parameter_name"]["column"]
@@ -112,11 +107,10 @@ def preorder_function_parameter(node):
 
     row = function_symboltable.CreateRow()
     row["name"] = parameter_name
-    row["type"] = parameter_type
+    row["entity_type"] = "parameter"
 
-def preorder_variable_declaration(node):
+def preorder_declaration_statement(node):
     variable_name = node["variable_name"]["value"]
-    variable_type = node["variable_type"]["value"]
 
     row = node["variable_name"]["row"]
     column = node["variable_name"]["column"]
@@ -128,4 +122,4 @@ def preorder_variable_declaration(node):
 
     row = function_symboltable.CreateRow()
     row["name"] = variable_name
-    row["type"] = variable_type
+    row["entity_type"] = "variable"

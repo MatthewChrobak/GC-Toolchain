@@ -87,7 +87,8 @@ namespace ASTVisitor
                 try {
                     this._engine.Operations.Invoke(variable, node);
                 } catch (Exception e) {
-                    Debug.Assert(false, e.Message);
+                    var eo = this._engine.GetService<ExceptionOperations>();
+                    Debug.Assert(false, eo.FormatException(e));
                 }
             }
         }
