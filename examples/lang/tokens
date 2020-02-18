@@ -19,6 +19,36 @@ $digit
 #token id
 $valid_head_id $valid_tail_id*
 
+#token !
+!
+
+#token && priority:1
+&&
+
+#token || priority:1
+||
+
+#token |
+|
+
+#token &
+&
+
+#token *
+\*
+
+#token +
++
+
+#token -
+\-
+
+#token ->
+->
+
+#token /
+/
+
 #token .
 .
 
@@ -33,6 +63,18 @@ $valid_head_id $valid_tail_id*
 
 #token =
 =
+
+#token += priority:1
++=
+
+#token *= priority:1
+*=
+
+#token -= priority:1
+-=
+
+#token /= priority:1
+/=
 
 #token (
 (
@@ -51,6 +93,33 @@ $valid_head_id $valid_tail_id*
 
 #token ]
 ]
+
+#token >
+>
+
+#token <
+<
+
+#token << priority:1
+<<
+
+#token >> priority:1
+>>
+
+#token >= priority:1
+>=
+
+#token <= priority:1
+<=
+
+#token == priority:1
+==
+
+#token != priority:1
+!=
+
+#token as priority:1
+as
 
 #token class priority:1
 class

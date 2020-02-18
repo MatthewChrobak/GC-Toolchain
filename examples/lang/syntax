@@ -1,8 +1,8 @@
-#blacklist
-whitespace
-
 #rule start
 S
+
+#blacklist
+whitespace
 
 #production S
 $namespaces:^
@@ -51,42 +51,133 @@ id:parameter_type id:parameter_name
 #production statements epsilon:true
 $statement:statement $statements:^
 
-#production statement
-$variable_declaration:variable_declaration
-$lvalue_statement:lvalue_statement
+#production assignment_tail epsilon:true
+$assignment_operator:^ $expression:expression
 
-#production variable_declaration
-id:variable_type id:variable_name ;
-id:variable_type id:variable_name = $rvalue:rvalue ;
+#production statement
+$lvalue_statement:lvalue_statement ;
+$declaration_statement:declaration_statement ;
+
+#production declaration_statement
+id:variable_type $pointer_or_reference_type_modifier:^ id:variable_name $assignment_tail:^
+
+#production pointer_or_reference_type_modifier epsilon:true
+*:pointer
+&:reference
 
 #production lvalue_statement
-$lvalue:lvalue $lvalue_statement_assignment ;
+$lvalue:lvalue $assignment_tail:^
 
-#production lvalue_statement_assignment epsilon:true
-= $rvalue:rvalue
+#production expression
+$expression:lhs $p10_operator:^ $p9_expression:rhs
+$p9_expression:^
+
+#production p9_expression
+$p9_expression:lhs $p9_operator:^ $p8_expression:rhs
+$p8_expression:^
+
+#production p8_expression
+$p8_expression:lhs $p8_operator:^ $p7_expression:rhs
+$p7_expression:^
+
+#production p7_expression
+$p7_expression:lhs $p7_operator:^ $p6_expression:rhs
+$p6_expression:^
+
+#production p6_expression
+$p6_expression:lhs $p6_operator:^ $p5_expression:rhs
+$p5_expression:^
+
+#production p5_expression
+$p5_expression:lhs $p5_operator:^ $p4_expression:rhs
+$p4_expression:^
+
+#production p4_expression
+$p4_expression:lhs $p4_operator:^ $p3_expression:rhs
+$p3_expression:^
+
+#production p3_expression
+$p3_expression:lhs $p3_operator:^ $rvalue:rhs
+$rvalue:^
 
 #production rvalue
+( $expression:^ )
 $lvalue:lvalue
 integer:integer
+$pointer_operator:^ $rvalue:rvalue
+$sign_operator:sign $rvalue:rvalue
 
 #production lvalue
-$lvalue_component:component $lvalue_list:^
+$lvalue_component:lvalue_component $lvalue_component_list:^
+
+#production lvalue_component_list epsilon:true
+$lvalue_tail_component:lvalue_component $lvalue_component_list:^
 
 #production lvalue_component
 id:identifier $indice:^
-id:function_identifier ( $function_arguments:^ )
+id:funtion_identifier ( $function_arguments:^ )
 
-#production lvalue_list epsilon:true
-. $lvalue:^
+#production lvalue_tail_component
+$access_operator:^ $lvalue_component:^
 
 #production indice epsilon:true
-[ $rvalue:indice ] $indice:^
+[ $expression:indice ] $indice:^
 
 #production function_arguments epsilon:true
-$function_argument:function_argument $function_arguments_tail:^
+$expression:function_argument $function_arguments_tail:^
 
 #production function_arguments_tail epsilon:true
-, $function_argument:function_argument $function_arguments_tail:^
+, $expression:function_argument $function_arguments_tail
 
-#production function_argument
-$rvalue:rvalue
+#production p10_operator
+>=:geq
+<=:leq
+<:lt
+>:gt
+!=:neq
+==:eq
+
+#production p9_operator
++:addition
+-:subtraction
+
+#production p8_operator
+*:multiplication
+/:division
+%:mod
+
+#production p7_operator
+<<:left_shift
+>>:right_shift
+
+#production p6_operator
+&&:and_sc
+
+#production p5_operator
+||:or_sc
+
+#production p4_operator
+&:and
+
+#production p3_operator
+|:or
+
+#production sign_operator
++:positive
+-:negative
+
+#production pointer_operator
+&:address_of
+*:value_of
+
+#production assignment_operator
+=:equals
++=:plus_equals
+-=:minus_equals
+*=:times_equals
+/=:divide_equals
+
+#production access_operator
+.:dot
+->:arrow
+scope_operator:scope
