@@ -76,7 +76,7 @@ namespace LexicalAnalysis
                 stream.Add(token);
             }
 
-            return stream;
+            return new TokenStream(stream);
         }
 
         public TokenStream ParseFile(string sourcefile) {
@@ -93,7 +93,7 @@ namespace LexicalAnalysis
         }
 
         public ReportSection GetReportSections() {
-            return new TokenStreamReportSection("Token Stream", this.stream);
+            return new TokenStreamReportSection("Unfiltered Token Stream", this.stream);
         }
     }
 }

@@ -3,6 +3,7 @@ S
 
 #blacklist
 whitespace
+comment
 
 #production S
 $namespaces:^

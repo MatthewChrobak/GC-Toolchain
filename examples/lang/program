@@ -1,5 +1,11 @@
 class Person {
     public static void main() {
+        /*
+        line 1 comment
+        line 2 comment
+        line 3 comment
+        */
+        // Single-line comment test
         int* x = malloc(sizeof(x) * 10);
         
         int xxs = a;

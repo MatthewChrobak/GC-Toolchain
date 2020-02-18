@@ -158,3 +158,17 @@ $whitespace_val*
 %09
 %20-%26
 %28-%7E
+
+#token comment
+// $singleline_comment_value*
+/\* $multiline_comment_value* \*/
+
+#subtoken singleline_comment_value
+%09
+%20-%7E
+
+#subtoken multiline_comment_value
+%09
+%20-%7E
+%0A
+%0D
