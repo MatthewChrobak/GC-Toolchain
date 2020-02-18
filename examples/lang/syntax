@@ -104,6 +104,8 @@ $rvalue:^
 ( $expression:^ )
 $lvalue:lvalue
 integer:integer
+string:string
+char:char
 $pointer_operator:^ $rvalue:rvalue
 $sign_operator:sign $rvalue:rvalue
 

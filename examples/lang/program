@@ -4,6 +4,9 @@ class Person {
         
         int xxs = a;
 
+        string name = "Matt";
+        char gender = 'm';
+
         dothing();
         dothing() = 2;
         dothing() = 2;

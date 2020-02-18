@@ -44,7 +44,7 @@ $valid_head_id $valid_tail_id*
 \-
 
 #token ->
-->
+\->
 
 #token /
 /
@@ -71,7 +71,7 @@ $valid_head_id $valid_tail_id*
 *=
 
 #token -= priority:1
--=
+\-=
 
 #token /= priority:1
 /=
@@ -133,12 +133,28 @@ namespace
 
 #subtoken whitespace_val
 %20
-%9
-%D
-%A
+%09
+%0D
+%0A
 
 #token static priority:1
 static
 
 #token whitespace priority:0
 $whitespace_val*
+
+#token string
+" $valid_string_character* "
+
+#subtoken valid_string_character
+%09
+%20-%21
+%23-%7E
+
+#token char
+' $valid_char_character '
+
+#subtoken valid_char_character
+%09
+%20-%26
+%28-%7E
