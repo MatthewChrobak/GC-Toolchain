@@ -114,9 +114,11 @@ namespace LexicalAnalysis.ReportGeneration
                 case '\n':
                     return "/n";
                 case '\t':
-                    return "/t ";
+                    return "/t";
                 case ' ':
                     return "' '";
+                case '"':
+                    return "''";
                 default:
                     return val.ToString();
             }

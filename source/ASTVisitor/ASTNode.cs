@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace ASTVisitor
@@ -28,13 +29,20 @@ namespace ASTVisitor
 
                     sb.Append("]");
                 } else {
-                    sb.Append($"\"{element.Value}\"");
+                    sb.Append($"\"{Escape(element.Value.ToString())}\"");
                 }
                 sb.AppendLine(",");
             }
 
             sb.AppendLine(prefix + "}");
             return sb.ToString();
+        }
+
+        private string Escape(string value) {
+            value = value.Replace("\r", "/r");
+            value = value.Replace("\"", "''");
+            value = value.Replace("\n", "/n");
+            return value;
         }
 
         public void Add(string tag, ASTNode ast) {
