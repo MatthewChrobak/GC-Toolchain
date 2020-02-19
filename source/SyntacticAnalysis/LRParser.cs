@@ -63,7 +63,6 @@ namespace SyntacticAnalysis
                             string? tag = rule.Symbols[i].Tag;
                             int number = node.Length;
                             if (tag != null) {
-
                                 if (tag == this._config.GetRule(SyntacticConfigurationFile.RULE_INLINE_KEY).ToString()) {
                                     foreach (var element in token.ASTNode.Elements) {
                                         if (element.Value is ASTNode astNode) {
@@ -71,11 +70,13 @@ namespace SyntacticAnalysis
                                         }
                                         if (element.Value is List<ASTNode> lst) {
                                             foreach (var lstItem in lst) {
-                                                node.Add(element.Key, lstItem);
+                                                // TODO: Look into why here items are added in reverse
+                                                node.AddReverse(element.Key, lstItem);
                                             }
                                         }
                                     }
                                 } else {
+                                    // TODO: Look into why here items are NOT added in reverse
                                     node.Add(tag, token.ASTNode);
                                 }
                             }

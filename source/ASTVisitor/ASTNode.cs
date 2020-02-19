@@ -18,10 +18,7 @@ namespace ASTVisitor
                 } else if (element.Value is List<ASTNode> lst) {
                     sb.Append("[");
 
-                    // TODO: Visual representation on the report seems to be reversed.
-                    // Actual pre-order / post-order ordering for traversal seems to be fine.
-                    for (int ii = lst.Count - 1; ii >= 0; ii--) {
-                        var lstElement = lst[ii];
+                    foreach (var lstElement in lst) {
                         sb.Append(lstElement.ToJSON());
                         sb.Append(",");
                     }
@@ -44,13 +41,26 @@ namespace ASTVisitor
             return value;
         }
 
-        public void Add(string tag, ASTNode ast) {
+        public void AddReverse(string tag, ASTNode ast) {
             if (this.Contains(tag)) {
                 if (this[tag] is List<ASTNode> lst) {
                     lst.Add(ast);
                 } else {
                     // Re-Create the node as a list.
                     this[tag] = new List<ASTNode>() { this[tag], ast };
+                }
+            } else {
+                this[tag] = ast;
+            }
+        }
+
+        public void Add(string tag, ASTNode ast) {
+            if (this.Contains(tag)) {
+                if (this[tag] is List<ASTNode> lst) {
+                    lst.Insert(0, ast);
+                } else {
+                    // Re-Create the node as a list.
+                    this[tag] = new List<ASTNode>() { ast, this[tag]};
                 }
             } else {
                 this[tag] = ast;

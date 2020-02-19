@@ -63,10 +63,12 @@ namespace ASTVisitor
                     continue;
                 }
 
-                foreach (var element in node.Elements) {
+                
+                foreach (var element in node.ReverseElements) {
                     var value = element.Value;
                     if (value is List<ASTNode> lst) {
-                        foreach (var member in lst) {
+                        for (int i = lst.Count - 1; i >= 0; i--) {
+                            var member = lst[i];
                             stk.Push((element.Key, member, false));
                         }
                     } else if (value is ASTNode astnode) {
