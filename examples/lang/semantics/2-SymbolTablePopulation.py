@@ -101,6 +101,7 @@ def preorder_function_parameter(node):
     column = node["parameter_name"]["column"]
 
     function_symboltable = currentSymbolTable()
+    node["stid"] = currentNamespaceID()
 
     if function_symboltable.RowExistsWhere("name", parameter_name):
         raise Exception("Function parameter {1} in {2} at {3!s}:{4!s} already exists", parameter_name, currentNamespaceID(), row, column)
@@ -108,6 +109,8 @@ def preorder_function_parameter(node):
     row = function_symboltable.CreateRow()
     row["name"] = parameter_name
     row["entity_type"] = "parameter"
+
+    log.WriteLineVerbose(parameter_name)
 
 def preorder_declaration_statement(node):
     variable_name = node["variable_name"]["value"]
@@ -124,3 +127,5 @@ def preorder_declaration_statement(node):
     row = function_symboltable.CreateRow()
     row["name"] = variable_name
     row["entity_type"] = "variable"
+
+    log.WriteLineVerbose(variable_name)

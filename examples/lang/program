@@ -1,5 +1,5 @@
 class Person {
-    void main() {
+    void main(global::std::string* args, int nArgs) {
         A::B::C* a1 = B();
         A::B::C& a2 = B();
         A::B::C a3 = B();
