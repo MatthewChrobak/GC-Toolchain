@@ -107,8 +107,17 @@ def postorder_declaration_statement(node):
 
     function_symboltable = symboltable.GetOrCreate(node["pstid"])
 
-    if function_symboltable.RowExistsWhere("name", variable_name):
-        raise Exception("Variable {0} at {1!s}:{2!s} already exists in the scope".format(variable_name, row, column))
+    level = 0
+    st = function_symboltable
+    while True:
+        if st.GetMetaData("sttype") != "local":
+            break
+
+        if st.RowExistsWhere("name", variable_name):
+            raise Exception("Variable {0} at {1!s}:{2!s} already exists in the scope".format(variable_name, row, column))
+
+        level += 1
+        st = symboltable.GetOrCreate(getParentNamespaceID(level, node["pstid"]))
 
     row, id = function_symboltable.CreateRow()
     node["rowid"] = id
@@ -130,19 +139,68 @@ def postorder_integer(node):
     row["register"] = register
     row["label"] = label
 
+def postorder_string(node):
+    parentSymbolTable = symboltable.GetOrCreate(node["pstid"])
+    label = node["value"]
+    register = GetRegister()
+    
+    row, id = parentSymbolTable.CreateRow()
+    node["rowid"] = id
+    node["register"] = register
+    node["label"] = label
+
+    row["entity_type"] = "subcalculationstackspace"
+    row["register"] = register
+    row["label"] = label
+
+def postorder_char(node):
+    parentSymbolTable = symboltable.GetOrCreate(node["pstid"])
+    label = node["value"]
+    register = GetRegister()
+    
+    row, id = parentSymbolTable.CreateRow()
+    node["rowid"] = id
+    node["register"] = register
+    node["label"] = label
+
+    row["entity_type"] = "subcalculationstackspace"
+    row["register"] = register
+    row["label"] = label
+
 def postorder_rvalue(node):
     parentSymbolTable = symboltable.GetOrCreate(node["pstid"])
     register = GetRegister()
     label = ""
 
+    if node.Contains("positive"):
+        label += "+"
+
+    if node.Contains("negative"):
+        label += "-"
+
+    if node.Contains("address_of"):
+        node["pointer_operator"] = "address_of"
+
+    if node.Contains("value_of"):
+        node["pointer_operator"] = "value_of"
+
     if node.Contains("integer"):
-        label = node["integer"]["label"]
+        label += node["integer"]["label"]
 
     if node.Contains("lvalue"):
-        label = node["lvalue"]["label"]
+        label += node["lvalue"]["label"]
 
     if node.Contains("expression"):
-        label = "(" + node["expression"]["label"] + ")"
+        label += "(" + node["expression"]["label"] + ")"
+
+    if node.Contains("string"):
+        label += node["string"]["label"]
+
+    if node.Contains("char"):
+        label += node["char"]["label"]
+
+    if node.Contains("rvalue"):
+        label += node["rvalue"]["label"]
 
     row, id = parentSymbolTable.CreateRow()
     node["rowid"] = id
@@ -205,14 +263,9 @@ def handlePostOrderExpression(node):
     row["register"] = register
     row["label"] = label
 
-previousLValueComponent = None
 def postorder_lvalue(node):
-    global previousLValueComponent
-
     if not node.Contains("allocate_register"):
         return
-
-    previousLValueComponent = None
 
     parentSymbolTable = symboltable.GetOrCreate(node["pstid"])
     register = GetRegister()
@@ -227,11 +280,10 @@ def postorder_lvalue(node):
     node["label"] = label
 
     row["entity_type"] = "subcalculationstackspace"
-    row["label"] = label
     row["register"] = register
+    row["label"] = label
 
 def postorder_lvalue_component(node):
-    global previousLValueComponent
 
     if not node.Contains("allocate_register"):
         return
@@ -239,10 +291,6 @@ def postorder_lvalue_component(node):
     parentSymbolTable = symboltable.GetOrCreate(node["pstid"])
     register = GetRegister()
     label = ""
-
-    if previousLValueComponent is not None:
-        label += previousLValueComponent["label"]
-    previousLValueComponent = node
 
     access = getPropertyValueIfExists(node, "dot", "")
     access = getPropertyValueIfExists(node, "arrow", access)
@@ -254,11 +302,17 @@ def postorder_lvalue_component(node):
     if node.Contains("identifier"):
         label += node["identifier"]["value"]
 
+    if node.Contains("function_identifier"):
+        label += node["function_identifier"]["value"]
+        label += "("
+        # TODO: func args
+        label += ")"
+
     row, id = parentSymbolTable.CreateRow()
     node["rowid"] = id
     node["register"] = register
     node["label"] = label
 
     row["entity_type"] = "subcalculationstackspace"
-    row["label"] = label
     row["register"] = register
+    row["label"] = label

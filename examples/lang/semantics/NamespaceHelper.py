@@ -16,3 +16,10 @@ def leaveNamespace():
     global cnsp, nsp_stk
     id = nsp_stk.pop()
     cnsp = cnsp[0:-(len(id))]
+
+def getParentNamespaceID(level, namespace):
+    for i in range(level):
+        index = namespace.rindex("::")
+        namespace = namespace[0:index]
+
+    return namespace

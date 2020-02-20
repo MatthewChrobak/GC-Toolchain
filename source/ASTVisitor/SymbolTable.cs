@@ -1,5 +1,4 @@
 ﻿using Core.ReportGeneration;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -26,10 +25,11 @@ namespace ASTVisitor
 
         private List<AssociativeArray> _rows;
         public IEnumerable<AssociativeArray> Rows => this._rows;
-
+        private Dictionary<string, string> _meta;
 
         public SymbolTable() {
             this._rows = new List<AssociativeArray>();
+            this._meta = new Dictionary<string, string>();
         }
 
         public (AssociativeArray row, int index) CreateRow() {
@@ -65,6 +65,14 @@ namespace ASTVisitor
 
         public static ReportSection GetReportSection() {
             return new SymbolTableReportSection(GlobalScope);
+        }
+
+        public string GetMetaData(string key) {
+            return this._meta.ContainsKey(key) ? this._meta[key] : string.Empty;
+        }
+
+        public void SetMetaData(string key, string value) {
+            this._meta[key] = value;
         }
     }
 }

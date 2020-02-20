@@ -1,7 +1,33 @@
 class Person {
     void main() {
-        int x = 10 + 3 * (5);
-
-        int x2 = a.b.c + a.b.d;
+        int y = a.b.c();
+        int x2 = 30;
+        {
+            int x2 = 10;
+        }
+        {
+            {
+                {
+                    {
+                        {
+                            {
+                                {
+                                    {
+                                        {
+                                            {
+                                                {
+                                                    int x2 = 20;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        int x = a[10][20][3 + 50]::func(arg1, arg2 + 3);
     }
 }

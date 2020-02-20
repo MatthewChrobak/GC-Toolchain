@@ -39,10 +39,13 @@ $function:function
 $access_modifier:^ $static:^ $type:field_type id:field_name ;
 
 #production free_function
-$type:return_type id:function_name ( $function_parameters:^ ) { $statements:^ }
+$type:return_type id:function_name ( $function_parameters:^ ) $statement_scope:^
 
 #production function
-$access_modifier:^ $static:^ $type:return_type id:function_name ( $function_parameters:^ ) { $statements:^ }
+$access_modifier:^ $static:^ $type:return_type id:function_name ( $function_parameters:^ ) $statement_scope:^
+
+#production statement_scope
+{:scope_start $statements:^ }
 
 #production function_parameters epsilon:true
 $function_parameter:function_parameter $function_parameters_tail:^
@@ -62,6 +65,7 @@ $assignment_operator:^ $expression:expression
 #production statement
 $lvalue_statement:lvalue_statement ;
 $declaration_statement:declaration_statement ;
+$statement_scope:statement_scope
 
 #production declaration_statement
 $type:variable_type id:variable_name $assignment_tail:^
@@ -112,7 +116,7 @@ integer:integer
 string:string
 char:char
 $pointer_operator:^ $rvalue:rvalue
-$sign_operator:sign $rvalue:rvalue
+$sign_operator:^ $rvalue:rvalue
 
 #production lvalue
 $lvalue_component:lvalue_component $lvalue_component_list:^
@@ -121,20 +125,26 @@ $lvalue_component:lvalue_component $lvalue_component_list:^
 $lvalue_tail_component:lvalue_component $lvalue_component_list:^
 
 #production lvalue_component
-id:identifier $indice:^
-id:funtion_identifier ( $function_arguments:^ )
+id:identifier $indice_list:^
+id:function_identifier ( $function_arguments:^ )
 
 #production lvalue_tail_component
 $access_operator:^ $lvalue_component:^
 
-#production indice epsilon:true
-[ $expression:indice ] $indice:^
+#production indice_list epsilon:true
+$indice:indice $indice_list:^
+
+#production indice
+[ $expression:expression ]
 
 #production function_arguments epsilon:true
-$expression:function_argument $function_arguments_tail:^
+$function_argument:function_argument $function_arguments_tail:^
 
 #production function_arguments_tail epsilon:true
-, $expression:function_argument $function_arguments_tail
+, $function_argument:function_argument $function_arguments_tail:^
+
+#production function_argument
+$expression:expression
 
 #production p10_operator
 >=:geq
