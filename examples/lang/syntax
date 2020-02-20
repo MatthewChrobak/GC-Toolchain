@@ -14,6 +14,7 @@ $namespace:namespace $namespaces:^
 #production namespace
 namespace id:namespace_name { $namespace_elements:^ }
 $class:class
+$free_function:function
 
 #production namespace_elements epsilon:true
 $class:class $namespace_elements:^
@@ -36,6 +37,9 @@ $function:function
 
 #production field
 $access_modifier:^ $static:^ $type:field_type id:field_name ;
+
+#production free_function
+$type:return_type id:function_name ( $function_parameters:^ ) { $statements:^ }
 
 #production function
 $access_modifier:^ $static:^ $type:return_type id:function_name ( $function_parameters:^ ) { $statements:^ }
@@ -99,7 +103,7 @@ $p3_expression:^
 
 #production p3_expression
 $p3_expression:lhs $p3_operator:^ $rvalue:rhs
-$rvalue:^
+$rvalue:rvalue
 
 #production rvalue
 ( $expression:^ )
@@ -141,29 +145,29 @@ $expression:function_argument $function_arguments_tail:^
 ==:eq
 
 #production p9_operator
-+:addition
--:subtraction
++:+
+-:-
 
 #production p8_operator
-*:multiplication
-/:division
-%:mod
+*:*
+/:/
+%:%
 
 #production p7_operator
-<<:left_shift
->>:right_shift
+<<:<<
+>>:>>
 
 #production p6_operator
-&&:and_sc
+&&:&&
 
 #production p5_operator
-||:or_sc
+||:||
 
 #production p4_operator
-&:and
+&:&
 
 #production p3_operator
-|:or
+|:|
 
 #production sign_operator
 +:positive

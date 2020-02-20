@@ -20,7 +20,7 @@ def preorder_declaration_statement(node):
             type += "::"
         type += id
     
-    row = symboltable.GetOrCreate(node["stid"]).GetRowWhere("name", variable_name, "entity_type", "variable")
+    row = symboltable.GetOrCreate(node["pstid"]).GetRowWhere("name", variable_name, "entity_type", "variable")
     row["type"] = type
     row["pointer"] = is_pointer
     row["reference"] = is_reference
@@ -47,7 +47,7 @@ def preorder_function_parameter(node):
             type += "::"
         type += id
 
-    row = symboltable.GetOrCreate(node["stid"]).GetRowWhere("name", parameter_name, "entity_type", "parameter")
+    row = symboltable.GetOrCreate(node["pstid"]).GetRowWhere("name", parameter_name, "entity_type", "parameter")
     row["type"] = type
     row["pointer"] = is_pointer
     row["reference"] = is_reference
