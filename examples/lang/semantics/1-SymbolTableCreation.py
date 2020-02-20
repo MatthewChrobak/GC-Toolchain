@@ -76,9 +76,26 @@ def preorder_integer(node):
 def preorder_rvalue(node):
     setpstid(node)
 
+    if node.Contains("lvalue"):
+        node["lvalue"]["allocate_register"] = ""
+
+
+
 def preorder_expression(node):
     setpstid(node)
 def preorder_lhs(node):
     setpstid(node)
 def preorder_rhs(node):
     setpstid(node)
+
+def preorder_lvalue(node):
+    setpstid(node)
+    if node.Contains("allocate_register"):
+        for component in node.AsArray("lvalue_component"):
+            component["allocate_register"] = ""
+
+def preorder_lvalue_component(node):
+    setpstid(node)
+
+def preorder_lvalue_statement(node):
+    node["lvalue"]["allocate_register"] = ""

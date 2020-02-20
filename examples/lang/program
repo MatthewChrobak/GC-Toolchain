@@ -1,5 +1,7 @@
 class Person {
     void main() {
-        int x = 10 + 3 * 5;
+        int x = 10 + 3 * (5);
+
+        int x2 = a.b.c + a.b.d;
     }
 }

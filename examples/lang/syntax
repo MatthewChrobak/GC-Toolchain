@@ -106,7 +106,7 @@ $p3_expression:lhs $p3_operator:^ $rvalue:rhs
 $rvalue:rvalue
 
 #production rvalue
-( $expression:^ )
+( $expression:expression )
 $lvalue:lvalue
 integer:integer
 string:string

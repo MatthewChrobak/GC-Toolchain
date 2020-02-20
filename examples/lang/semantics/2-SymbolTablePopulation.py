@@ -138,6 +138,12 @@ def postorder_rvalue(node):
     if node.Contains("integer"):
         label = node["integer"]["label"]
 
+    if node.Contains("lvalue"):
+        label = node["lvalue"]["label"]
+
+    if node.Contains("expression"):
+        label = "(" + node["expression"]["label"] + ")"
+
     row, id = parentSymbolTable.CreateRow()
     node["rowid"] = id
     node["register"] = register
@@ -198,3 +204,61 @@ def handlePostOrderExpression(node):
     row["entity_type"] = "subcalculationstackspace"
     row["register"] = register
     row["label"] = label
+
+previousLValueComponent = None
+def postorder_lvalue(node):
+    global previousLValueComponent
+
+    if not node.Contains("allocate_register"):
+        return
+
+    previousLValueComponent = None
+
+    parentSymbolTable = symboltable.GetOrCreate(node["pstid"])
+    register = GetRegister()
+    label = ""
+
+    lvalue_components = node.AsArray("lvalue_component")
+    label = lvalue_components[len(lvalue_components) - 1]["label"]
+
+    row, id = parentSymbolTable.CreateRow()
+    node["rowid"] = id
+    node["register"] = register
+    node["label"] = label
+
+    row["entity_type"] = "subcalculationstackspace"
+    row["label"] = label
+    row["register"] = register
+
+def postorder_lvalue_component(node):
+    global previousLValueComponent
+
+    if not node.Contains("allocate_register"):
+        return
+
+    parentSymbolTable = symboltable.GetOrCreate(node["pstid"])
+    register = GetRegister()
+    label = ""
+
+    if previousLValueComponent is not None:
+        label += previousLValueComponent["label"]
+    previousLValueComponent = node
+
+    access = getPropertyValueIfExists(node, "dot", "")
+    access = getPropertyValueIfExists(node, "arrow", access)
+    access = getPropertyValueIfExists(node, "scope", access)
+
+    if access is not "":
+        label += access
+
+    if node.Contains("identifier"):
+        label += node["identifier"]["value"]
+
+    row, id = parentSymbolTable.CreateRow()
+    node["rowid"] = id
+    node["register"] = register
+    node["label"] = label
+
+    row["entity_type"] = "subcalculationstackspace"
+    row["label"] = label
+    row["register"] = register
