@@ -17,11 +17,11 @@ def preorder_free_function(node):
     row["is_free"] = True
 
 
-def handle_type(parent, type_key, name_key, entity_type_key):
+def handle_type(parent, type_key, name_key, entity_type):
     type = parent[type_key]
     name = parent[name_key]["value"]
     handle_lvalue_type(type)
-    row = symboltable.GetOrCreate(parent["pstid"]).GetRowWhere("name", name, "entity_type", entity_type_key)
+    row = symboltable.GetOrCreate(parent["pstid"]).GetRowWhere("name", name, "entity_type", entity_type)
     row["label"] = type["label"] + " " + name
     row["pointer"] = type["pointer"]
     row["reference"] = type["reference"]

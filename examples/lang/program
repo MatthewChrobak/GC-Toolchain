@@ -1,7 +1,7 @@
-class Person {
-    global::Person nextPerson;
+class global {
+    global::global nextPerson;
 
-    void main() {
+    global main() {
         int y = a[1 + 2][3 + c].b.c();
         int x2s = 30;
         {
