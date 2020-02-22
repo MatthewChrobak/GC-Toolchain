@@ -1,4 +1,4 @@
-from NamespaceHelper import *
+from NamespaceHelper import getParentNamespaceID
 
 registerCounter = 0
 
@@ -43,7 +43,7 @@ def preorder_field(node):
     class_symboltable = symboltable.GetOrCreate(node["pstid"])
 
     if class_symboltable.RowExistsWhere("name", field_name, "entity_type", "field"):
-        raise Exception("Field {0}-{1} at {2!s}:{3!s} is already defined in {4}".format("field", field_name, row, column, currentNamespaceID()))
+        raise Exception("Field {0}-{1} at {2!s}:{3!s} is already defined in {4}".format("field", field_name, row, column, node["pstid"]))
 
     row, id = class_symboltable.CreateRow()
     node["rowid"] = id
@@ -123,7 +123,7 @@ def postorder_declaration_statement(node):
     node["rowid"] = id
     row["name"] = variable_name
     row["entity_type"] = "variable"
-    row["register"] = GetRegister()
+    row["register"] = GetRegister()    
 
 def postorder_integer(node):
     parentSymbolTable = symboltable.GetOrCreate(node["pstid"])
@@ -308,6 +308,11 @@ def postorder_lvalue_component(node):
         # TODO: func args
         label += ")"
 
+    if node.Contains("indice"):
+        indices = node.AsArray("indice")
+        for indice in indices:
+            label += "[" + indice["label"] + "]"
+
     row, id = parentSymbolTable.CreateRow()
     node["rowid"] = id
     node["register"] = register
@@ -316,3 +321,6 @@ def postorder_lvalue_component(node):
     row["entity_type"] = "subcalculationstackspace"
     row["register"] = register
     row["label"] = label
+
+def postorder_indice(node):
+    node["label"] = node["expression"]["label"]

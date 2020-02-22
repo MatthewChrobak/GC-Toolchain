@@ -1,7 +1,9 @@
 class Person {
+    global::Person nextPerson;
+
     void main() {
-        int y = a.b.c();
-        int x2 = 30;
+        int y = a[1 + 2][3 + c].b.c();
+        int x2s = 30;
         {
             int x2 = 10;
         }
@@ -16,7 +18,7 @@ class Person {
                                         {
                                             {
                                                 {
-                                                    int x2 = 20;
+                                                    int x23 = 20;
                                                 }
                                             }
                                         }

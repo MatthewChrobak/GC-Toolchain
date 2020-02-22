@@ -73,10 +73,12 @@ namespace ASTVisitor
                         }
                     } else if (value is ASTNode astnode) {
                         stk.Push((element.Key, astnode, false));
-                    } else if (value is string str) {
+                    } else if (value is string) {
                         // Ignore
-                    } else if (value is int val) {
+                    } else if (value is int) {
                         // Ignore
+                    } else if (value is bool) {
+                        // ignore
                     } else {
                         Log.WriteLineError($"Unknown element type in ASTNode: {element.Key}:{value.GetType()}");
                     }

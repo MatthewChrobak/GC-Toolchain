@@ -121,3 +121,9 @@ def preorder_lvalue_component(node):
 
 def preorder_lvalue_statement(node):
     node["lvalue"]["allocate_register"] = ""
+
+def preorder_indice(node):
+    setpstid(node)
+
+def preorder_type(node):
+    setpstid(node)

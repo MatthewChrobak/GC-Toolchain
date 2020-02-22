@@ -14,7 +14,7 @@ $namespace:namespace $namespaces:^
 #production namespace
 namespace id:namespace_name { $namespace_elements:^ }
 $class:class
-$free_function:function
+$free_function:free_function
 
 #production namespace_elements epsilon:true
 $class:class $namespace_elements:^
