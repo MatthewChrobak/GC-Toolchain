@@ -96,7 +96,7 @@ namespace SyntacticAnalysis
                     }
                 } else {
                     Log.WriteLineVerboseClean($"couldn't retrieve: state {x} symbol {a.TokenType}");
-                    Log.WriteLineError($"Expected {string.Join(", ", tableRow.Actions.Keys)}. Instead got {a.TokenType}");
+                    Log.WriteLineError($"Expected {string.Join(", ", tableRow.Actions.Keys)}. Instead got {a.TokenType} at {a.Row}:{a.Column}");
                     return null;
                 }
             }

@@ -1,129 +1,93 @@
 from NamespaceHelper import *
 
-def setpstid(node):
-    node["pstid"] = currentNamespaceID()
+def createSymbolTable(node, nameKey, entity_type):
+    name, loc = getNodeValues(node, nameKey)
+    enterNamespace(node, name)
+
+    if name == "global" and (entity_type == "namespace" or entity_type == "class") :
+        Error("The {0} at {1}:{2} cannot be named global".format(entity_type, loc[0], loc[1]))
+
+    if symboltable.Exists(currentNamespaceID()):
+        Error("The {0} {1} at {2}:{3} is already defined".format(entity_type, name, loc[0], loc[1]))
+    else:
+        st = symboltable.GetOrCreate(currentNamespaceID())
+        st.SetMetaData("symboltable_type", entity_type)
+
 
 def preorder_global(node):
-    enterNamespace("global")
-
+    enterNamespace(node, "global")
 def postorder_global(node):
     leaveNamespace()
 
-def preorder_namespace(node):
-    if node.Contains("namespace_name"):
-        id = node["namespace_name"]["value"]
-        enterNamespace(id)
-        st = symboltable.GetOrCreate(currentNamespaceID())
-        st.SetMetaData("sttype", "namespace")
 
+def preorder_namespace(node):
+    if node.Contains("namespace_name"):     
+        createSymbolTable(node, "namespace_name", "namespace")
 def postorder_namespace(node):
     if node.Contains("namespace_name"):
         leaveNamespace()
 
-def preorder_class(node):   
-    classname_node = node["class_name"]
-    parent_namespace_id = currentNamespaceID()
 
-    class_name = classname_node["value"]
-    class_row = str(classname_node["row"])
-    class_column = str(classname_node["column"])
-
-    enterNamespace(class_name)
-    class_symboltable_id = parent_namespace_id + "::" + class_name
-    
-    if symboltable.Exists(class_symboltable_id):
-        raise Exception("The class {0} at {1}:{2} is already defined".format(class_symboltable_id, class_row, class_column))
-
-    st = symboltable.GetOrCreate(class_symboltable_id)
-    st.SetMetaData("sttype", "class")
-
-    node["pstid"] = parent_namespace_id
-    node["stid"] = class_symboltable_id
-
+def preorder_class(node):
+    createSymbolTable(node, "class_name", "class")
 def postorder_class(node):
     leaveNamespace()
 
-def preorder_function(node):
-    function_name = node["function_name"]["value"]
-    row = node["function_name"]["row"]
-    column = node["function_name"]["column"]
-    setpstid(node)
-    function_symboltable_id = currentNamespaceID() + "::" + function_name
+def preorder_free_function(node):
+    preorder_function(node, True)
+def postorder_free_function(node):
+    postorder_function(node)
 
-    enterNamespace(function_name)
 
-    if symboltable.Exists(function_symboltable_id):
-        raise Exception("The function {0} at {1!s}:{2!s} is already defined".format(function_symboltable_id, row, column))
-
-    st = symboltable.GetOrCreate(function_symboltable_id)
-    st.SetMetaData("sttype", "local")
-
-    node["stid"] = function_symboltable_id
-
+def preorder_function(node, isFree=False):
+    createSymbolTable(node, "function_name", "function")
 def postorder_function(node):
     leaveNamespace()
 
+
 def preorder_statement_scope(node):
-    setpstid(node)
+    scope, loc = getNodeValues(node, "scope_start")
 
-    row = node["scope_start"]["row"]
-    column = node["scope_start"]["column"]
-
-    enterNamespace("{0}_{1}".format(row, column))
-
+    enterNamespace(node, "{0}_{1}".format(loc[0], loc[1]))
+    
     if symboltable.Exists(currentNamespaceID()):
-        raise Exception("The scope {0} at {1!s}:{2!s} is already defined".format(currentNamespaceID(), row, column))
-
-    st = symboltable.GetOrCreate(currentNamespaceID())
-    st.SetMetaData("sttype", "local")
-
+        Error("The scope {0} at {1!s}:{1!s} is already defined".format(currentNamespaceID(), loc[0], loc[1]))
+    else:
+        st = symboltable.GetOrCreate(currentNamespaceID())
+        st.SetMetaData("symboltable_type", "local")
 def postorder_statement_scope(node):
     leaveNamespace()
 
 
 def preorder_field(node):
-    setpstid(node)
-
+    setPSTID(node)
 def preorder_function_parameter(node):
-    setpstid(node)
-
+    setPSTID(node)
 def preorder_declaration_statement(node):
-    setpstid(node)
-
+    setPSTID(node)
 def preorder_integer(node):
-    setpstid(node)
+    setPSTID(node)
 def preorder_string(node):
-    setpstid(node)
+    setPSTID(node)
 def preorder_char(node):
-    setpstid(node)
+    setPSTID(node)
 def preorder_rvalue(node):
-    setpstid(node)
-
-    if node.Contains("lvalue"):
-        node["lvalue"]["allocate_register"] = ""
-
-
+    setPSTID(node)
 def preorder_expression(node):
-    setpstid(node)
+    setPSTID(node)
 def preorder_lhs(node):
-    setpstid(node)
+    setPSTID(node)
 def preorder_rhs(node):
-    setpstid(node)
-
+    setPSTID(node)
+def preorder_lvalue_type(node):
+    setPSTID(node)
 def preorder_lvalue(node):
-    setpstid(node)
-    if node.Contains("allocate_register"):
-        for component in node.AsArray("lvalue_component"):
-            component["allocate_register"] = ""
-
+    setPSTID(node)
+    for component in node.AsArray("lvalue_component"):
+        component["allocate_register"] = ""
 def preorder_lvalue_component(node):
-    setpstid(node)
-
-def preorder_lvalue_statement(node):
-    node["lvalue"]["allocate_register"] = ""
-
+    setPSTID(node)
 def preorder_indice(node):
-    setpstid(node)
-
+    setPSTID(node)
 def preorder_type(node):
-    setpstid(node)
+    setPSTID(node)

@@ -66,6 +66,7 @@ $assignment_operator:^ $expression:expression
 $lvalue_statement:lvalue_statement ;
 $declaration_statement:declaration_statement ;
 $statement_scope:statement_scope
+return:return $rvalue:rvalue ;
 
 #production declaration_statement
 $type:variable_type id:variable_name $assignment_tail:^
@@ -113,7 +114,6 @@ $rvalue:rvalue
 ( $expression:expression )
 $lvalue:lvalue
 integer:integer
-string:string
 char:char
 $pointer_operator:^ $rvalue:rvalue
 $sign_operator:^ $rvalue:rvalue
@@ -147,37 +147,37 @@ $function_argument:function_argument $function_arguments_tail:^
 $expression:expression
 
 #production p10_operator
->=:geq
-<=:leq
-<:lt
->:gt
-!=:neq
-==:eq
+>=:operator
+<=:operator
+<:operator
+>:goperator
+!=:operator
+==:operator
 
 #production p9_operator
-+:+
--:-
++:operator
+-:operator
 
 #production p8_operator
-*:*
-/:/
-%:%
+*:operator
+/:operator
+%:operator
 
 #production p7_operator
-<<:<<
->>:>>
+<<:operator
+>>:operator
 
 #production p6_operator
-&&:&&
+&&:operator
 
 #production p5_operator
-||:||
+||:operator
 
 #production p4_operator
-&:&
+&:operator
 
 #production p3_operator
-|:|
+|:operator
 
 #production sign_operator
 +:positive
@@ -196,8 +196,7 @@ $expression:expression
 
 #production access_operator
 .:dot
-->:arrow
 scope_operator:scope
 
 #production type
-$lvalue:lvalue $pointer_or_reference_type_modifier:^
+$lvalue:lvalue_type $pointer_or_reference_type_modifier:^

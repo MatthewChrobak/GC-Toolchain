@@ -1,12 +1,15 @@
-class global {
-    global::global nextPerson;
+class void {}
 
-    global main() {
-        int y = a[1 + 2][3 + c].b.c();
-        int x2s = 30;
-        {
-            int x2 = 10;
-        }
+class LinkedList {
+    private LinkedList _next;
+    private int _value;
+
+    public static void Initialize(LinkedList ref) {
+        ref._next = 0;
+        ref._value = 0;
+    }
+
+    public void SetValue(int value) {
         {
             {
                 {
@@ -15,13 +18,9 @@ class global {
                             {
                                 {
                                     {
-                                        {
-                                            {
-                                                {
-                                                    int x23 = 20;
-                                                }
-                                            }
-                                        }
+                                        _value = value;
+                                        LinkedList::Initialize();
+                                        _next.Initialize();
                                     }
                                 }
                             }
@@ -30,6 +29,17 @@ class global {
                 }
             }
         }
-        int x = a[10][20][3 + 50]::func(arg1, arg2 + 3);
+    }
+
+    public void AddToValue(int value) {
+        SetValue(_value + value);
+    }
+
+    public int Count() {
+        return 10;
+    }
+
+    public LinkedList* GetNext() {
+        _next();
     }
 }
