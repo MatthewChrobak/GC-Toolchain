@@ -20,6 +20,7 @@ def postorder_class(node):
     classNamespaceID = None
 
 def postorder_lvalue(node):
+    global internal_types
     # Exit out early if we've already computed it.
     if node.Contains("type"):
         return
@@ -30,47 +31,94 @@ def postorder_lvalue(node):
 
     componentPairs = []
     for i in range(len(offset_components) - 1):
-        offset_component = offset_components[i]
+        offset_component = offset_components[i + 1]
         if offset_component.Contains("dot"):
             access = "dot"
         elif offset_component.Contains("scope"):
             access = "scope"
         else:
             access = ""
-        componentPairs.append((offset_component, access))
+        componentPairs.append((offset_components[i], access))
+    componentPairs.append((offset_components[len(offset_components) - 1], ""))
 
-    # Keep accessing staticly until we start accessing members
     stid = None
     canBeStatic = True
     for componentPair in componentPairs:
         component, access = componentPair
-
-        if node.Contains("identifier"):
+        if component.Contains("identifier"):
             identifier_key = "identifier"
-        if node.contains("function_identifier"):
+        elif component.Contains("function_identifier"):
             identifier_key = "function_identifier"
-            canBeStatic = False
-        identifier, loc = getNodeValues(node, identifier_key)
-
-        if access in ["dot", ""]:
-            canBeStatic = False
-
-            # First lvalue_component?
-            if stid is None:
-                stid = LFC(identifier, node["pstid"])
         else:
-            if not canAccessViaStatic:
-                Error("Unable to resolve the type {0} at {1}:{2}".format(identifier, loc[0], loc[1]))
+            identifier_key = None
+        identifier, loc = getNodeValues(component, identifier_key)
+
+        if access not in ["scope", "dot", ""]:
+            Error("1Uknown accessor {0} at {1}:{2}".format(access, loc[0], loc[1]))
+            return
+
+        if stid is not None:
+            if not symboltable.Exists(stid):
+                Error("2Unable to find symbol table with id {0} at {1}:{2}".format(stid, loc[0], loc[1]))
                 return
 
-            # First lvalue_component?
-            if stid is None:
-                stid = getStaticSymbolTableID(identi)
+        # Are we at the first element?
+        if stid is None:
+            # is the first one a static element?
+            if access == "scope":
+                stid = "::" + identifier
+            else:
+                # Non-static. Check in LFC scope.
+                canBeStatic = False
+                stid = LFC(identifier, node["pstid"])
+        else:
+            if canBeStatic:
+                if access == "scope":
+                    stid += "::" + identifier
+                else:
+                    # Using dot to access a static member.
+                    st = symboltable.GetOrCreate(stid)
+                    if not st.RowExistsWhere("name", identifier, "static", True):
+                        Error("3Unable to find static element {0} at {1}:{2} in {3}".format(identifier, loc[0], loc[1], stid))
+                        return
+                    row = st.GetRowWhere("name", identifier, "static", True)
 
+                    # Get the type of the element. For functions, this includes return type.
+                    stid = row["type"]
+                    canBeStatic = False
+            else:
+                if access == "scope":
+                    Error("4Static element {0} at {1}:{2} must be preceded with a type".format(identifier, loc[0], loc[1]))
+                    return
+                else:
+                    st = symboltable.GetOrCreate(stid)
+                    if not st.RowExistsWhere("name", identifier, "static", False):
+                        Error("5Unable to find member element {0} at {1}:{2} in {3}".format(identifier, loc[0], loc[1], stid))
+                        return
+                    row = st.GetRowWhere("name", identifier, "static", False)
+                    stid = row["type"]
 
+        # TODO: Account for namespaces
+        symboltableExists = True
+        if stid is not None:
+            if not stid in internal_types:
+                if not symboltable.Exists(stid):
+                    if canBeStatic:
+                        if not symboltable.Exists("::global"):
+                            symboltableExists = False
+                        else:
+                            stid = "::global" + stid
+                    else:
+                        symboltableExists = False
+        else:
+            symboltableExists = False
 
-def getStaticSymbolTableID(id):
-
+        if not symboltableExists:
+            if stid is not None:
+                Error("6Unable to find symbol table with id {0} at {1}:{2}".format(stid, loc[0], loc[1]))
+            else:
+                Error("7Unable to find local or member element {0} at {1}:{2}".format(identifier, loc[0], loc[1]))
+            return
 
 # LOCAL or FUNCTION or CLASS - returns the symboltableID that contains the identifier. None if none of them have it.
 def LFC(identifier, namespace):
@@ -84,7 +132,7 @@ def LFC(identifier, namespace):
         if not st.GetMetaData("symboltable_type") in ["local", "function", "class"]:
             break
 
-        if st.RowExistsWhere("name", identifier):
+        if st.RowExistsWhere("name", identifier, "static", False):
             return parent
         else:
             level += 1

@@ -1,45 +1,12 @@
-class void {}
-
-class LinkedList {
-    private LinkedList _next;
-    private int _value;
-
-    public static void Initialize(LinkedList ref) {
-        ref._next = 0;
-        ref._value = 0;
+class Person
+{
+    public int myAge;
+    public static int Age;
+    public static Person Initialize() {
+        return 0;
     }
-
-    public void SetValue(int value) {
-        {
-            {
-                {
-                    {
-                        {
-                            {
-                                {
-                                    {
-                                        _value = value;
-                                        LinkedList::Initialize();
-                                        _next.Initialize();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    public void AddToValue(int value) {
-        SetValue(_value + value);
-    }
-
-    public int Count() {
-        return 10;
-    }
-
-    public LinkedList* GetNext() {
-        _next();
+    int Test() {
+        Person::Initialize().myAge = global::Person::Age;
+        myAge;
     }
 }
