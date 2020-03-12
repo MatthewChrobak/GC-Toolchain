@@ -25,17 +25,17 @@
 
 namespace V1
 {
-    class App
+    class App1 : App2
     {
         public int Version;
     }
 }
 
-class App
+class App2 : V1::App1
 {
     public int Version;
 
-    public static V1::App Singleton;
+    public static V1::App1 Singleton;
 }
 
 int main() {

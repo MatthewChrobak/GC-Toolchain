@@ -52,7 +52,10 @@ $valid_head_id $valid_tail_id*
 #token ,
 ,
 
-#token scope_operator
+#token colon
+:
+
+#token scope_operator priority:1
 ::
 
 #token ;

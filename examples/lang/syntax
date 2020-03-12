@@ -26,7 +26,10 @@ access_modifier:access_modifier
 static:static
 
 #production class
-$access_modifier:^ $static:^ class id:class_name { $class_elements:^ }
+$access_modifier:^ $static:^ class id:class_name $inheritance:parent_class { $class_elements:^ }
+
+#production inheritance epsilon:true
+colon $lvalue:lvalue_type
 
 #production class_elements epsilon:true
 $class_element:^ $class_elements:^

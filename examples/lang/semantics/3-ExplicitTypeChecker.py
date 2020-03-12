@@ -11,7 +11,6 @@ def resolveType(type, namespace):
     while True:
         stid = getParentNamespaceID(level, namespace)
         potentialType = stid + "::" + type
-        print(potentialType)
         if symboltable.Exists(potentialType):
             if symboltable.GetOrCreate(potentialType).GetMetaData("symboltable_type") == "class":
                 return potentialType
@@ -71,6 +70,7 @@ def handleType(node, type_key):
     #         knownTypeId = knownType
 
     row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+    lvalue["type"] = resolvedType
     row["type"] = resolvedType
     return row
 
@@ -100,3 +100,7 @@ def preorder_string(node):
 def preorder_char(node):
     global internal_types
     setType(node, internal_types[2])
+
+def preorder_class(node):
+    if node.Contains("parent_class"):
+        handleType(node, "parent_class")
