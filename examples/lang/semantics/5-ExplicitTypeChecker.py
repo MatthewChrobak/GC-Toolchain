@@ -1,6 +1,26 @@
 from NamespaceHelper import *
 from TypeHelper import *
 
+def resolveType(type, namespace):
+    global internal_types
+
+    if type in internal_types:
+        return type
+
+    level = 0
+    while True:
+        stid = getParentNamespaceID(level, namespace)
+        potentialType = stid + "::" + type
+        print(potentialType)
+        if symboltable.Exists(potentialType):
+            if symboltable.GetOrCreate(potentialType).GetMetaData("symboltable_type") == "class":
+                return potentialType
+        
+        if len(stid) == 0:
+            return None
+
+        level += 1
+
 def setType(node, type):
     pst = symboltable.GetOrCreate(node["pstid"])
     row = pst.RowAt(node["rowid"])
@@ -24,27 +44,34 @@ def handleType(node, type_key):
             knownType += "::"
         knownType += component["identifier"]["value"]
 
-    knownTypeId = None
-    if symboltable.Exists(knownType):
-        knownTypeId = knownType
+    resolvedType = resolveType(knownType, node["pstid"])
 
-    if symboltable.Exists("::global::" + knownType):
-        knownTypeId = "::global::" + knownType
+    if resolvedType is None:
+        Error("Unknown type {0} at {1}:{2}".format(knownType, loc[0], loc[1]))
+        return
+
+
+    # knownTypeId = None
+    # if symboltable.Exists(knownType):
+    #     knownTypeId = knownType
+
+    # if symboltable.Exists("::global::" + knownType):
+    #     knownTypeId = "::global::" + knownType
     
-    if knownTypeId is not None:
-        if symboltable.GetOrCreate(knownTypeId).GetMetaData("symboltable_type") != "class":
-            Error("Type of {0} at {1}:{2} needs to be a class or internal type".format(knownType, loc[0], loc[1]))
-            return
+    # if knownTypeId is not None:
+    #     if symboltable.GetOrCreate(knownTypeId).GetMetaData("symboltable_type") != "class":
+    #         Error("Type of {0} at {1}:{2} needs to be a class or internal type".format(knownType, loc[0], loc[1]))
+    #         return
     
-    if knownTypeId is None:
-        if not knownType in internal_types:
-            Error("Unknown type {0} at {1}:{2}".format(knownType, loc[0], loc[1]))
-            return
-        else:
-            knownTypeId = knownType
+    # if knownTypeId is None:
+    #     if not knownType in internal_types:
+    #         Error("Unknown type {0} at {1}:{2}".format(knownType, loc[0], loc[1]))
+    #         return
+    #     else:
+    #         knownTypeId = knownType
 
     row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
-    row["type"] = knownTypeId
+    row["type"] = resolvedType
     return row
 
 def preorder_free_function(node):
