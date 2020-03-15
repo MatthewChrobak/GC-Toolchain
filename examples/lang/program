@@ -23,21 +23,20 @@
 //     B::C::Initialize().instance.age = A::C::Instance.age;
 // }
 
-namespace V1
+namespace Hidden
 {
-    class App1 : App2
+    class Child : Parent
     {
-        public int Version;
     }
 }
 
-class App2 : V1::App1
+class Parent
 {
-    public int Version;
+    public Parent Version;
 
-    public static V1::App1 Singleton;
+    public static Hidden::Child Singleton;
 }
 
 int main() {
-    App::Singleton.Version;
+    Parent::Singleton.Version = 10;
 }

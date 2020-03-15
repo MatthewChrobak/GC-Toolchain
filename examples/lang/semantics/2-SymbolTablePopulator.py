@@ -148,9 +148,6 @@ def postorder_lvalue_component(node):
 
     if node.Contains("function_identifier"):
         label += node["function_identifier"]["value"]
-        label += "("
-        # TODO: function args
-        label += ")"
 
     createSubCalculationStackSpace(node, label)
 

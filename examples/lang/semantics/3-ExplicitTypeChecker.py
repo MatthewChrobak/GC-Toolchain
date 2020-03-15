@@ -99,7 +99,7 @@ def preorder_string(node):
 
 def preorder_char(node):
     global internal_types
-    setType(node, internal_types[2])
+    setType(node, internal_types[1])
 
 def preorder_class(node):
     if node.Contains("parent_class"):

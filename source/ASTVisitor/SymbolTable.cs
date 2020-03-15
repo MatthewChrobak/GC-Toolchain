@@ -32,8 +32,8 @@ namespace ASTVisitor
             this._meta = new Dictionary<string, string>();
         }
 
-        public (AssociativeArray row, int index) CreateRow() {
-            var row = new AssociativeArray();
+        public (AssociativeArray row, int index) CreateRow(AssociativeArray? copy = null) {
+            var row = new AssociativeArray(copy);
             int index = this._rows.Count;
             this._rows.Add(row);
             return (row, index);

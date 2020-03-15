@@ -191,11 +191,11 @@ $expression:expression
 *:value_of
 
 #production assignment_operator
-=:equals
-+=:plus_equals
--=:minus_equals
-*=:times_equals
-/=:divide_equals
+=:operator
++=:operator
+-=:operator
+*=:operator
+/=:operator
 
 #production access_operator
 .:dot

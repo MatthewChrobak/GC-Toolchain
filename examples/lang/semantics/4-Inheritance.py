@@ -44,7 +44,19 @@ def postorder_global(node):
                 if parentNameResolved not in finished:
                     pending.append(classNode)
                 else:
-                    #TODO: Add members to the class
+                    pst = symboltable.GetOrCreate(parentNameResolved)
+                    st = symboltable.GetOrCreate(classNameResolved)
+                    for row in pst.GetRowsWhere("static", False):
+
+                        if row["access_modifier"] in ["default", "private"]:
+                            continue
+
+                        if st.RowExistsWhere("name", row["name"], "entity_type", row["entity_type"]):
+                            Error("Unable to override member {3} {0} in {1} from {2}".format(row["name"], classNameResolved, parentNameResolved, row["entity_type"]))
+
+                        row, rowid = st.CreateRow(row)
+                        row["inherited_from"] = parentNameResolved
+
                     finished.append(classNameResolved)
             else:
                 finished.append(classNameResolved)

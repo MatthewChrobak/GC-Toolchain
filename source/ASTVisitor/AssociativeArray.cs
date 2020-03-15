@@ -51,9 +51,16 @@ namespace ASTVisitor
             return this._elements.ContainsKey(key);
         }
 
-        public AssociativeArray() {
+        public AssociativeArray(AssociativeArray? copy = null) {
             this._elements = new Dictionary<string, dynamic>();
             this._insertOrder = new List<string>();
+
+            if (copy != null) {
+                this._insertOrder = new List<string>(copy._insertOrder);
+                foreach (var entry in copy._elements) {
+                    this._elements[entry.Key] = entry.Value;
+                }
+            }
         }
     }
 }

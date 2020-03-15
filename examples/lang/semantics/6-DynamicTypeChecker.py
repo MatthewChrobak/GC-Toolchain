@@ -125,6 +125,31 @@ def postorder_lvalue(node):
         else:
             stid = next_stid
 
+    setType(node, stid)
+
+def postorder_expression(node):
+    handleExpression(node)
+def postorder_lhs(node):
+    handleExpression(node)
+def postorder_rhs(node):
+    handleExpression(node)
+
+def handleExpression(node):
+    if node.Contains("rvalue"):
+        setType(node, node["rvalue"]["type"])
+
+def postorder_rvalue(node):
+    if node.Contains("expression"):
+        setType(node, node["expression"]["type"])
+    if node.Contains("lvalue"):
+        setType(node, node["lvalue"]["type"])
+    if node.Contains("integer"):
+        setType(node, node["integer"]["type"])
+    if node.Contains("char"):
+        setType(node, node["char"]["type"])
+    if node.Contains("rvalue"):
+        setType(node, node["rvalue"]["type"])
+
 # LOCAL or FUNCTION or CLASS - returns the symboltableID that contains the identifier. None if none of them have it.
 def LFC(identifier, namespace):
     level = 0
