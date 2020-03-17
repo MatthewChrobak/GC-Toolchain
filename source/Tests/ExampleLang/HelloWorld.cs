@@ -10,7 +10,6 @@ int main() {
 }
 ") {
         }
-
         [Test]
         public void SymbolTableTest() {
             SymbolTableExists("::global::main")
@@ -18,6 +17,8 @@ int main() {
             SymbolTableExists("::global")
                 .WithRow((NAME_COLUMN, "main"), (ENTITY_TYPE_COLUMN, ENTITY_TYPE_FUNCTION))
                 .WithColumn(TYPE_COLUMN, "int");
+
+            Assert.AreEqual(ProgramOutput, "hello world");
         }
     }
 }

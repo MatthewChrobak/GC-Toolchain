@@ -26,8 +26,11 @@ namespace Tests.Lang
         private static readonly string SyntaxPath = $"{ProgramPath}\\syntax";
         private static readonly string SemanticVisitorsPath = $"{ProgramPath}\\semantics\\";
         private static readonly string CodeGeneratorVisitorsPath = $"{ProgramPath}\\codegeneration\\";
-        private static readonly string PostBuildScript = $"{ProgramPath}\\build.ps1";
+        private static readonly string PostBuildScript = $"{ProgramPath}\\build_d.ps1";
+        private static readonly string STDIO_D = $"{ProgramPath}\\stdio_d.c";
         private static readonly string InstructionStreamFileName = "output.ir";
+        private readonly string OutputPath;
+        public string ProgramOutput => File.ReadAllText(this.OutputPath);
 
         public ExampleLangTest(string program) {
             SymbolTable.Reset();
@@ -69,10 +72,20 @@ namespace Tests.Lang
             File.WriteAllText(Path.Combine(localDirectory, InstructionStreamFileName), instructionStream.ToString());
 
             File.Copy(PostBuildScript, Path.Combine(localDirectory, new FileInfo(PostBuildScript).Name));
+            File.Copy(STDIO_D, Path.Combine(localDirectory, new FileInfo(STDIO_D).Name));
             var process = new System.Diagnostics.Process();
             process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
                 FileName = "powershell",
                 Arguments = PostBuildScript,
+                WorkingDirectory = localDirectory
+            };
+            process.Start();
+            process.WaitForExit();
+
+            this.OutputPath = Path.Combine(localDirectory, "debug_output.out");
+            process = new System.Diagnostics.Process();
+            process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
+                FileName = Path.Combine(localDirectory, "program.exe"),
                 WorkingDirectory = localDirectory
             };
             process.Start();
