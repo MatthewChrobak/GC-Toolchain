@@ -27,16 +27,27 @@ namespace Hidden
 {
     class Child : Parent
     {
+        
     }
 }
 
 class Parent
 {
-    public Parent Version;
+    public int Version;
 
     public static Hidden::Child Singleton;
+
+    public int Test(int a, int b, int d) {
+        int local;
+    }
 }
 
 int main() {
-    Parent::Singleton.Version = 10;
+    Parent p;
+
+    main();
+    p.Test(1, 2, 3);
+
+    Parent::Singleton.Version = 20;
+
 }

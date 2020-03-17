@@ -1,7 +1,6 @@
 from NamespaceHelper import *
 
 def postorder_expression(node):
-
     if node.Contains("rvalue"):
         node["type"] = node["rvalue"]["type"]
     else:

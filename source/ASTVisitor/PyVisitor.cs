@@ -80,7 +80,7 @@ namespace ASTVisitor
                     } else if (value is bool) {
                         // ignore
                     } else {
-                        Log.WriteLineError($"Unknown element type in ASTNode: {element.Key}:{value.GetType()}");
+                        Log.WriteLineError($"Unknown element type in ASTNode: {element.Key}:{value?.GetType()}");
                     }
                 }
             }

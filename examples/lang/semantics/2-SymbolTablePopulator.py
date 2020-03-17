@@ -50,7 +50,10 @@ def preorder_field(node):
     if row is not None:
         extractAccessModifierAndStatic(node, row)
 
+parameterIndex = 0
 def preorder_function(node, isFree=False):
+    global parameterIndex
+    parameterIndex = 0
     functionName, loc = getNodeValues(node, "function_name")
     row = createRowInPSTID(node, functionName, "function", loc)
 
@@ -62,8 +65,12 @@ def preorder_free_function(node):
     preorder_function(node, True)
 
 def preorder_function_parameter(node):
+    global parameterIndex
     parameterName, loc = getNodeValues(node, "parameter_name")
     row = createRowInPSTID(node, parameterName, "variable", loc)
+    row["is_parameter"] = True
+    row["parameter_index"] = parameterIndex
+    parameterIndex += 1
 
 def postorder_declaration_statement(node):
     variableName, loc = getNodeValues(node, "variable_name")

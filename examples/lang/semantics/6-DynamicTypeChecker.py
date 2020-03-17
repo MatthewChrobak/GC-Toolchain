@@ -65,10 +65,12 @@ def postorder_lvalue(node):
     canBeStatic = True
     for componentPair in componentPairs:
         component, access = componentPair
+        isFunction = False
         if component.Contains("identifier"):
             identifier_key = "identifier"
         elif component.Contains("function_identifier"):
             identifier_key = "function_identifier"
+            isFunction = True
         else:
             identifier_key = None
         identifier, loc = getNodeValues(component, identifier_key)
@@ -92,6 +94,7 @@ def postorder_lvalue(node):
                 # Non-static. Check in LFC scope.
                 canBeStatic = False
                 next_stid = LFC(identifier, node["pstid"])
+                stid = next_stid
         else:
             if canBeStatic:
                 if access == "scope":
@@ -120,9 +123,17 @@ def postorder_lvalue(node):
                     next_stid = resolveType(row["type"], node["pstid"])
 
         if next_stid is None:
-            Error("Unable to find symbol table with id {0} at {1}:{2}".format(identifier if stid is None else stid, loc[0], loc[1]))
+            if stid is None:
+                Error("Unable to find symbol table for the identifier {0} at {1}:{2}".format(identifier, loc[0], loc[1]))
+            else:
+                Error("Unable to find symbol table {0} at {1}:{2}".format(stid, loc[0], loc[1]))
             return
         else:
+            if isFunction:
+                if stid is not None:
+                    component["referencing_type"] = stid
+                else:
+                    Error("Null stid for referencingtype")
             stid = next_stid
 
     setType(node, stid)
@@ -150,6 +161,9 @@ def postorder_rvalue(node):
     if node.Contains("rvalue"):
         setType(node, node["rvalue"]["type"])
 
+def postorder_function_argument(node):
+    node["type"] = node["expression"]["type"]
+    
 # LOCAL or FUNCTION or CLASS - returns the symboltableID that contains the identifier. None if none of them have it.
 def LFC(identifier, namespace):
     level = 0
@@ -159,11 +173,19 @@ def LFC(identifier, namespace):
             log.WriteLineError("Unknown parent symbol table in LFC {0}".format(parent))
             return None
         st = symboltable.GetOrCreate(parent)
-        if not st.GetMetaData("symboltable_type") in ["local", "function", "class"]:
-            break
+        # if not st.GetMetaData("symboltable_type") in ["local", "function", "class", "namespace"]:
+        #     break
 
-        if st.RowExistsWhere("name", identifier, "static", False):
-            return parent
+        if st.RowExistsWhere("name", identifier):
+            row = st.GetRowWhere("name", identifier)
+            if row.Contains("static") and row["static"] == True:
+                continue
+            if symboltable.Exists(parent + "::" + identifier):
+                log.WriteLineVerbose("@@@@@@@@@@LFCN=" + parent + "::" + identifier + "-" + identifier)
+                return parent
+            else:
+                log.WriteLineVerbose("@@@@@@@@@@LFCN=" + row["type"] + "-" + identifier)
+                return row["type"]
         else:
             level += 1
     return None
