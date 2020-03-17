@@ -7,8 +7,14 @@ namespace ASTVisitor
     public class SymbolTable  
     {
         private static Dictionary<string, SymbolTable> GlobalScope;
-        
+
+#pragma warning disable CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
         static SymbolTable() {
+#pragma warning restore CS8618 // Non-nullable field is uninitialized. Consider declaring as nullable.
+            Reset();
+        }
+
+        public static void Reset() {
             GlobalScope = new Dictionary<string, SymbolTable>();
         }
 
