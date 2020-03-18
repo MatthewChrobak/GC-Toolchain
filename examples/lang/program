@@ -45,6 +45,8 @@ class Parent
 int main() {
     Parent p;
 
+    print_int(1);
+
     main();
     p.Test(1, 2, 3);
 

@@ -10,6 +10,19 @@ def createSubCalculationStackSpace(node, label):
     row["entity_type"] = "subcalculationstackspace"
     row["label"] = label
 
+def createRowInPSTID_BuiltIn(entityType, parentSTID, entityName):
+    pst = symboltable.GetOrCreate(parentSTID)
+
+    if pst.RowExistsWhere("name", entityName, "entity_type", entityType):
+        Error("The built in {0} '{1}' is already defined in {2}".format(entityType, entityName, parentSTID))
+        return
+    
+    row, id = pst.CreateRow()
+    row["rowid"] = id
+    row["name"] = entityName
+    row["entity_type"] = entityType
+    return row
+
 def createRowInPSTID(node, entityName, entityType, loc):
     pstid = getPSTID(node)
     pst = symboltable.GetOrCreate(pstid)
@@ -35,6 +48,32 @@ def extractAccessModifierAndStatic(node, row):
 
     static_key = "static"
     row[static_key] = node.Contains(static_key)
+
+def preorder_global(node):
+
+    createRowInPSTID_BuiltIn("function", "::global", "print_str")
+    st = symboltable.GetOrCreate("::global::print_str")
+    row, id = st.CreateRow()
+    row["entity_type"] = "variable"
+    row["is_parameter"] = True
+    row["parameter_index"] = 0
+    row["type"] = "char*"
+
+    createRowInPSTID_BuiltIn("function", "::global", "print_int")
+    st = symboltable.GetOrCreate("::global::print_int")
+    row, id = st.CreateRow()
+    row["entity_type"] = "variable"
+    row["is_parameter"] = True
+    row["parameter_index"] = 0
+    row["type"] = "int"
+
+    createRowInPSTID_BuiltIn("function", "::global", "print_float")
+    st = symboltable.GetOrCreate("::global::print_float")
+    row, id = st.CreateRow()
+    row["entity_type"] = "variable"
+    row["is_parameter"] = True
+    row["parameter_index"] = 0
+    row["type"] = "float"
 
 def preorder_class(node):
     className, loc = getNodeValues(node, "class_name")

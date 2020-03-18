@@ -1,5 +1,13 @@
 from NamespaceHelper import *
 
+def CreateBuiltIn(entity_type, id):
+    if symboltable.Exists(id):
+        Error("The built in {0} {1} already exists".format(entity_type, id))
+        return
+
+    st = symboltable.GetOrCreate(id)
+    st.SetMetaData("symboltable_type", entity_type)
+
 def createSymbolTable(node, nameKey, entity_type):
     name, loc = getNodeValues(node, nameKey)
     enterNamespace(node, name)
@@ -16,6 +24,11 @@ def createSymbolTable(node, nameKey, entity_type):
 
 def preorder_global(node):
     enterNamespace(node, "global")
+
+    CreateBuiltIn("function", "::global::print_int")
+    CreateBuiltIn("function", "::global::print_str")
+    CreateBuiltIn("function", "::global::print_float")
+
 def postorder_global(node):
     leaveNamespace()
 

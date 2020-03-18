@@ -13,14 +13,24 @@ using System.Text;
 
 namespace Tests.Lang
 {
+    public class Column
+    {
+        public const string Name = "name";
+        public const string Type = "type";
+        public const string IsParameter = "is_parameter";
+        public const string ParameterIndex = "parameter_index";
+        public const string EntityType = "entity_type";
+    }
+
+    public class EntityType
+    {
+        public const string Function = "function";
+        public const string Variable = "variable";
+        public const string CLASS = "class";
+    }
+
     public class ExampleLangTest
     {
-        public const string NAME_COLUMN = "name";
-        public const string TYPE_COLUMN = "type";
-        public const string ENTITY_TYPE_COLUMN = "entity_type";
-        public const string ENTITY_TYPE_FUNCTION = "function";
-        public const string ENTITY_TYPE_CLASS = "class";
-
         private static readonly string ProgramPath = new DirectoryInfo(Directory.GetCurrentDirectory() + "\\..\\..\\..\\..\\..\\examples\\lang").FullName;
         private static readonly string TokenPath = $"{ProgramPath}\\tokens";
         private static readonly string SyntaxPath = $"{ProgramPath}\\syntax";
@@ -41,7 +51,7 @@ namespace Tests.Lang
                 var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(program));
                 localDirectory = Path.Combine(cwd, BitConverter.ToString(hash).Replace("-", ""));
             }
-            
+
             if (Directory.Exists(localDirectory)) {
                 Directory.Delete(localDirectory, true);
             }
@@ -91,8 +101,8 @@ namespace Tests.Lang
             process.Start();
             process.WaitForExit();
         }
-    
-        protected ExistingSymbolTable SymbolTableExists(string id) {
+
+        public ExistingSymbolTable SymbolTableExists(string id) {
             Assert.IsTrue(SymbolTable.Exists(id));
             return new ExistingSymbolTable(SymbolTable.GetOrCreate(id));
         }
@@ -115,7 +125,7 @@ namespace Tests.Lang
             return rows.Select(row => new ExistingRow(row));
         }
 
-        public IEnumerable<ExistingRow> WithRow(params (string key, dynamic value)[] filters) {
+        public IEnumerable<ExistingRow> WithOneRow(params (string key, dynamic value)[] filters) {
             return WithExactlyNRows(1, filters);
         }
 
