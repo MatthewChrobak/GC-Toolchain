@@ -1,5 +1,6 @@
 ﻿using ASTVisitor;
 using CodeGeneration;
+using Core;
 using LexicalAnalysis;
 using NUnit.Framework;
 using SemanticAnalysis;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Tests.Lang
@@ -40,66 +42,71 @@ namespace Tests.Lang
         private static readonly string STDIO_D = $"{ProgramPath}\\stdio_d.c";
         private static readonly string InstructionStreamFileName = "output.ir";
         private readonly string OutputPath;
-        public string ProgramOutput => File.ReadAllText(this.OutputPath);
+        public string ProgramOutput => File.Exists(this.OutputPath) ? File.ReadAllText(this.OutputPath) : string.Empty;
 
-        public ExampleLangTest(string program) {
-            SymbolTable.Reset();
+        public ExampleLangTest(string program, [CallerMemberNameAttribute] string testName = "unknown") {
             string cwd = Directory.GetCurrentDirectory();
-
             string localDirectory;
             using (var md5 = System.Security.Cryptography.MD5.Create()) {
                 var hash = md5.ComputeHash(Encoding.UTF8.GetBytes(program));
-                localDirectory = Path.Combine(cwd, BitConverter.ToString(hash).Replace("-", ""));
+                localDirectory = Path.Combine(cwd, $"{testName}_{BitConverter.ToString(hash).Replace("-", "")}");
             }
-
             if (Directory.Exists(localDirectory)) {
                 Directory.Delete(localDirectory, true);
             }
             Directory.CreateDirectory(localDirectory);
+            try {
+                SymbolTable.Reset();
+                // Lexical analysis
+                var tokenConfigurationFile = new LexicalConfigurationFile(TokenPath);
+                var tokenParserTableGenerator = new TokenParserTableGenerator(tokenConfigurationFile);
+                var tokenParser = new TokenParser(tokenParserTableGenerator.NFATable);
+                var tokenStream = tokenParser.ParseString(program);
 
-            // Lexical analysis
-            var tokenConfigurationFile = new LexicalConfigurationFile(TokenPath);
-            var tokenParserTableGenerator = new TokenParserTableGenerator(tokenConfigurationFile);
-            var tokenParser = new TokenParser(tokenParserTableGenerator.NFATable);
-            var tokenStream = tokenParser.ParseString(program);
+                // Syntactic analysis
+                var syntaxConfigurationFile = new SyntacticConfigurationFile(SyntaxPath);
+                var productionTable = new ProductionTable(syntaxConfigurationFile);
+                var clrStates = new CLRStateGenerator(productionTable, syntaxConfigurationFile);
+                var lrTable = LRParsingTable.From(clrStates, productionTable);
+                var syntaxParser = new LRParser(syntaxConfigurationFile, tokenStream);
+                var ast = syntaxParser.Parse(lrTable, tokenStream);
 
-            // Syntactic analysis
-            var syntaxConfigurationFile = new SyntacticConfigurationFile(SyntaxPath);
-            var productionTable = new ProductionTable(syntaxConfigurationFile);
-            var clrStates = new CLRStateGenerator(productionTable, syntaxConfigurationFile);
-            var lrTable = LRParsingTable.From(clrStates, productionTable);
-            var syntaxParser = new LRParser(syntaxConfigurationFile, tokenStream);
-            var ast = syntaxParser.Parse(lrTable, tokenStream);
+                foreach (var file in Directory.GetFiles(SemanticVisitorsPath, "*.py")) {
+                    new SemanticVisitor(file).Traverse(ast);
+                }
 
-            foreach (var file in Directory.GetFiles(SemanticVisitorsPath, "*.py")) {
-                new SemanticVisitor(file).Traverse(ast);
+                var instructionStream = new InstructionStream();
+                foreach (var file in Directory.GetFiles(CodeGeneratorVisitorsPath, "*.py")) {
+                    new CodeGeneratorVisiter(file, instructionStream).Traverse(ast);
+                }
+                File.WriteAllText(Path.Combine(localDirectory, InstructionStreamFileName), instructionStream.ToString());
+
+                File.Copy(PostBuildScript, Path.Combine(localDirectory, new FileInfo(PostBuildScript).Name));
+                File.Copy(STDIO_D, Path.Combine(localDirectory, new FileInfo(STDIO_D).Name));
+                var process = new System.Diagnostics.Process();
+                process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
+                    FileName = "powershell",
+                    Arguments = PostBuildScript,
+                    WorkingDirectory = localDirectory,
+                    RedirectStandardOutput = true
+                };
+                process.Start();
+                process.WaitForExit();
+                Log.WriteLineVerbose(process.StandardOutput.ReadToEnd());
+
+                this.OutputPath = Path.Combine(localDirectory, "debug_output.out");
+                process = new System.Diagnostics.Process();
+                process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
+                    FileName = Path.Combine(localDirectory, "program.exe"),
+                    WorkingDirectory = localDirectory
+                };
+                process.Start();
+                process.WaitForExit();
+            } catch (Exception e) {
+                throw e;
+            } finally {
+                Log.Dump(Path.Combine(localDirectory, "dmp.log"));
             }
-
-            var instructionStream = new InstructionStream();
-            foreach (var file in Directory.GetFiles(CodeGeneratorVisitorsPath, "*.py")) {
-                new CodeGeneratorVisiter(file, instructionStream).Traverse(ast);
-            }
-            File.WriteAllText(Path.Combine(localDirectory, InstructionStreamFileName), instructionStream.ToString());
-
-            File.Copy(PostBuildScript, Path.Combine(localDirectory, new FileInfo(PostBuildScript).Name));
-            File.Copy(STDIO_D, Path.Combine(localDirectory, new FileInfo(STDIO_D).Name));
-            var process = new System.Diagnostics.Process();
-            process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
-                FileName = "powershell",
-                Arguments = PostBuildScript,
-                WorkingDirectory = localDirectory
-            };
-            process.Start();
-            process.WaitForExit();
-
-            this.OutputPath = Path.Combine(localDirectory, "debug_output.out");
-            process = new System.Diagnostics.Process();
-            process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
-                FileName = Path.Combine(localDirectory, "program.exe"),
-                WorkingDirectory = localDirectory
-            };
-            process.Start();
-            process.WaitForExit();
         }
 
         public ExistingSymbolTable SymbolTableExists(string id) {

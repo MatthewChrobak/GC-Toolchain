@@ -42,12 +42,12 @@ class Parent
     }
 }
 
-int main() {
+int main_real() {
     Parent p;
 
     print_int(1);
 
-    main();
+    // main();
     p.Test(1, 2, 3);
 
     Parent::Singleton.Version = 20;

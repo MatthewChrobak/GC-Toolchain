@@ -1,6 +1,7 @@
 ﻿using Core.ReportGeneration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Core
 {
@@ -10,12 +11,20 @@ namespace Core
         private static string _state;
         public static string State => _state;
         private static Dictionary<string, List<string>> _stateHistory;
+        private static List<string> AllLines = new List<string>();
 
         static Log() {
             _stateHistory = new Dictionary<string, List<string>>();
             AllowedOutputs[(int)OutputLevel.Verbose] = false;
             AllowedOutputs[(int)OutputLevel.Warning] = true;
             AllowedOutputs[(int)OutputLevel.Error] = true;
+            SetState("Unknown");
+        }
+
+        public static void Dump(string path) {
+            File.AppendAllLines(path, AllLines);
+            AllLines = new List<string>();
+            _stateHistory = new Dictionary<string, List<string>>();
             SetState("Unknown");
         }
 
@@ -48,6 +57,7 @@ namespace Core
                 return;
             }
             _stateHistory[_state].Add(message);
+            AllLines.Add(message);
             Console.Write(message);
         }
 

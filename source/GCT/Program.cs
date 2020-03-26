@@ -15,6 +15,7 @@ namespace GCT
     public static class Program
     {
         private static Report report;
+        private static string logDumpPath;
 
         public static void Main(string[] args) {
             // If no args are given, take some.
@@ -31,6 +32,9 @@ namespace GCT
             } finally {
                 report.AddSection(Log.GetReportSections());
                 report.Save();
+
+                Log.WriteLineVerbose($"Writing log to {logDumpPath}...");
+                Log.Dump(logDumpPath);
             }
         }
 
@@ -44,6 +48,7 @@ namespace GCT
             string? postBuildScript = null;
             string? instructionStreamFilepath = null;
             string? cwd = AppDomain.CurrentDomain.BaseDirectory;
+            logDumpPath = Path.Join(cwd, "dmp.log");
 
             bool includeAST = false;
             bool includeStateMachine = false;
@@ -87,6 +92,7 @@ namespace GCT
                         MakeSureFileExists(postBuildScript);
 
                         cwd = flagValue;
+                        logDumpPath = Path.Combine(cwd, "dmp.log");
                         break;
                     case "v":
                     case "verbose":
@@ -146,6 +152,7 @@ namespace GCT
                         includeLRTrace = true;
                         includeLRStates = true;
                         includeSymbolTables = true;
+                        logDumpPath = "log.dmp";
                         break;
                 }
             }
@@ -230,7 +237,9 @@ namespace GCT
                 foreach (var file in Directory.GetFiles(codeGeneratorFolder, "*.py")) {
                     new CodeGeneratorVisiter(file, instructionStream).Traverse(ast);
                 }
-                File.WriteAllText(instructionStreamFilepath, instructionStream.ToString());
+                string inst = instructionStream.ToString();
+                File.WriteAllText(instructionStreamFilepath, inst);
+                Log.WriteLineVerbose(inst);
             }
 
             Log.SetState("Post-Build");
@@ -239,9 +248,12 @@ namespace GCT
                 process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
                     FileName = "powershell",
                     Arguments = postBuildScript,
-                    WorkingDirectory = cwd
+                    WorkingDirectory = cwd,
+                    RedirectStandardOutput = true
                 };
                 process.Start();
+                process.WaitForExit();
+                Log.WriteLineVerbose(process.StandardOutput.ReadToEnd());
             }
         }
 
