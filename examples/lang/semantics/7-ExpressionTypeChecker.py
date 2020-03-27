@@ -15,11 +15,10 @@ def postorder_expression(node):
         node["type"] = lhs["type"]
 
 def postorder_declaration_statement(node):
-    if node.Contains("expression"):
-        if node["variable_type"]["type"] != node["expression"]["type"]:
-            _, loc = getNodeValues(node, "variable_name")
-            Error("Unable to assign {0} to a {1} at {2}:{3}".format(node["expression"]["type"], node["variable_type"]["type"], loc[0], loc[1]))
-            return
+    if node["variable_type"]["type"] != node["expression"]["type"]:
+        _, loc = getNodeValues(node, "variable_name")
+        Error("Unable to assign {0} to a {1} at {2}:{3}".format(node["expression"]["type"], node["variable_type"]["type"], loc[0], loc[1]))
+        return
 
 def postorder_lvalue_statement(node):
     if node.Contains("expression"):

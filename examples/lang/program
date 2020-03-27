@@ -1,55 +1,69 @@
-// namespace A {
-//     class C
+// // namespace A {
+// //     class C
+// //     {
+// //         public int age;
+// //         public static C Instance;
+// //     }   
+// // }
+// // namespace B {
+// //     class C {
+// //         public A::C instance;
+
+// //         public static C Initialize() {
+// //             C::Initialize();
+// //         }
+
+// //         public static C fff() {
+
+// //         }
+// //     }
+// // }
+
+// // int main() {
+// //     B::C::Initialize().instance.age = A::C::Instance.age;
+// // }
+
+// namespace Hidden
+// {
+//     class Child : Parent
 //     {
-//         public int age;
-//         public static C Instance;
-//     }   
-// }
-// namespace B {
-//     class C {
-//         public A::C instance;
-
-//         public static C Initialize() {
-//             C::Initialize();
-//         }
-
-//         public static C fff() {
-
-//         }
+        
 //     }
 // }
 
-// int main() {
-//     B::C::Initialize().instance.age = A::C::Instance.age;
+// class Parent
+// {
+//     public int Version;
+
+//     public static Hidden::Child Singleton;
+
+//     public int Test(int a, int b, int d) {
+//         int local;
+//     }
 // }
 
-namespace Hidden
-{
-    class Child : Parent
+// int main_real() {
+//     Parent p;
+
+//     print_int(1);
+
+//     // main();
+//     p.Test(1, 2, 3);
+
+//     Parent::Singleton.Version = 20;
+
+// }
+namespace Test {
+    class Person
     {
-        
+        static int doThing() {
+
+        }
     }
 }
 
-class Parent
-{
-    public int Version;
-
-    public static Hidden::Child Singleton;
-
-    public int Test(int a, int b, int d) {
-        int local;
-    }
-}
-
-int main_real() {
-    Parent p;
-
-    print_int(1);
-
-    // main();
-    p.Test(1, 2, 3);
-
-    Parent::Singleton.Version = 20;
-
+int main() {
+    int x = 10;
+    Test::Person::doThing();
+    print_int(x);
 }

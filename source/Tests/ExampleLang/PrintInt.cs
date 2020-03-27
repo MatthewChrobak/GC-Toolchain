@@ -30,7 +30,7 @@ namespace Tests.Lang
                 .WithOneRow((Column.Name, "main"), (Column.EntityType, EntityType.Function))
                 .WithColumn(Column.Type, "int");
 
-            Assert.AreEqual(results.ProgramOutput, "1");
+            Assert.AreEqual("1", results.ProgramOutput);
         }
 
         [Test]
@@ -38,6 +38,13 @@ namespace Tests.Lang
             string program = @"int print_int(int val) { }";
             var e = Assert.Catch<AssertionFailedException>(new TestDelegate(() => new ExampleLangTest(program)));
             AssertExceptionCause(e, "The function print_int at 1:5 is already defined.");
+        }
+
+        [Test]
+        public void print_int_from_variable_succeed() {
+            string program = @"int main() { int x = 10; print_int(x); }";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("10", results.ProgramOutput);
         }
     }
 }

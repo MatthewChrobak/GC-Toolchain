@@ -66,6 +66,7 @@ def postorder_lvalue(node):
     for componentPair in componentPairs:
         component, access = componentPair
         isFunction = False
+
         if component.Contains("identifier"):
             identifier_key = "identifier"
         elif component.Contains("function_identifier"):
@@ -85,6 +86,8 @@ def postorder_lvalue(node):
                 Error("Unable to find symbol table with id {0} at {1}:{2}".format(stid, loc[0], loc[1]))
                 return
 
+        
+        
         # Are we at the first element?
         if stid is None:
             # is the first one a static element?
@@ -136,6 +139,8 @@ def postorder_lvalue(node):
                     Error("Null stid for referencingtype")
             stid = next_stid
 
+    
+
     setType(node, stid)
 
 def postorder_expression(node):
@@ -173,18 +178,14 @@ def LFC(identifier, namespace):
             log.WriteLineError("Unknown parent symbol table in LFC {0}".format(parent))
             return None
         st = symboltable.GetOrCreate(parent)
-        # if not st.GetMetaData("symboltable_type") in ["local", "function", "class", "namespace"]:
-        #     break
 
         if st.RowExistsWhere("name", identifier):
             row = st.GetRowWhere("name", identifier)
             if row.Contains("static") and row["static"] == True:
                 continue
             if symboltable.Exists(parent + "::" + identifier):
-                log.WriteLineVerbose("@@@@@@@@@@LFCN=" + parent + "::" + identifier + "-" + identifier)
                 return parent
             else:
-                log.WriteLineVerbose("@@@@@@@@@@LFCN=" + row["type"] + "-" + identifier)
                 return row["type"]
         else:
             level += 1

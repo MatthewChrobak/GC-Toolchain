@@ -72,6 +72,7 @@ def handleType(node, type_key):
     row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
     lvalue["type"] = resolvedType
     row["type"] = resolvedType
+    type["type"] = resolvedType
     return row
 
 def preorder_free_function(node):

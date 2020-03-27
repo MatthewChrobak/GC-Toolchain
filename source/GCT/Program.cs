@@ -237,9 +237,7 @@ namespace GCT
                 foreach (var file in Directory.GetFiles(codeGeneratorFolder, "*.py")) {
                     new CodeGeneratorVisiter(file, instructionStream).Traverse(ast);
                 }
-                string inst = instructionStream.ToString();
-                File.WriteAllText(instructionStreamFilepath, inst);
-                Log.WriteLineVerbose(inst);
+                File.WriteAllText(instructionStreamFilepath, instructionStream.ToString());
             }
 
             Log.SetState("Post-Build");

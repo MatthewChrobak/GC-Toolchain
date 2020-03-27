@@ -9,6 +9,7 @@ def createSubCalculationStackSpace(node, label):
 
     row["entity_type"] = "subcalculationstackspace"
     row["label"] = label
+    return row
 
 def createRowInPSTID_BuiltIn(entityType, parentSTID, entityName):
     pst = symboltable.GetOrCreate(parentSTID)
@@ -175,7 +176,8 @@ def postorder_rvalue(node):
 def postorder_lvalue(node):
     components = node.AsArray("lvalue_component")
     label = components[len(components) - 1]["label"]
-    createSubCalculationStackSpace(node, label)
+    row = createSubCalculationStackSpace(node, label)
+    row["lvalue"] = True
     
 def postorder_lvalue_component(node):
     if not node.Contains("allocate_register"):
