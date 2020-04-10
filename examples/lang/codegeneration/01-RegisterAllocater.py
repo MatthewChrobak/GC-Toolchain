@@ -38,23 +38,15 @@ def postorder_lvalue_component(node):
         fc = node["function_call"]
         arguments = fc.AsArray("function_argument") if fc.Contains("function_argument") else []
         getAdditionalRegisters(node, len(arguments))
-    else:
-        getAdditionalRegisters(node, 1)
-        allocate(node)
 
-def preorder_lvalue_statement(node):
-    if not node.Contains("assignment"):
-        row = symboltable.GetOrCreate(node["lvalue"]["pstid"]).RowAt(node["lvalue"]["rowid"])
-        row["do_not_allocate_register"] = True
+def postorder_lvalue_statement(node):
+    if node.Contains("assignment"):
+        node["register"] = get()
 
 def postorder_lvalue(node):
-    row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
-    if not row.Contains("do_not_allocate_register"):
-        getAdditionalRegisters(node, 1)
-        allocate(node)
+    allocate(node)
 
 def postorder_rvalue(node):
-    getAdditionalRegisters(node, 1)
     allocate(node)
 
 def postorder_declaration_statement(node):

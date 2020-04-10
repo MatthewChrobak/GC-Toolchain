@@ -1,9 +1,5 @@
 ﻿#include <stdio.h>
 
-struct Person {
-	int x;
-};
-
 void print_int(int val) {
 	printf("%d", val);
 }
@@ -18,10 +14,4 @@ void print_str(const char* val) {
 
 char getkey() {
 	return getchar();
-}
-
-
-void Test() {
-	struct Person p;
-	p.x = 20;
 }

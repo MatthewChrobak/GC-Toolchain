@@ -2,6 +2,9 @@ from helper import *
 
 registerMap = {}
 
+def GetRow(node):
+    return symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+
 def resetRegisterMap():
     global registerMap
     registerMap = {}
@@ -80,24 +83,31 @@ def postorder_integer(node):
 def postorder_rvalue(node):
     instructionstream.AppendLine("; rvalue")
     possibleChildren = ["integer", "lvalue"]
-    r, a = getRegisters(node)
     for child in possibleChildren:
         if node.Contains(child):
-            cr = getRegister(node[child])
-            instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], cr))
-            instructionstream.AppendLine("{0} = alloca i32".format(r))
-            instructionstream.AppendLine("store i32 {1}, i32* {0}".format(r, a[0]))
+            row = GetRow(node)
+            node["register"] = node[child]["register"]
+            row["register"] = node["register"]
             break
 
 def postorder_lvalue_statement(node):
+    if not node.Contains("assignment"):
+        return
+
     instructionstream.AppendLine("; lvalue statement")
+    r = registerRegister(node["register"])
+
+    instructionstream.AppendLine("{0} = load i32, i32* {1}".format(r, node["rvalue"]["register"]))
+    instructionstream.AppendLine("store i32 {0}, i32* {1}".format(r, node["lvalue"]["register"]))
+
 
 def postorder_lvalue(node):
     instructionstream.AppendLine("; lvalue")
     components = node.AsArray("lvalue_component")
     last_register = None
 
-    for component in components:
+    if len(components) == 1:
+        component = components[0]
         identifier, loc = GetValue(component["identifier"])
 
         if component.Contains("function_call"):
@@ -113,21 +123,11 @@ def postorder_lvalue(node):
                 argumentRegisters.append("i32 {0}".format(ca[i]))
             instructionstream.AppendLine("call void @{0}({1})".format(identifier, ", ".join(argumentRegisters)))
         else:
-            cr, ca = getRegisters(component)
             instructionstream.AppendLine("; non-function call")
-            row = symboltable.GetOrCreate(component["pstid"]).GetRowWhere("name", identifier)
-            instructionstream.AppendLine("{0} = load i32, i32* {1}".format(ca[0], row["register"]))
-            instructionstream.AppendLine("{0} = alloca i32".format(cr))
-            instructionstream.AppendLine("store i32 {1}, i32* {0}".format(cr, ca[0]))
-            last_register = cr
-
-    instructionstream.AppendLine("; lvalue end")
-    row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
-    if not row.Contains("do_not_allocate_register"):
-        r, a = getRegisters(node)
-        instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], last_register))
-        instructionstream.AppendLine("{0} = alloca i32".format(r))
-        instructionstream.AppendLine("store i32 {1}, i32* {0}".format(r, a[0]))
+            r = symboltable.GetOrCreate(component["pstid"]).GetRowWhere("name", identifier)["register"]
+            row = GetRow(node)
+            node["register"] = r
+            row["register"] = r
 
 def postorder_declaration_statement(node):
     instructionstream.AppendLine("; declaration statement")
