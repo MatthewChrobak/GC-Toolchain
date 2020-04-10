@@ -16,7 +16,7 @@ def getAdditionalRegisters(node, count):
 
 def get():
     global registerCount
-    register = "%{0}".format(str(registerCount))
+    register = "u{0}".format(str(registerCount))
     registerCount += 1
     return register
 

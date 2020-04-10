@@ -9,7 +9,7 @@ def resetRegisterMap():
 def registerRegister(register):
     global registerMap
 
-    if register.startsWith("%"):
+    if register[0] == "%":
         return register
 
     # Does the mapping already exist?
@@ -21,31 +21,37 @@ def registerRegister(register):
     registerMap[register] = "%{0}".format(str(n))
     return registerMap[register]
 
-def getRegisters(node):
-    r = node["register"]
-    r = registerRegister(r)
-
-    row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
-    row["register"] = r
+def getAdditionalRegisters(node, row=None):
+    if row is None:
+        row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
 
     a = []
     if node.Contains("additional_registers"):
-        for r in node["additional_register"]:
+        for r in node["additional_registers"]:
             a.append(registerRegister(r))
     row["additional_registers"] = ", ".join(a)
-
-    node["register"] = r
     node["additional_registes"] = a
+    return a
+
+def getRegister(node, row=None):
+    if row is None:
+        row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+    r = node["register"]
+    r = registerRegister(r)
+    row["register"] = r
+    node["register"] = r
+    return r
+
+def getRegisters(node):
+    row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+    a = getAdditionalRegisters(node)
+    r = getRegister(node)
     return r, a
     
-
 def typeMorpher(type):
     if type == "int":
         return "i32"
     return type
-
-def getAdditionalRegisters(node):
-    return node["additional_registers"]
 
 def preorder_global(node):
     instructionstream.AppendLine("declare void @print_int(i32)")
@@ -65,25 +71,26 @@ def postorder_function(node):
     instructionstream.AppendLine("}")
 
 def postorder_integer(node):
+    r = getRegister(node)
     instructionstream.AppendLine("; integer")
     value, loc = GetValue(node)
-    instructionstream.AppendLine("{0} = alloca i32".format(node["register"]))
-    instructionstream.AppendLine("store i32 {1}, i32* {0}".format(node["register"], value))
+    instructionstream.AppendLine("{0} = alloca i32".format(r))
+    instructionstream.AppendLine("store i32 {1}, i32* {0}".format(r, value))
 
 def postorder_rvalue(node):
     instructionstream.AppendLine("; rvalue")
     possibleChildren = ["integer", "lvalue"]
+    r, a = getRegisters(node)
     for child in possibleChildren:
         if node.Contains(child):
-            r = getAdditionalRegisters(node)
-            instructionstream.AppendLine("{0} = load i32, i32* {1}".format(r[0], node[child]["register"]))
-            instructionstream.AppendLine("{0} = alloca i32".format(node["register"]))
-            instructionstream.AppendLine("store i32 {1}, i32* {0}".format(node["register"], r[0]))
+            cr = getRegister(node[child])
+            instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], cr))
+            instructionstream.AppendLine("{0} = alloca i32".format(r))
+            instructionstream.AppendLine("store i32 {1}, i32* {0}".format(r, a[0]))
             break
 
 def postorder_lvalue_statement(node):
     instructionstream.AppendLine("; lvalue statement")
-
 
 def postorder_lvalue(node):
     instructionstream.AppendLine("; lvalue")
@@ -92,81 +99,59 @@ def postorder_lvalue(node):
 
     for component in components:
         identifier, loc = GetValue(component["identifier"])
-        r = getAdditionalRegisters(component)
 
         if component.Contains("function_call"):
             instructionstream.AppendLine("; function call")
             instructionstream.AppendLine("; function arguments")
+            ca = getAdditionalRegisters(component)
             fc = component["function_call"]
             arguments = fc.AsArray("function_argument") if fc.Contains("function_argument") else []
             argumentRegisters = []
             for i in range(len(arguments)):
-                instructionstream.AppendLine("{0} = load i32, i32* {1}".format(r[i], arguments[i]["register"]))
-                argumentRegisters.append("i32 {0}".format(r[i]))
+                ar = getRegister(arguments[i])
+                instructionstream.AppendLine("{0} = load i32, i32* {1}".format(ca[i], ar))
+                argumentRegisters.append("i32 {0}".format(ca[i]))
             instructionstream.AppendLine("call void @{0}({1})".format(identifier, ", ".join(argumentRegisters)))
         else:
+            cr, ca = getRegisters(component)
             instructionstream.AppendLine("; non-function call")
             row = symboltable.GetOrCreate(component["pstid"]).GetRowWhere("name", identifier)
-            instructionstream.AppendLine("{0} = load i32, i32* {1}".format(r[0], row["register"]))
-            instructionstream.AppendLine("{0} = alloca i32".format(component["register"]))
-            instructionstream.AppendLine("store i32 {1}, i32* {0}".format(component["register"], r[0]))
-            last_register = component["register"]
+            instructionstream.AppendLine("{0} = load i32, i32* {1}".format(ca[0], row["register"]))
+            instructionstream.AppendLine("{0} = alloca i32".format(cr))
+            instructionstream.AppendLine("store i32 {1}, i32* {0}".format(cr, ca[0]))
+            last_register = cr
 
     instructionstream.AppendLine("; lvalue end")
     row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
     if not row.Contains("do_not_allocate_register"):
-        r = getAdditionalRegisters(node)
-
-        instructionstream.AppendLine("{0} = load i32, i32* {1}".format(r[0], last_register))
-        instructionstream.AppendLine("{0} = alloca i32".format(node["register"]))
-        instructionstream.AppendLine("store i32 {1}, i32* {0}".format(node["register"], r[0]))
-
-# def postorder_lvalue(node):
-#     components = node.AsArray("lvalue_component")
-#     previous_register = None
-
-#     for component in components:
-#         identifier, loc = GetValue(component["identifier"])
-#         if component.Contains("function_call"):
-#             instructionstream.Append("{0} = call void @{1}(".format(component["register"], identifier))
-
-#             fc = component["function_call"]
-#             arguments = fc.AsArray("function_argument") if fc.Contains("function_argument") else []
-#             argumentRegisters = []
-#             for argument in arguments:
-#                 argumentRegisters.append("i32 {0}".format(argument["register"]))
-#             instructionstream.Append(", ".join(argumentRegisters))
-#             instructionstream.AppendLine(")")
-
-#             previous_register = component["register"]
-#         else:
-#             row = symboltable.GetOrCreate(component["pstid"]).GetRowWhere("name", identifier)
-#             instructionstream.AppendLine("{0} = alloca i32".format(node["register"]))
-#             instructionstream.AppendLine("store i32 {1}, i32* {0}".format(component["register"], row["register"]))
-#             previous_register = row["register"]
-    
-#     instructionstream.AppendLine("{0} = alloca i32".format(node["register"]))
-#     instructionstream.AppendLine("store i32 {1}, i32* {0}".format(node["register"], previous_register))
+        r, a = getRegisters(node)
+        instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], last_register))
+        instructionstream.AppendLine("{0} = alloca i32".format(r))
+        instructionstream.AppendLine("store i32 {1}, i32* {0}".format(r, a[0]))
 
 def postorder_declaration_statement(node):
     instructionstream.AppendLine("; declaration statement")
-    r = getAdditionalRegisters(node)
+    r, a = getRegisters(node)
 
     if node.Contains("assignment"):
-        instructionstream.AppendLine("{0} = load i32, i32* {1}".format(r[0], node["rvalue"]["register"]))
-    instructionstream.AppendLine("{0} = alloca i32".format(node["register"]))
+        rr = getRegister(node["rvalue"])
+        instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], rr))
+    instructionstream.AppendLine("{0} = alloca i32".format(r))
     if node.Contains("assignment"):
-        instructionstream.AppendLine("store i32 {1}, i32* {0}".format(node["register"], r[0]))
+        instructionstream.AppendLine("store i32 {1}, i32* {0}".format(r, a[0]))
 
 def postorder_function_argument(node):
-    r = getAdditionalRegisters(node)
-    instructionstream.AppendLine("{0} = load i32, i32* {1}".format(r[0], node["rvalue"]["register"]))
-    instructionstream.AppendLine("{0} = alloca i32".format(node["register"]))
-    instructionstream.AppendLine("store i32 {1}, i32* {0}".format(node["register"], r[0]))
+    r, a = getRegisters(node)
+    rr = getRegister(node["rvalue"])
+    instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], rr))
+    instructionstream.AppendLine("{0} = alloca i32".format(r))
+    instructionstream.AppendLine("store i32 {1}, i32* {0}".format(r, a[0]))
 
 def postorder_return_statement(node):
-    instructionstream.AppendLine("; return statement")
+    r = getRegister(node)
+    rr = getRegister(node["rvalue"])
 
-    instructionstream.AppendLine("{0} = load i32, i32* {1}".format(node["register"], node["rvalue"]["register"]))
+    instructionstream.AppendLine("; return statement")
+    instructionstream.AppendLine("{0} = load i32, i32* {1}".format(r, rr))
     type = typeMorpher(node["rvalue"]["type"])
-    instructionstream.AppendLine("ret {0} {1}".format(type, node["register"]))
+    instructionstream.AppendLine("ret {0} {1}".format(type, r))
