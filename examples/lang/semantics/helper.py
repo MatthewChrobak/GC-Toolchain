@@ -5,14 +5,12 @@ def currentNamespaceID():
     global current_namespace
     return current_namespace
 
-def enterNamespace(node, id):
+def enterNamespace(id):
     global current_namespace, namespace_stack
 
-    setPSTID(node)
     id = "::" + id
     current_namespace = current_namespace + id
     namespace_stack.append(id)
-    setSTID(node)
     return current_namespace
 
 def leaveNamespace():
@@ -24,29 +22,21 @@ def getParentNamespaceID(level, namespace):
     for i in range(level):
         index = namespace.rindex("::")
         namespace = namespace[0:index]
-    return namespace    
+    return namespace
 
-def getNodeValue(node, key):
-    return node[key]["value"]
+    
+def Error(message):
+    raise Exception(message)
 
-def getNodeValues(node, key):
-    node = node[key]
+def ErrorIf(cond, message):
+    if cond:
+        Error(message)
+
+def ErrorIfNot(cond, message):
+    ErrorIf(not cond, message)
+
+def GetValue(node):
+    ErrorIfNot(node.Contains("value"), "Cannot get 'value' from node. Node only contains {0}".format(node.Keys))
+    ErrorIfNot(node.Contains("row"), "Cannot get 'row' from node. Node only contains {0}".format(node.Keys))
+    ErrorIfNot(node.Contains("column"), "Cannot get 'column' from node. Node only contains {0}".format(node.Keys))
     return node["value"], (node["row"], node["column"])
-
-def Error(str):
-    raise Exception(str)
-
-def Warning(str):
-    print(str)
-
-def setPSTID(node):
-    node["pstid"] = currentNamespaceID()
-
-def setSTID(node):
-    node["stid"] = currentNamespaceID()
-
-def getPSTID(node):
-    return node["pstid"]
-
-def getSTID(node):
-    return node["stid"]

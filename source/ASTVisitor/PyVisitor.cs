@@ -62,7 +62,6 @@ namespace ASTVisitor
                     this.TryInvoke(post_visit_id, node);
                     continue;
                 }
-
                 
                 foreach (var element in node.ReverseElements) {
                     var value = element.Value;
@@ -80,7 +79,7 @@ namespace ASTVisitor
                     } else if (value is bool) {
                         // ignore
                     } else {
-                        Log.WriteLineError($"Unknown element type in ASTNode: {element.Key}:{value?.GetType()}");
+                        Log.WriteLineWarning($"Unknown element type in ASTNode: {element.Key}:{value?.GetType()}");
                     }
                 }
             }

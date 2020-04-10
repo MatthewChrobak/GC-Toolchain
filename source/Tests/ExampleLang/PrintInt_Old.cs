@@ -1,7 +1,7 @@
 ﻿using Core;
 using NUnit.Framework;
 
-namespace Tests.Lang
+namespace Tests.ExampleLang
 {
     public class PrintInt
     {
@@ -16,8 +16,8 @@ namespace Tests.Lang
         }
 
         [Test]
-        public void print_int_succeed() {
-            string program = @"int main() {
+        public void print_int_literal_succeed() {
+            string program = @"void main() {
     print_int(1);
 }";
             var results = new ExampleLangTest(program);
@@ -28,21 +28,31 @@ namespace Tests.Lang
             results.SymbolTableExists("::global::main");
             results.SymbolTableExists("::global")
                 .WithOneRow((Column.Name, "main"), (Column.EntityType, EntityType.Function))
-                .WithColumn(Column.Type, "int");
+                .WithColumn(Column.ReturnType, "void");
 
             Assert.AreEqual("1", results.ProgramOutput);
         }
 
         [Test]
+        public void print_int_variable_succeed() {
+            string program = @"void main() {
+    int x = 2;
+    print_int(x);
+}";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("2", results.ProgramOutput);
+        }
+
+        [Test]
         public void print_int_override_fails() {
-            string program = @"int print_int(int val) { }";
+            string program = @"void print_int(int val) { }";
             var e = Assert.Catch<AssertionFailedException>(new TestDelegate(() => new ExampleLangTest(program)));
-            AssertExceptionCause(e, "The function print_int at 1:5 is already defined.");
+            AssertExceptionCause(e, "The function print_int at (1, 6) already exists.");
         }
 
         [Test]
         public void print_int_from_variable_succeed() {
-            string program = @"int main() { int x = 10; print_int(x); }";
+            string program = @"void main() { int x = 10; print_int(x); }";
             var results = new ExampleLangTest(program);
             Assert.AreEqual("10", results.ProgramOutput);
         }

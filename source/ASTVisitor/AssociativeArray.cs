@@ -8,6 +8,7 @@ namespace ASTVisitor
         private Dictionary<string, dynamic> _elements;
         public IEnumerable<KeyValuePair<string, dynamic>> Elements => this.GetElements();
         public IEnumerable<KeyValuePair<string, dynamic>> ReverseElements => this.GetElementsReverse();
+        public string Keys => string.Join(", ", this._elements.Keys);
 
         private IEnumerable<KeyValuePair<string, dynamic>> GetElements() {
             for (int i = 0; i < this._insertOrder.Count; i++) {

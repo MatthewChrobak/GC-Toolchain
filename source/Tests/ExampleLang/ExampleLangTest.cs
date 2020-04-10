@@ -13,12 +13,13 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Tests.Lang
+namespace Tests.ExampleLang
 {
     public class Column
     {
         public const string Name = "name";
         public const string Type = "type";
+        public const string ReturnType = "return_type";
         public const string IsParameter = "is_parameter";
         public const string ParameterIndex = "parameter_index";
         public const string EntityType = "entity_type";
@@ -94,10 +95,16 @@ namespace Tests.Lang
                 process.WaitForExit();
                 Log.WriteLineVerbose(process.StandardOutput.ReadToEnd());
 
+                string exePath = Path.Combine(localDirectory, "program.exe");
+
+                if (!File.Exists(exePath)) {
+                    throw new BuildFailureException("Program.exe did not build. Likely a problem in the IR when building using GCC");
+                }
+
                 this.OutputPath = Path.Combine(localDirectory, "debug_output.out");
                 process = new System.Diagnostics.Process();
                 process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
-                    FileName = Path.Combine(localDirectory, "program.exe"),
+                    FileName = exePath,
                     WorkingDirectory = localDirectory
                 };
                 process.Start();

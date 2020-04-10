@@ -6,49 +6,16 @@ whitespace
 comment
 
 #production S
-$namespaces:^
+$global_elements:^
 
-#production namespaces epsilon:true
-$namespace:namespace $namespaces:^
+#production global_elements epsilon:true
+$global_element:^ $global_elements:^
 
-#production namespace
-namespace id:namespace_name { $namespace_elements:^ }
-$class:class
-$free_function:free_function
-
-#production namespace_elements epsilon:true
-$class:class $namespace_elements:^
-
-#production access_modifier epsilon:true
-access_modifier:access_modifier
-
-#production static epsilon:true
-static:static
-
-#production class
-$access_modifier:^ $static:^ class id:class_name $inheritance:parent_class { $class_elements:^ }
-
-#production inheritance epsilon:true
-colon $lvalue:lvalue_type
-
-#production class_elements epsilon:true
-$class_element:^ $class_elements:^
-
-#production class_element
-$field:field
+#production global_element
 $function:function
 
-#production field
-$access_modifier:^ $static:^ $type:field_type id:field_name ;
-
-#production free_function
-$type:return_type id:function_name ( $function_parameters:^ ) $statement_scope:^
-
 #production function
-$access_modifier:^ $static:^ $type:return_type id:function_name ( $function_parameters:^ ) $statement_scope:^
-
-#production statement_scope
-{:scope_start $statements:^ }
+$type:return_type id:identifier ( $function_parameters:^ ) $scope:scope
 
 #production function_parameters epsilon:true
 $function_parameter:function_parameter $function_parameters_tail:^
@@ -57,88 +24,42 @@ $function_parameter:function_parameter $function_parameters_tail:^
 , $function_parameter:function_parameter $function_parameters_tail:^
 
 #production function_parameter
-$type:parameter_type id:parameter_name
+$type:type id:identifier
 
-#production statements epsilon:true
-$statement:statement $statements:^
+#production scope
+{ $scope_statements:^ }
 
-#production assignment_tail epsilon:true
-$assignment_operator:^ $expression:expression
+#production scope_statements epsilon:true
+$scope_statement:statement $scope_statements:^
 
-#production statement
-$lvalue_statement:lvalue_statement ;
+#production scope_statement
 $declaration_statement:declaration_statement ;
-$statement_scope:statement_scope
-return:return $rvalue:rvalue ;
+$lvalue_statement:lvalue_statement ;
+$return_statement:return_statement ;
+
+#production return_statement
+return $rvalue:rvalue
 
 #production declaration_statement
-$type:variable_type id:variable_name $assignment_tail:^
-
-#production pointer_or_reference_type_modifier epsilon:true
-*:pointer
-&:reference
+$type:type id:identifier $equals_tail:^
 
 #production lvalue_statement
-$lvalue:lvalue $assignment_tail:^
+$lvalue:lvalue $equals_tail:^
 
-#production expression
-$expression:lhs $p10_operator:^ $p9_expression:rhs
-$p9_expression:^
-
-#production p9_expression
-$p9_expression:lhs $p9_operator:^ $p8_expression:rhs
-$p8_expression:^
-
-#production p8_expression
-$p8_expression:lhs $p8_operator:^ $p7_expression:rhs
-$p7_expression:^
-
-#production p7_expression
-$p7_expression:lhs $p7_operator:^ $p6_expression:rhs
-$p6_expression:^
-
-#production p6_expression
-$p6_expression:lhs $p6_operator:^ $p5_expression:rhs
-$p5_expression:^
-
-#production p5_expression
-$p5_expression:lhs $p5_operator:^ $p4_expression:rhs
-$p4_expression:^
-
-#production p4_expression
-$p4_expression:lhs $p4_operator:^ $p3_expression:rhs
-$p3_expression:^
-
-#production p3_expression
-$p3_expression:lhs $p3_operator:^ $rvalue:rhs
-$rvalue:rvalue
-
-#production rvalue
-( $expression:expression )
-$lvalue:lvalue
-integer:integer
-char:char
-$pointer_operator:^ $rvalue:rvalue
-$sign_operator:^ $rvalue:rvalue
+#production equals_tail epsilon:true
+=:assignment $rvalue:rvalue
 
 #production lvalue
-$lvalue_component:lvalue_component $lvalue_component_list:^
+$lvalue_component:lvalue_component $lvalue_components:^
 
-#production lvalue_component_list epsilon:true
-$lvalue_tail_component:lvalue_component $lvalue_component_list:^
+#production lvalue_components epsilon:true
+. $lvalue_component:lvalue_component $lvalue_components:^
 
 #production lvalue_component
-id:identifier $indice_list:^
-id:function_identifier ( $function_arguments:^ )
+id:identifier $function_call:function_call
 
-#production lvalue_tail_component
-$access_operator:^ $lvalue_component:^
-
-#production indice_list epsilon:true
-$indice:indice $indice_list:^
-
-#production indice
-[ $expression:expression ]
+#production function_call epsilon:true
+( $function_arguments:^ )
 
 #production function_arguments epsilon:true
 $function_argument:function_argument $function_arguments_tail:^
@@ -147,59 +68,15 @@ $function_argument:function_argument $function_arguments_tail:^
 , $function_argument:function_argument $function_arguments_tail:^
 
 #production function_argument
-$expression:expression
+$rvalue:rvalue
 
-#production p10_operator
->=:operator
-<=:operator
-<:operator
->:goperator
-!=:operator
-==:operator
+#production rvalue
+$lvalue:lvalue
+integer:integer
 
-#production p9_operator
-+:operator
--:operator
-
-#production p8_operator
-*:operator
-/:operator
-%:operator
-
-#production p7_operator
-<<:operator
->>:operator
-
-#production p6_operator
-&&:operator
-
-#production p5_operator
-||:operator
-
-#production p4_operator
-&:operator
-
-#production p3_operator
-|:operator
-
-#production sign_operator
-+:positive
--:negative
-
-#production pointer_operator
-&:address_of
-*:value_of
-
-#production assignment_operator
-=:operator
-+=:operator
--=:operator
-*=:operator
-/=:operator
-
-#production access_operator
-.:dot
-scope_operator:scope
+#production expression
+$expression:expression $operator:operator $rvalue:rvalue
+$rvalue:rvalue
 
 #production type
-$lvalue:lvalue_type $pointer_or_reference_type_modifier:^
+id:identifier
