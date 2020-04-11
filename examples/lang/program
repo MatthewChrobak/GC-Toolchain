@@ -1,9 +1,5 @@
 void main() {
-    int x = 2;
-    int y = x;
-    x = 1;
-
+    int x = 10;
     print_int(x);
-    print_int(y);
 }
 

@@ -23,7 +23,6 @@ def getParentNamespaceID(level, namespace):
         index = namespace.rindex("::")
         namespace = namespace[0:index]
     return namespace
-
     
 def Error(message):
     raise Exception(message)
@@ -40,3 +39,12 @@ def GetValue(node):
     ErrorIfNot(node.Contains("row"), "Cannot get 'row' from node. Node only contains {0}".format(node.Keys))
     ErrorIfNot(node.Contains("column"), "Cannot get 'column' from node. Node only contains {0}".format(node.Keys))
     return node["value"], (node["row"], node["column"])
+
+
+valid_types = ["int"]
+def isValidType(type):
+    global valid_types
+    return type in valid_types
+
+def isValidReturnType(type):
+    return isValidType(type) or type == "void"

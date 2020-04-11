@@ -131,11 +131,12 @@ def postorder_lvalue(node):
 
 def postorder_declaration_statement(node):
     instructionstream.AppendLine("; declaration statement")
-    r, a = getRegisters(node)
 
     if node.Contains("assignment"):
+        a = getAdditionalRegisters(node)
         rr = getRegister(node["rvalue"])
         instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], rr))
+    r = getRegister(node)
     instructionstream.AppendLine("{0} = alloca i32".format(r))
     if node.Contains("assignment"):
         instructionstream.AppendLine("store i32 {1}, i32* {0}".format(r, a[0]))

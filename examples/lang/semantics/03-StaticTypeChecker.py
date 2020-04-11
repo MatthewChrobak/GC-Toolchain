@@ -5,10 +5,20 @@ def getRow(node):
     return st.RowAt(node["rowid"])
 
 def postorder_function(node):
-    getRow(node)["return_type"] = node["return_type"]["identifier"]["value"]
+    type, loc = GetValue(node["return_type"]["identifier"])
+
+    if not isValidReturnType(type):
+        Error("Unknown return type '{0}' at {1}".format(type, loc))
+
+    getRow(node)["return_type"] = type
 
 def postorder_declaration_statement(node):
-    getRow(node)["type"] = node["type"]["identifier"]["value"]
+    type, loc = GetValue(node["type"]["identifier"])
+
+    if not isValidType(type):
+        Error("Unknown variable type '{0}' at {1}".format(type, loc))
+
+    getRow(node)["type"]  = type
 
 def postorder_integer(node):
     node["type"] = "int"
