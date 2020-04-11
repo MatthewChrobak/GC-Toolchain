@@ -14,9 +14,9 @@ def GetValue(node):
     ErrorIfNot(node.Contains("column"), "Cannot get 'column' from node. Node only contains {0}".format(node.Keys))
     return node["value"], (node["row"], node["column"])
 
-def ConvertType(type):
-    if type == "void":
+def ConvertType(type, allowVoid=False):
+    if type == "void" and allowVoid:
         return "void"
     if type == "int":
         return "i32"
-    Error("Unknown type {0}".format(type))
+    Error("Unknown type {0} allowVoid:{1}".format(type, allowVoid))
