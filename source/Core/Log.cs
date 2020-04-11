@@ -22,7 +22,7 @@ namespace Core
         }
 
         public static void Dump(string path) {
-            File.AppendAllLines(path, AllLines);
+            File.AppendAllText(path, string.Join('\0', AllLines));
             AllLines = new List<string>();
             _stateHistory = new Dictionary<string, List<string>>();
             SetState("Unknown");

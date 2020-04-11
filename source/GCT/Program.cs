@@ -94,6 +94,15 @@ namespace GCT
                         cwd = flagValue;
                         logDumpPath = Path.Combine(cwd, "dmp.log");
                         break;
+                    case "semantics":
+                        semanticsFolder = flagValue;
+                        break;
+                    case "codegen":
+                        codeGeneratorFolder = flagValue;
+                        break;
+                    case "buildscript":
+                        postBuildScript = flagValue;
+                        break;
                     case "v":
                     case "verbose":
                         Debug.Assert(flagValue == string.Empty, "Verbose flag should not trailed by any value");

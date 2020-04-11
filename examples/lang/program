@@ -2,8 +2,8 @@ void main() {
     int x = 2;
     int y = x;
     x = 1;
-    y = 20;
 
     print_int(x);
     print_int(y);
 }
+
