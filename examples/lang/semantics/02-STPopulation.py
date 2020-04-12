@@ -64,3 +64,6 @@ def postorder_function_parameter(node):
     row["is_parameter"] = True
     row["parameter_index"] = parameterIndex
     parameterIndex += 1
+
+def postorder_return_statement(node):
+    CreateRow(node, "return_statement", "return " + node["rvalue"]["label"])

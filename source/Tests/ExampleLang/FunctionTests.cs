@@ -19,7 +19,7 @@ namespace Tests.ExampleLang
 
         [Test]
         public void FunctionDefinition_Multiple_Allowed() {
-            string program = @"void main() { } int main2() { }";
+            string program = @"void main() { } void main2() { }";
             var results = new ExampleLangTest(program);
 
             results.SymbolTableExists("::global::main");
@@ -42,7 +42,7 @@ namespace Tests.ExampleLang
 
         [Test]
         public void FunctionParameters_CorrectNumber_CorrectTypes_Allowed() {
-            string program = @"void Test(int x, int y) { } int main() { Test(1, 2); }";
+            string program = @"void Test(int x, int y) { } void main() { Test(1, 2); }";
             var results = new ExampleLangTest(program);
 
             results.SymbolTableExists("::global::Test").WithExactlyNRows(2, (Column.IsParameter, true));
@@ -70,7 +70,7 @@ namespace Tests.ExampleLang
 
         [Test]
         public void FunctionArguments_CorrectNumber_CorrectTypes_Allowed() {
-            string program = @"void Test(int x, int y) { } int main() { Test(1, 2); }";
+            string program = @"void Test(int x, int y) { } void main() { Test(1, 2); }";
             var results = new ExampleLangTest(program);
 
             results.SymbolTableExists("::global::Test").WithExactlyNRows(2, (Column.IsParameter, true));
@@ -109,6 +109,50 @@ namespace Tests.ExampleLang
         public void FunctionReturnType_InvalidType_NotAllowed() {
             string program = @"abc main() { }";
             AssertExceptionCause(program, "Unknown return type 'abc' at (1, 1).");
+        }
+
+        [Test]
+        public void FunctionCall() {
+            string program = @"void main() { Foo(); } void Foo() { print_int(1); }";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("1", results.ProgramOutput);
+        }
+
+        [Test]
+        public void FunctionArguments_Literal() {
+            string program = @"void main() { Foo(1, 2, 3); } void Foo(int a, int b, int c) { print_int(a); print_int(b); print_int(c); }";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("123", results.ProgramOutput);
+        }
+
+        [Test]
+        public void FunctionArguments_Variables() {
+            string program = @"void main() {
+    int a = 1;
+    int b = 2;
+    int c = 3;
+    Foo(a, b, c);
+}
+void Foo(int a, int b, int c) {
+    print_int(a);
+    print_int(b);
+    print_int(c);
+}";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("123", results.ProgramOutput);
+        }
+
+        [Test]
+        public void Function_ReturnValue() {
+            string program = @"void main() {
+    int a = 100;
+    print_int(Foo(a));
+}
+int Foo(int a) {
+    return a;
+}";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("100", results.ProgramOutput);
         }
     }
 }

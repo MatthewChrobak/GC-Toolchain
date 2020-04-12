@@ -61,3 +61,6 @@ def preorder_function_parameter(node):
 
 def preorder_function_argument(node):
     pstid(node)
+
+def preorder_return_statement(node):
+    pstid(node)

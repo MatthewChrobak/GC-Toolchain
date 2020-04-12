@@ -1,5 +1,7 @@
-void main() {
-    int x = 10;
-    print_int(x);
+int Test(int param1, int param2) {
+    return param2;
 }
 
+void main() {
+    print_int(Test(5, 10));
+}

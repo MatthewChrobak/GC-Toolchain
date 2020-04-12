@@ -20,7 +20,7 @@ def registerRegister(register):
         return registerMap[register]
 
     # It doesn't. Make an entry
-    n = len(registerMap) + 1
+    n = len(registerMap)
     registerMap[register] = "%{0}".format(str(n))
     return registerMap[register]
 
@@ -55,10 +55,39 @@ def preorder_global(node):
     instructionstream.AppendLine("declare void @print_int(i32)")
 
 def preorder_function(node):
-    row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+    row = GetRow(node)
     returnType = ConvertType(row["return_type"], True)
-    instructionstream.AppendLine("define {1} @{0}() {{".format(node["function_name"], returnType))
+
+    resetRegisterMap()
+
+    parameters = node.AsArray("function_parameter") if node.Contains("function_parameter") else []
+    p_types = [] # Types
+    p_ar = [] # Raw value
+    p_r = [] # Pointer value
+    for parameter in parameters:
+        row = GetRow(parameter)
+        ar = parameter["additional_registers"][0]
+        ar = registerRegister(ar)
+        row["additional_registers"] = ar
+        p_ar.append(ar)
+
+    # Not sure why we need this
+    registerRegister("unused")
+    
+    for parameter in parameters:
+        row = GetRow(parameter)
+        r = registerRegister(row["register"])
+        row["register"] = r
+        type = ConvertType(row["type"])
+        p_types.append(type)
+        p_r.append(r)
+
+    instructionstream.AppendLine("define {1} @{0}({2}) {{".format(node["function_name"], returnType, ",".join(p_types)))
     instructionstream.IncrementTab(1)
+
+    for (t, r, a) in zip(p_types, p_r, p_ar):
+        instructionstream.AppendLine("{0} = alloca {1}".format(r, t))
+        instructionstream.AppendLine("store {0} {1}, {0}* {2}".format(t, a, r))
 
 def postorder_function(node):
     row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
@@ -83,6 +112,7 @@ def postorder_rvalue(node):
         if node.Contains(child):
             row = GetRow(node)
             node["register"] = node[child]["register"]
+            log.WriteLineVerbose(node["register"])
             row["register"] = node["register"]
             break
 
@@ -110,9 +140,11 @@ def postorder_lvalue(node):
 
         if component.Contains("function_call"):
             instructionstream.AppendLine("; function call")
-            instructionstream.AppendLine("; function arguments")
+            row = GetRow(component)
+            returnType = ConvertType(row["dynamic_type"], True)
             ca = getAdditionalRegisters(component)
             fc = component["function_call"]
+
             arguments = fc.AsArray("function_argument") if fc.Contains("function_argument") else []
             argumentRegisters = []
             for i in range(len(arguments)):
@@ -121,8 +153,22 @@ def postorder_lvalue(node):
                 ar = getRegister(argument)
                 instructionstream.AppendLine("{0} = load {2}, {2}* {1}".format(ca[i], ar, argument_type))
                 argumentRegisters.append("{1} {0}".format(ca[i], argument_type))
-                # TODO: Return type for function.
-            instructionstream.AppendLine("call void @{0}({1})".format(identifier, ", ".join(argumentRegisters)))
+
+            prefix = ""
+            if returnType != "void":
+                realRegister = getRegister(component)
+                returnRegister = ca[len(ca) - 1]
+                prefix = "{0} = ".format(returnRegister)
+
+                row = GetRow(node)
+                node["register"] = realRegister
+                row["register"] = realRegister
+
+            instructionstream.AppendLine("{3}call {2} @{0}({1})".format(identifier, ", ".join(argumentRegisters), returnType, prefix))
+
+            if returnType != "void":
+                instructionstream.AppendLine("{0} = alloca {1}".format(realRegister, returnType))
+                instructionstream.AppendLine("store {0} {1}, {0}* {2}".format(returnType, returnRegister, realRegister))
         else:
             instructionstream.AppendLine("; non-function call")
             r = symboltable.GetOrCreate(component["pstid"]).GetRowWhere("name", identifier)["register"]
@@ -160,3 +206,8 @@ def postorder_return_statement(node):
     instructionstream.AppendLine("{0} = load {2}, {2}* {1}".format(r, rr, type))
     type = ConvertType(node["rvalue"]["type"])
     instructionstream.AppendLine("ret {0} {1}".format(type, r))
+
+def postorder_function_parameter(node):
+    row = GetRow(node)
+    r = getRegister(node)
+    row["register"] = r
