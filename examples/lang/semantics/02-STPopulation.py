@@ -37,6 +37,22 @@ def postorder_lvalue(node):
         labels.append(component["label"])
     CreateRow(node, "lvalue", ".".join(labels))
 
+def postorder_expression(node):
+    if node.Contains("operator"):
+        expressions = node.AsArray("expression")
+        lhs = expressions[0]
+        rhs = expressions[1]
+        op, loc = GetValue(node["operator"])
+        label = "{0} {1} {2}".format(lhs["label"], op, rhs["label"])
+    else:
+        possibleChildren = ["expression", "lvalue", "integer", "rvalue"]
+        for child in possibleChildren:
+            if node.Contains(child):
+                label = node[child]["label"]
+
+    row = CreateRow(node, "expression", label)
+
+
 def postorder_lvalue_component(node):
     CreateRow(node, "lvalue_component", node["identifier"]["value"])
 

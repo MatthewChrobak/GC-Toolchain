@@ -1,5 +1,8 @@
 from helper import *
 
+def GetRow(node):
+    return symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+
 def preorder_lvalue(node):
     stid = node["pstid"]
     lvalueType = None
@@ -13,7 +16,7 @@ def preorder_lvalue(node):
         row = symboltable.GetOrCreate(parent).GetRowWhere("name", identifier)
         type = row["return_type"] if component.Contains("function_call") else row["type"]
 
-        row = symboltable.GetOrCreate(component["pstid"]).RowAt(component["rowid"])
+        row = GetRow(component)
         row["dynamic_pstid"] = parent
         row["dynamic_type"] = type
 
@@ -28,23 +31,25 @@ def preorder_lvalue(node):
     row["dynamic_pstid"] = parent
 
 def postorder_lvalue_component(node):
-    row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+    row = GetRow(node)
     node["dynamic_pstid"] = row["dynamic_pstid"]
     node["dynamic_type"] = row["dynamic_type"]
 
 def postorder_rvalue(node):
-    possibleChildren = ["lvalue", "integer"]
+    possibleChildren = ["expression"]
     for child in possibleChildren:
         if node.Contains(child):
             node["type"] = node[child]["type"]
             break
 
 def postorder_function_argument(node):
+    row = GetRow(node)
     node["type"] = node["rvalue"]["type"]
+    row["type"] = node["type"]
 
 def postorder_function_parameter(node):
     identifier, loc = GetValue(node["type"]["identifier"])
-    row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+    row = GetRow(node)
     row["type"] = identifier
 
 def LFC(entityName, startingNamespace):
@@ -60,3 +65,28 @@ def LFC(entityName, startingNamespace):
         level += 1
 
     return None
+
+def postorder_expression(node):
+    if node.Contains("operator"):
+        expressions = node.AsArray("expression")
+        lhs = expressions[0]
+        rhs = expressions[1]
+        op, loc = GetValue(node["operator"])
+
+        rhs_type = rhs["type"]
+        lhs_type = lhs["type"]
+
+        ErrorIf(lhs_type != rhs_type, "LHS and RHS at {0} have incompatible types for operator '{2}': {1}{2}{3}".format(loc, lhs_type, op, rhs_type))
+
+        type = lhs_type
+    else:
+        possibleChildren = ["expression", "lvalue", "integer", "rvalue"]
+        for child in possibleChildren:
+            if node.Contains(child):
+                type = node[child]["type"]
+
+    print(type)
+    
+    row = GetRow(node)
+    node["type"] = type
+    row["type"] = type

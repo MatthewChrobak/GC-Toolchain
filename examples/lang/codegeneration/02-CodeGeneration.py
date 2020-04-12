@@ -3,7 +3,9 @@ from helper import *
 registerMap = {}
 
 def GetRow(node):
-    return symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+    st = symboltable.GetOrCreate(node["pstid"])
+    row = st.RowAt(node["rowid"])
+    return row
 
 def resetRegisterMap():
     global registerMap
@@ -38,7 +40,7 @@ def getAdditionalRegisters(node, row=None):
 
 def getRegister(node, row=None):
     if row is None:
-        row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+        row = GetRow(node)
     r = node["register"]
     r = registerRegister(r)
     row["register"] = r
@@ -46,7 +48,7 @@ def getRegister(node, row=None):
     return r
 
 def getRegisters(node):
-    row = symboltable.GetOrCreate(node["pstid"]).RowAt(node["rowid"])
+    row = GetRow(node)
     a = getAdditionalRegisters(node)
     r = getRegister(node)
     return r, a
@@ -107,7 +109,7 @@ def postorder_integer(node):
 
 def postorder_rvalue(node):
     instructionstream.AppendLine("; rvalue")
-    possibleChildren = ["integer", "lvalue"]
+    possibleChildren = ["expression"]
     for child in possibleChildren:
         if node.Contains(child):
             row = GetRow(node)
@@ -211,3 +213,35 @@ def postorder_function_parameter(node):
     row = GetRow(node)
     r = getRegister(node)
     row["register"] = r
+
+def postorder_expression(node):
+    instructionstream.AppendLine("; expression")
+    if node.Contains("operator"):
+        expressions = node.AsArray("expression")
+        op, loc = GetValue(node["operator"])
+        lhs = expressions[0]
+        rhs = expressions[1]
+        prefix_map = {"i32":""}
+        op_map = {"+":"add", "-":"sub"}
+        r, a = getRegisters(node)
+        t = ConvertType(node["type"])
+
+        prefix = prefix_map[t]
+        op = op_map[op]
+
+        instructionstream.AppendLine("{0} = load {1}, {1}* {2}".format(a[0], t, lhs["register"]))
+        instructionstream.AppendLine("{0} = load {1}, {1}* {2}".format(a[1], t, rhs["register"]))
+        
+        s = a[2]
+
+        instructionstream.AppendLine("{0} = {1}{2} {3} {4}, {5}".format(s, prefix, op, t, a[0], a[1]))
+        instructionstream.AppendLine("{0} = alloca {1}".format(r, t))
+        instructionstream.AppendLine("store {0} {1}, {0}* {2}".format(t, s, r))
+    else:
+        possibleChildren = ["expression", "lvalue", "integer", "rvalue"]
+        for child in possibleChildren:
+            if node.Contains(child):
+                r = getRegister(node[child])
+                row = GetRow(node)
+                row["register"] = r
+                node["register"] = r

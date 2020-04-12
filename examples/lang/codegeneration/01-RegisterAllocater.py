@@ -60,6 +60,11 @@ def postorder_lvalue(node):
 def postorder_rvalue(node):
     allocate(node)
 
+def postorder_expression(node):
+    if node.Contains("operator"):
+        getAdditionalRegisters(node, 3)
+    allocate(node)
+
 def postorder_declaration_statement(node):
     getAdditionalRegisters(node, 1)
     allocate(node)

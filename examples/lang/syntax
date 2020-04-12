@@ -71,12 +71,20 @@ $function_argument:function_argument $function_arguments_tail:^
 $rvalue:rvalue
 
 #production rvalue
-$lvalue:lvalue
-integer:integer
+$expression:expression
 
 #production expression
-$expression:expression $operator:operator $rvalue:rvalue
-$rvalue:rvalue
+$expression:expression $operator:^ $rvalue_noexpression:expression
+$rvalue_noexpression:expression
+
+#production rvalue_noexpression
+$lvalue:lvalue
+integer:integer
+( $rvalue:rvalue )
 
 #production type
 id:identifier
+
+#production operator
++:operator
+-:operator
