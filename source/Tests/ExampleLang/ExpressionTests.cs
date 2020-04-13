@@ -192,7 +192,7 @@ namespace Tests.ExampleLang
         }
 
         [Test]
-        public void Sign_Expression() {
+        public void Sign_In_Expression() {
             string program = @"int Test(int param1, int param2) {
     return ((param2 + param1) - (param2)) / 5;
 }
@@ -203,6 +203,20 @@ void main() {
 ";
             var results = new ExampleLangTest(program);
             Assert.AreEqual("-1", results.ProgramOutput);
+        }
+
+        [Test]
+        public void Sign_Outside_Expression() {
+            string program = @"int Test(int param1, int param2) {
+    return -((param2 + param1) - (param2)) / 5;
+}
+
+void main() {
+    print_int(Test(-5, -10));
+}
+";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("1", results.ProgramOutput);
         }
     }
 }
