@@ -3,5 +3,5 @@ int Test(int param1, int param2) {
 }
 
 void main() {
-    print_int(Test(5, 10));
+    print_int(Test(-5, -10));
 }

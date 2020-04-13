@@ -71,7 +71,7 @@ $function_argument:function_argument $function_arguments_tail:^
 $rvalue:rvalue
 
 #production rvalue
-$p10_expression:expression
+$sign:^ $p10_expression:expression
 
 #production p10_expression
 $p10_expression:expression $p10_operator:^ $p9_expression:expression
@@ -93,6 +93,10 @@ $rvalue_noexpression:expression
 $lvalue:lvalue
 integer:integer
 ( $rvalue:rvalue )
+
+#production sign epsilon:true
++:sign
+-:sign
 
 #production type
 id:identifier

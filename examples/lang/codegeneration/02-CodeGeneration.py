@@ -104,6 +104,7 @@ def postorder_integer(node):
     instructionstream.AppendLine("; integer")
     value, loc = GetValue(node)
     type = ConvertType(node["type"])
+
     instructionstream.AppendLine("{0} = alloca {1}".format(r, type))
     instructionstream.AppendLine("store {2} {1}, {2}* {0}".format(r, value, type))
 
@@ -117,6 +118,18 @@ def postorder_rvalue(node):
             log.WriteLineVerbose(node["register"])
             row["register"] = node["register"]
             break
+
+    if node.Contains("sign"):
+        instructionstream.AppendLine("; Sign")
+        ErrorIf(node["type"] != "int", "Sign doesn't currently support non-ints")
+
+        a = getAdditionalRegisters(node)
+        sign, _ = GetValue(node["sign"])
+        multiplier = "1" if sign == "+" else "-1"
+
+        instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["register"]))
+        instructionstream.AppendLine("{0} = mul i32 {1}, {2}".format(a[1], multiplier, a[0]))
+        instructionstream.AppendLine("store i32 {0}, i32* {1}".format(a[1], node["register"]))
 
 def postorder_lvalue_statement(node):
     if not node.Contains("assignment"):

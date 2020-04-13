@@ -58,6 +58,8 @@ def postorder_lvalue(node):
     allocate(node)
 
 def postorder_rvalue(node):
+    if node.Contains("sign"):
+        getAdditionalRegisters(node, 2)
     allocate(node)
 
 def postorder_expression(node):

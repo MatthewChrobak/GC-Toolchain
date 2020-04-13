@@ -171,5 +171,38 @@ namespace Tests.ExampleLang
             var results = new ExampleLangTest(program);
             Assert.AreEqual("2", results.ProgramOutput);
         }
+
+        [Test]
+        public void Sign_Literal() {
+            string program = @"void main() {
+    print_int(-5);
+}";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("-5", results.ProgramOutput);
+        }
+
+        [Test]
+        public void Sign_Variable() {
+            string program = @"void main() {
+    int x = 5;
+    print_int(-x);
+}";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("-5", results.ProgramOutput);
+        }
+
+        [Test]
+        public void Sign_Expression() {
+            string program = @"int Test(int param1, int param2) {
+    return ((param2 + param1) - (param2)) / 5;
+}
+
+void main() {
+    print_int(Test(-5, -10));
+}
+";
+            var results = new ExampleLangTest(program);
+            Assert.AreEqual("-1", results.ProgramOutput);
+        }
     }
 }
