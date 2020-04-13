@@ -1,5 +1,5 @@
 int Test(int param1, int param2) {
-    return ((param2 + param1) - (param2));
+    return ((param2 + param1) - (param2)) / 5;
 }
 
 void main() {

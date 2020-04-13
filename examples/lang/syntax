@@ -71,11 +71,23 @@ $function_argument:function_argument $function_arguments_tail:^
 $rvalue:rvalue
 
 #production rvalue
-$expression:expression
+$p10_expression:expression
 
-#production expression
-$expression:expression $operator:^ $rvalue_noexpression:expression
+#production p10_expression
+$p10_expression:expression $p10_operator:^ $p9_expression:expression
+$p9_expression:expression
+
+#production p10_operator
++:operator
+-:operator
+
+#production p9_expression
+$p9_expression:expression $p9_operator:^ $rvalue_noexpression:expression
 $rvalue_noexpression:expression
+
+#production p9_operator
+*:operator
+/:operator
 
 #production rvalue_noexpression
 $lvalue:lvalue
@@ -84,7 +96,3 @@ integer:integer
 
 #production type
 id:identifier
-
-#production operator
-+:operator
--:operator

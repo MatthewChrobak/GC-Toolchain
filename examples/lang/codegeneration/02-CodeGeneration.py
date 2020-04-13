@@ -222,7 +222,7 @@ def postorder_expression(node):
         lhs = expressions[0]
         rhs = expressions[1]
         prefix_map = {"i32":""}
-        op_map = {"+":"add", "-":"sub"}
+        op_map = {"+":"add", "-":"sub", "*":"mul", "/":"sdiv"}
         r, a = getRegisters(node)
         t = ConvertType(node["type"])
 
