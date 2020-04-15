@@ -5,12 +5,6 @@
 a-z
 A-Z
 
-#token if priority:1
-if
-
-#token else priority:1
-else
-
 #token integer
 $digit*
 
@@ -24,6 +18,18 @@ $digit
 
 #token id
 $valid_head_id $valid_tail_id*
+
+#token if priority:1
+if
+
+#token for priority:1
+for
+
+#token else priority:1
+else
+
+#token while priority:1
+while
 
 #token !
 !

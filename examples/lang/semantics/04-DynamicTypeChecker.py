@@ -89,3 +89,12 @@ def postorder_expression(node):
     row = GetRow(node)
     node["type"] = type
     row["type"] = type
+
+def postorder_while_condition(node):
+    row = GetRow(node)
+    type = node["rvalue"]["type"]
+    node["type"] = type
+    row["type"] = type
+
+    _, loc = GetValue(node["while_start_marker"])
+    ErrorIf(type != "int", "While-loop condition at {0} needs to be of type int".format(loc))

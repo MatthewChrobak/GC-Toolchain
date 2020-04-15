@@ -11,6 +11,10 @@ def resetRegisterMap():
     global registerMap
     registerMap = {}
 
+def RegisterMapLength():
+    global registerMap
+    return len(registerMap)
+
 def registerRegister(register):
     global registerMap
 
@@ -72,10 +76,7 @@ def preorder_function(node):
         ar = registerRegister(ar)
         row["additional_registers"] = ar
         p_ar.append(ar)
-
-    # Not sure why we need this
-    registerRegister("unused")
-    
+   
     for parameter in parameters:
         row = GetRow(parameter)
         r = registerRegister(row["register"])
@@ -86,6 +87,8 @@ def preorder_function(node):
 
     instructionstream.AppendLine("define {1} @{0}({2}) {{".format(node["function_name"], returnType, ",".join(p_types)))
     instructionstream.IncrementTab(1)
+
+    instructionstream.AppendLineNoIndent("{0}: ; entrypoint".format(registerRegister("unused")[1:]))
 
     for (t, r, a) in zip(p_types, p_r, p_ar):
         instructionstream.AppendLine("{0} = alloca {1}".format(r, t))
@@ -251,7 +254,6 @@ def postorder_expression(node):
         instructionstream.AppendLine("{0} = alloca {1}".format(r, t))
         instructionstream.AppendLine("store {0} {1}, {0}* {2}".format(t, s, r))
     else:
-        instructionstream.AppendLine("; sign")
         child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue"])
         r = getRegister(child)
         row = GetRow(node)
@@ -259,6 +261,7 @@ def postorder_expression(node):
         node["register"] = r
 
         if node.Contains("sign"):
+            instructionstream.AppendLine("; sign")
             a = getAdditionalRegisters(node)
             sign, _ = GetValue(node["sign"])
             multiplier = "1" if sign == "+" else "-1"
@@ -266,3 +269,34 @@ def postorder_expression(node):
             instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["register"]))
             instructionstream.AppendLine("{0} = mul i32 {1}, {2}".format(a[1], multiplier, a[0]))
             instructionstream.AppendLine("store i32 {0}, i32* {1}".format(a[1], node["register"]))
+
+def postorder_while_loop(node):
+    while_condition = node["while_condition"]
+    compare_marker = while_condition["compare_marker"]
+    false_marker = registerRegister(node["false_marker"])[1:]
+    true_marker = while_condition["true_marker"]
+    r = while_condition["register"]
+    index = while_condition["branch_instruction_index"]
+
+    instructionstream.AppendLine("br label %{0}".format(compare_marker))
+    instructionstream.AppendLineNoIndent("{0}: ; While - false_marker".format(false_marker))
+    instructionstream.AppendLineAt(index, "br i1 {0}, label %{1}, label %{2}".format(r, true_marker, false_marker))
+
+def preorder_while_condition(node):
+    r = registerRegister(node["compare_marker"])[1:]
+    node["compare_marker"] = r
+
+    instructionstream.AppendLine("br label %{0}".format(r))
+    instructionstream.AppendLineNoIndent("{0}: ; While - compare_marker".format(r))
+
+def postorder_while_condition(node):
+    r, a = getRegisters(node)
+    true_marker = registerRegister(node["true_marker"])[1:]
+    node["true_marker"] = true_marker
+
+    instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["rvalue"]["register"]))
+    instructionstream.AppendLine("{0} = icmp ne i32 {1}, 0".format(r, a[0]))
+
+    node["branch_instruction_index"] = instructionstream.CreateEmptyInstruction()
+
+    instructionstream.AppendLineNoIndent("{0}: ; While - true_marker".format(true_marker))

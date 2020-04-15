@@ -67,3 +67,6 @@ def preorder_return_statement(node):
 
 def preorder_expression(node):
     pstid(node)
+
+def preorder_while_condition(node):
+    pstid(node)

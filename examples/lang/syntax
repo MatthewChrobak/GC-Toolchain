@@ -36,6 +36,17 @@ $scope_statement:statement $scope_statements:^
 $declaration_statement:declaration_statement ;
 $lvalue_statement:lvalue_statement ;
 $return_statement:return_statement ;
+$while_loop:while_loop
+
+#production while_loop
+while $while_condition:while_condition $while_body:while_body
+
+#production while_condition
+(:while_start_marker $rvalue:rvalue )
+
+#production while_body
+$scope_statement:statement
+$scope:scope
 
 #production return_statement
 return $rvalue:rvalue

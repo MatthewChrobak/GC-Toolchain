@@ -185,7 +185,7 @@ namespace Tests.ExampleLang
         public void Sign_Variable() {
             string program = @"void main() {
     int x = 5;
-    print_int(-x);
+    print_int(-(x));
 }";
             var results = Run(program);
             Assert.AreEqual("-5", results.ProgramOutput);

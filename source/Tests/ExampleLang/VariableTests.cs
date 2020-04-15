@@ -1,5 +1,4 @@
-﻿using Core;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 
 namespace Tests.ExampleLang
 {

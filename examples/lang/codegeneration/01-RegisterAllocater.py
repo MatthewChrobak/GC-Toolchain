@@ -13,6 +13,9 @@ def getAdditionalRegisters(node, count):
         registers.append(get())
     node["additional_registers"] = registers
 
+    if not node.Contains("pstid"):
+        return
+
     st = symboltable.GetOrCreate(node["pstid"])
     row = st.RowAt(node["rowid"])
     row["additional_registers"] = ", ".join(registers)
@@ -25,9 +28,13 @@ def get():
 
 def allocate(node):
     register = get()
+    node["register"] = register
+
+    if not node.Contains("pstid"):
+        return
+
     row = GetRow(node)
     row["register"] = register
-    node["register"] = register
 
 def postorder_function(node):
     reset()
@@ -86,4 +93,13 @@ def postorder_function_parameter(node):
     allocate(node)
 
 def postorder_return_statement(node):
-    node["register"] = get()
+    allocate(node)
+
+def postorder_while_loop(node):
+    node["false_marker"] = get()
+
+def postorder_while_condition(node):
+    getAdditionalRegisters(node, 1)
+    allocate(node)
+    node["compare_marker"] = get()
+    node["true_marker"] = get()
