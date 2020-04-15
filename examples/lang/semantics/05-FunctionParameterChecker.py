@@ -2,7 +2,6 @@ from helper import *
 
 def preorder_lvalue_component(node):
     if not node.Contains("function_call"):
-        log.WriteLineVerbose("We exited out")
         return
 
     fc = node["function_call"]

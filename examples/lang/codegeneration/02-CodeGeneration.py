@@ -77,6 +77,8 @@ def preorder_function(node):
         row["additional_registers"] = ar
         p_ar.append(ar)
    
+    openingBlock = registerRegister("unused")[1:]
+
     for parameter in parameters:
         row = GetRow(parameter)
         r = registerRegister(row["register"])
@@ -88,7 +90,7 @@ def preorder_function(node):
     instructionstream.AppendLine("define {1} @{0}({2}) {{".format(node["function_name"], returnType, ",".join(p_types)))
     instructionstream.IncrementTab(1)
 
-    instructionstream.AppendLineNoIndent("{0}: ; entrypoint".format(registerRegister("unused")[1:]))
+    instructionstream.AppendLineNoIndent("{0}: ; entrypoint".format(openingBlock))
 
     for (t, r, a) in zip(p_types, p_r, p_ar):
         instructionstream.AppendLine("{0} = alloca {1}".format(r, t))

@@ -5,6 +5,14 @@ namespace Tests.ExampleLang
     public class VariableTests : LangUnitTestSuite
     {
         [Test]
+        public void Variable_NotInFunction() {
+            string program = @"void main() {
+    print_int(x);
+}";
+            AssertExceptionCause(program, "LFC was unable to find an entity in ::global::main for x.");
+        }
+
+        [Test]
         public void LiteralAssignment() {
             string program = @"void main() {
     int x = 10;

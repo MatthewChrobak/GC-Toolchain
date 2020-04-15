@@ -20,6 +20,8 @@ def leaveNamespace():
 
 def getParentNamespaceID(level, namespace):
     for i in range(level):
+        if "::" not in namespace:
+            return None
         index = namespace.rindex("::")
         namespace = namespace[0:index]
     return namespace

@@ -55,6 +55,8 @@ def LFC(entityName, startingNamespace):
     while True:
         print(namespace + " " + entityName)
         namespace = getParentNamespaceID(level, namespace)
+        if namespace is None:
+            break
         ErrorIfNot(symboltable.Exists(namespace), "LFC: The namespace {0} does not exist".format(namespace))
         st = symboltable.GetOrCreate(namespace)
         if st.RowExistsWhere("name", entityName):
