@@ -101,6 +101,8 @@ def postorder_function(node):
     returnType = ConvertType(row["return_type"], True)
     if returnType == "void":
         instructionstream.AppendLine("ret void")
+    if returnType == "i32":
+        instructionstream.AppendLine("ret i32 0")
     instructionstream.IncrementTab(-1)
     instructionstream.AppendLine("}")
 
@@ -202,6 +204,7 @@ def postorder_function_argument(node):
 
 def postorder_return_statement(node):
     r = getRegister(node)
+    _ = getAdditionalRegisters(node)
     rr = getRegister(node["rvalue"])
 
     type = ConvertType(node["rvalue"]["type"])
@@ -298,7 +301,43 @@ def postorder_while_condition(node):
 
     instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["rvalue"]["register"]))
     instructionstream.AppendLine("{0} = icmp ne i32 {1}, 0".format(r, a[0]))
+    node["branch_instruction_index"] = instructionstream.CreateEmptyInstruction()
+    instructionstream.AppendLineNoIndent("{0}: ; While - true_marker".format(true_marker))
+
+def preorder_if_statement(node):
+    instructionstream.AppendLine("; if-statement")
+
+def postorder_if_condition(node):
+    r, a = getRegisters(node)
+    true_marker = registerRegister(node["true_marker"])[1:]
+    node["true_marker"] = true_marker
+
+    instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["rvalue"]["register"]))
+    instructionstream.AppendLine("{0} = icmp ne i32 {1}, 0".format(r, a[0]))
+    node["branch_instruction_index"] = instructionstream.CreateEmptyInstruction()
+    instructionstream.AppendLineNoIndent("{0}: ; If - true_marker".format(true_marker))
+
+def postorder_if_statement(node):
+    true_marker = node["if_condition"]["true_marker"]
+    end_marker = registerRegister(node["end_marker"])[1:]
+    else_marker = node["else"]["else_marker"] if node.Contains("else") else end_marker
+    node["end_marker"] = end_marker
+
+    true_or_false_index = node["if_condition"]["branch_instruction_index"]
+    r = node["if_condition"]["register"]
+    
+    instructionstream.AppendLine("br label %{0}".format(end_marker))
+    instructionstream.AppendLineNoIndent("{0}: ; If - end_marker".format(end_marker))
+
+    instructionstream.AppendLineAt(true_or_false_index, "br i1 {0}, label %{1}, label %{2}".format(r, true_marker, else_marker))
+
+    if node.Contains("else"):
+        true_to_end_index = node["else"]["branch_instruction_index"]
+        instructionstream.AppendLineAt(true_to_end_index, "br label %{0}".format(end_marker))
+
+def preorder_else(node):
+    else_marker = registerRegister(node["else_marker"])[1:]
+    node["else_marker"] = else_marker
 
     node["branch_instruction_index"] = instructionstream.CreateEmptyInstruction()
-
-    instructionstream.AppendLineNoIndent("{0}: ; While - true_marker".format(true_marker))
+    instructionstream.AppendLineNoIndent("{0}: ; If - else_marker".format(else_marker))

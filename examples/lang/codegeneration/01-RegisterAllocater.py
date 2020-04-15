@@ -93,6 +93,7 @@ def postorder_function_parameter(node):
     allocate(node)
 
 def postorder_return_statement(node):
+    getAdditionalRegisters(node, 1)
     allocate(node)
 
 def postorder_while_loop(node):
@@ -103,3 +104,16 @@ def postorder_while_condition(node):
     allocate(node)
     node["compare_marker"] = get()
     node["true_marker"] = get()
+
+# def preorder_if_statement(node):
+
+def postorder_if_statement(node):
+    node["end_marker"] = get()
+    
+def postorder_if_condition(node):
+    getAdditionalRegisters(node, 1)
+    allocate(node)
+    node["true_marker"] = get()
+
+def preorder_else(node):
+    node["else_marker"] = get()

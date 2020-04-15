@@ -1,3 +1,11 @@
+int Fib(int a) {
+    if (a <= 1) {
+        return a;
+    } else {
+        return Fib(a - 1) +  Fib(a - 2);
+    }
+}
+
 void main() {
-    
+    print_int(Fib(12));
 }

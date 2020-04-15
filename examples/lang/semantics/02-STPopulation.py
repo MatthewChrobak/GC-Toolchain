@@ -91,3 +91,6 @@ def postorder_return_statement(node):
 
 def postorder_while_condition(node):
     CreateRow(node, "while_condition", node["rvalue"]["label"])
+
+def postorder_if_condition(node):
+    CreateRow(node, "if_condition", node["rvalue"]["label"])

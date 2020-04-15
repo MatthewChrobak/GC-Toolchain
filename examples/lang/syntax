@@ -37,15 +37,24 @@ $declaration_statement:declaration_statement ;
 $lvalue_statement:lvalue_statement ;
 $return_statement:return_statement ;
 $while_loop:while_loop
+$if_statement:if_statement
+
+#production if_statement
+if $if_condition:if_condition $scope_or_statement:if_body $else:else
+
+#production if_condition
+(:start_marker $rvalue:rvalue )
+
+#production else epsilon:true
+else $scope_or_statement:else_body
 
 #production while_loop
-while $while_condition:while_condition $while_body:while_body
+while $while_condition:while_condition $scope_or_statement:while_body
 
 #production while_condition
-(:while_start_marker $rvalue:rvalue )
+(:start_marker $rvalue:rvalue )
 
-#production while_body
-$scope_statement:statement
+#production scope_or_statement
 $scope:scope
 
 #production return_statement

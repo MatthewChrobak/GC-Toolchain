@@ -98,5 +98,14 @@ def postorder_while_condition(node):
     node["type"] = type
     row["type"] = type
 
-    _, loc = GetValue(node["while_start_marker"])
+    _, loc = GetValue(node["start_marker"])
     ErrorIf(type != "int", "While-loop condition at {0} needs to be of type int".format(loc))
+
+def postorder_if_condition(node):
+    row = GetRow(node)
+    type = node["rvalue"]["type"]
+    node["type"] = type
+    row["type"] = type
+
+    _, loc = GetValue(node["start_marker"])
+    ErrorIf(type != "int", "If-statement condition at {0} needs to be of type int".format(loc))
