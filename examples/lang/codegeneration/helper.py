@@ -20,3 +20,9 @@ def ConvertType(type, allowVoid=False):
     if type == "int":
         return "i32"
     Error("Unknown type {0} allowVoid:{1}".format(type, allowVoid))
+
+def GetPossibleChild(node, possibleChildren):
+    for possibleChild in possibleChildren:
+        if node.Contains(possibleChild):
+            return node[possibleChild]
+    Error("Unable to get child from possible children: {0}".format(", ".join(possibleChildren)))

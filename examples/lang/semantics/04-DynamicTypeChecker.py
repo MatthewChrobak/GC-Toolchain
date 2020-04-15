@@ -36,11 +36,8 @@ def postorder_lvalue_component(node):
     node["dynamic_type"] = row["dynamic_type"]
 
 def postorder_rvalue(node):
-    possibleChildren = ["expression"]
-    for child in possibleChildren:
-        if node.Contains(child):
-            node["type"] = node[child]["type"]
-            break
+    child = GetPossibleChild(node, ["expression"])
+    node["type"] = child["type"]
 
 def postorder_function_argument(node):
     row = GetRow(node)
@@ -71,7 +68,9 @@ def postorder_expression(node):
         expressions = node.AsArray("expression")
         lhs = expressions[0]
         rhs = expressions[1]
-        op, loc = GetValue(node["operator"])
+
+        operator = GetPossibleChild(node["operator"], ["arithmetic", "logical", "comparison"])
+        op, loc = GetValue(operator)
 
         rhs_type = rhs["type"]
         lhs_type = lhs["type"]
@@ -80,13 +79,13 @@ def postorder_expression(node):
 
         type = lhs_type
     else:
-        possibleChildren = ["expression", "lvalue", "integer", "rvalue"]
-        for child in possibleChildren:
-            if node.Contains(child):
-                type = node[child]["type"]
+        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue"])
+        type = child["type"]
 
-    print(type)
-    
+    if node.Contains("sign"):
+        _, loc = GetValue(node["sign"])
+        ErrorIf(type not in ["int"], "{0} at {1} cannot be signed".format(type, loc))
+
     row = GetRow(node)
     node["type"] = type
     row["type"] = type

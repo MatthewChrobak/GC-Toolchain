@@ -58,13 +58,19 @@ def postorder_lvalue(node):
     allocate(node)
 
 def postorder_rvalue(node):
-    if node.Contains("sign"):
-        getAdditionalRegisters(node, 2)
     allocate(node)
 
 def postorder_expression(node):
     if node.Contains("operator"):
-        getAdditionalRegisters(node, 3)
+        operator = node["operator"]
+        if operator.Contains("comparison"):
+            getAdditionalRegisters(node, 4)
+        else:
+            getAdditionalRegisters(node, 3)
+    else:
+        if node.Contains("sign"):
+            getAdditionalRegisters(node, 2)
+
     allocate(node)
 
 def postorder_declaration_statement(node):

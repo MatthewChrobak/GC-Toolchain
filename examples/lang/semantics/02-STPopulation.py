@@ -42,13 +42,20 @@ def postorder_expression(node):
         expressions = node.AsArray("expression")
         lhs = expressions[0]
         rhs = expressions[1]
-        op, loc = GetValue(node["operator"])
+
+        op = None
+        loc = None
+        operator = GetPossibleChild(node["operator"], ["arithmetic", "logical", "comparison"])
+        op, loc = GetValue(operator)
+
         label = "{0} {1} {2}".format(lhs["label"], op, rhs["label"])
     else:
-        possibleChildren = ["expression", "lvalue", "integer", "rvalue"]
-        for child in possibleChildren:
-            if node.Contains(child):
-                label = node[child]["label"]
+        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue"])
+        label = child["label"]
+
+    if node.Contains("sign"):
+        sign, loc = GetValue(node["sign"])
+        label = sign + label
 
     row = CreateRow(node, "expression", label)
 
@@ -61,10 +68,8 @@ def postorder_integer(node):
 
 def postorder_rvalue(node):
     label = ""
-    possibleChildren = ["lvalue", "integer"]
-    for child in possibleChildren:
-        if node.Contains(child):
-            label = node[child]["label"]
+    child = GetPossibleChild(node, ["expression"])
+    label = child["label"]
     CreateRow(node, "rvalue", label)
 
 def postorder_function_argument(node):

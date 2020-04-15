@@ -71,28 +71,54 @@ $function_argument:function_argument $function_arguments_tail:^
 $rvalue:rvalue
 
 #production rvalue
-$sign:^ $p10_expression:expression
+$p10_expression:expression
 
 #production p10_expression
-$p10_expression:expression $p10_operator:^ $p9_expression:expression
+$p10_expression:expression $p10_operator:operator $p9_expression:expression
 $p9_expression:expression
 
 #production p10_operator
-+:operator
--:operator
+&&:logical
 
 #production p9_expression
-$p9_expression:expression $p9_operator:^ $rvalue_noexpression:expression
-$rvalue_noexpression:expression
+$p9_expression:expression $p9_operator:operator $p8_expression:expression
+$p8_expression:expression
 
 #production p9_operator
-*:operator
-/:operator
+||:logical
+
+#production p8_expression
+$p8_expression:expression $p8_operator:operator $p7_expression:expression
+$p7_expression:expression
+
+#production p8_operator
+>=:comparison
+<=:comparison
+<:comparison
+>:comparison
+!=:comparison
+==:comparison
+
+#production p7_expression
+$p7_expression:expression $p7_operator:operator $p6_expression:expression
+$p6_expression:expression
+
+#production p7_operator
++:arithmetic
+-:arithmetic
+
+#production p6_expression
+$p6_expression:expression $p6_operator:operator $rvalue_noexpression:expression
+$rvalue_noexpression:expression
+
+#production p6_operator
+*:arithmetic
+/:arithmetic
 
 #production rvalue_noexpression
-$lvalue:lvalue
-integer:integer
-( $rvalue:rvalue )
+$sign:^ $lvalue:lvalue
+$sign:^ integer:integer
+$sign:^ ( $rvalue:rvalue )
 
 #production sign epsilon:true
 +:sign

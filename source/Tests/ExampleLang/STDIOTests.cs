@@ -7,7 +7,7 @@ namespace Tests.ExampleLang
         [Test]
         public void PrintInt_Exists() {
             string program = @"void main() { }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
 
             results.SymbolTableExists("::global::print_int")
                 .WithOneRow(("is_parameter", true))
@@ -18,14 +18,14 @@ namespace Tests.ExampleLang
         [Test]
         public void PrintInt_FromLiteral() {
             string program = @"void main() { print_int(1); }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("1", results.ProgramOutput);
         }
 
         [Test]
         public void PrintInt_FromVariable() {
             string program = @"void main() { int x = 1; print_int(x); }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("1", results.ProgramOutput);
         }
     }

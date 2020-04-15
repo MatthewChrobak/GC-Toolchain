@@ -8,7 +8,7 @@ namespace Tests.ExampleLang
             string program = @"void main() {
     print_int(5+10);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("15", results.ProgramOutput);
         }
 
@@ -19,7 +19,7 @@ namespace Tests.ExampleLang
     int y = 5;
     print_int(x + y);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("15", results.ProgramOutput);
         }
 
@@ -29,7 +29,7 @@ namespace Tests.ExampleLang
     int x = 10;
     print_int(x + 5);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("15", results.ProgramOutput);
         }
 
@@ -38,7 +38,7 @@ namespace Tests.ExampleLang
             string program = @"void main() {
     print_int(10 - 5);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("5", results.ProgramOutput);
         }
 
@@ -49,7 +49,7 @@ namespace Tests.ExampleLang
     int y = 5;
     print_int(x - y);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("5", results.ProgramOutput);
         }
 
@@ -59,7 +59,7 @@ namespace Tests.ExampleLang
     int x = 10;
     print_int(x - 5);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("5", results.ProgramOutput);
         }
 
@@ -68,7 +68,7 @@ namespace Tests.ExampleLang
             string program = @"void main() {
     print_int(5 * 10);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("50", results.ProgramOutput);
         }
 
@@ -79,7 +79,7 @@ namespace Tests.ExampleLang
     int y = 5;
     print_int(x * y);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("50", results.ProgramOutput);
         }
 
@@ -89,7 +89,7 @@ namespace Tests.ExampleLang
     int x = 10;
     print_int(x * 5);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("50", results.ProgramOutput);
         }
 
@@ -98,7 +98,7 @@ namespace Tests.ExampleLang
             string program = @"void main() {
     print_int(10 / 5);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("2", results.ProgramOutput);
         }
 
@@ -109,7 +109,7 @@ namespace Tests.ExampleLang
     int y = 5;
     print_int(x / y);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("2", results.ProgramOutput);
         }
 
@@ -119,7 +119,7 @@ namespace Tests.ExampleLang
     int x = 10;
     print_int(x / 5);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("2", results.ProgramOutput);
         }
 
@@ -128,7 +128,7 @@ namespace Tests.ExampleLang
             string program = @"void main() {
     print_int(4 / 2 - 3 * 5 + 7);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("-6", results.ProgramOutput);
         }
 
@@ -142,7 +142,7 @@ namespace Tests.ExampleLang
     int e = 7;
     print_int(a / b - c * d + e);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("-6", results.ProgramOutput);
         }
 
@@ -154,7 +154,7 @@ namespace Tests.ExampleLang
     int c = 3;
     print_int(a / b - c * 5 + 7);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("-6", results.ProgramOutput);
         }
 
@@ -168,7 +168,7 @@ namespace Tests.ExampleLang
     int e = 9;
     print_int((a - b) * (c + d) / e);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("2", results.ProgramOutput);
         }
 
@@ -177,7 +177,7 @@ namespace Tests.ExampleLang
             string program = @"void main() {
     print_int(-5);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("-5", results.ProgramOutput);
         }
 
@@ -187,7 +187,7 @@ namespace Tests.ExampleLang
     int x = 5;
     print_int(-x);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("-5", results.ProgramOutput);
         }
 
@@ -201,7 +201,7 @@ void main() {
     print_int(Test(-5, -10));
 }
 ";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("-1", results.ProgramOutput);
         }
 
@@ -215,8 +215,56 @@ void main() {
     print_int(Test(-5, -10));
 }
 ";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("1", results.ProgramOutput);
+        }
+
+        [Test]
+        public void Comparison_Int() {
+            string program = @"void cmp(int a, int b) {
+    print_int(a > b);
+    print_int(a >= b);
+    print_int(a < b);
+    print_int(a <= b);
+    print_int(a == b);
+    print_int(a != b);
+}
+
+void main() {
+    cmp(5, 5);
+    cmp(5, 0);
+    cmp(0, 5);
+}";
+            var results = Run(program);
+            Assert.AreEqual("010110110001001101", results.ProgramOutput);
+        }
+
+        [Test]
+        public void LogicalOperators() {
+            string program = @"void main() {
+    print_int(5 && 15);
+    print_int(1 || 7);
+}";
+            var results = Run(program);
+            Assert.AreEqual("57", results.ProgramOutput);
+        }
+
+        [Test]
+        public void OperatorPrecedence() {
+            string program = @"void main() {
+    print_int(5 + 3 * 10 == 1 + 170 / 5 && 1 + 5 <= 7);
+}";
+            var results = Run(program);
+            Assert.AreEqual("1", results.ProgramOutput);
+        }
+
+        [Test]
+        public void Sign_NestedInExpression() {
+            string program = @"void main() {
+    print_int(-5 + 5);
+}";
+            var results = Run(program);
+            Assert.AreEqual("0", results.ProgramOutput);
         }
     }
 }

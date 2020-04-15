@@ -5,6 +5,12 @@
 a-z
 A-Z
 
+#token if priority:1
+if
+
+#token else priority:1
+else
+
 #token integer
 $digit*
 

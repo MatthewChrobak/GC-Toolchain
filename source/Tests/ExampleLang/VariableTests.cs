@@ -14,7 +14,7 @@ namespace Tests.ExampleLang
     print_int(x);
     print_int(y);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("1020", results.ProgramOutput);
         }
 
@@ -27,7 +27,7 @@ namespace Tests.ExampleLang
     print_int(x);
     print_int(y);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("1010", results.ProgramOutput);
         }
 
@@ -41,14 +41,14 @@ namespace Tests.ExampleLang
     print_int(x);
     print_int(y);
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
             Assert.AreEqual("2010", results.ProgramOutput);
         }
 
         [Test]
         public void VariableDeclaration_KnownType() {
             string program = @"void main() { int x; }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
 
             results.SymbolTableExists("::global::main").WithOneRow((Column.EntityType, "variable"), (Column.Name, "x")).WithColumn(Column.Type, "int");
         }
@@ -70,7 +70,7 @@ namespace Tests.ExampleLang
             string program = @"void main() {
     int x;
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
 
             results.SymbolTableExists("::global::main").WithOneRow((Column.EntityType, "variable"), (Column.Name, "x"), (Column.Type, "int"));
         }
@@ -80,7 +80,7 @@ namespace Tests.ExampleLang
             string program = @"void main() {
     int x = 1;
 }";
-            var results = new ExampleLangTest(program);
+            var results = Run(program);
 
             results.SymbolTableExists("::global::main").WithOneRow((Column.EntityType, "variable"), (Column.Name, "x"), (Column.Type, "int"));
         }

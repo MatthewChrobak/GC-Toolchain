@@ -48,3 +48,9 @@ def isValidType(type):
 
 def isValidReturnType(type):
     return isValidType(type) or type == "void"
+
+def GetPossibleChild(node, possibleChildren):
+    for possibleChild in possibleChildren:
+        if node.Contains(possibleChild):
+            return node[possibleChild]
+    Error("Unable to get child from possible children: {0}".format(", ".join(possibleChildren)))

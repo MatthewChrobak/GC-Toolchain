@@ -22,6 +22,3 @@ def postorder_declaration_statement(node):
 
 def postorder_integer(node):
     node["type"] = "int"
-
-# TODO:
-# Expression type checking? We don't have expressions yet

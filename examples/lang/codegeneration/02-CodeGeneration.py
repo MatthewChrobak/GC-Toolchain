@@ -110,26 +110,10 @@ def postorder_integer(node):
 
 def postorder_rvalue(node):
     instructionstream.AppendLine("; rvalue")
-    possibleChildren = ["expression"]
-    for child in possibleChildren:
-        if node.Contains(child):
-            row = GetRow(node)
-            node["register"] = node[child]["register"]
-            log.WriteLineVerbose(node["register"])
-            row["register"] = node["register"]
-            break
-
-    if node.Contains("sign"):
-        instructionstream.AppendLine("; Sign")
-        ErrorIf(node["type"] != "int", "Sign doesn't currently support non-ints")
-
-        a = getAdditionalRegisters(node)
-        sign, _ = GetValue(node["sign"])
-        multiplier = "1" if sign == "+" else "-1"
-
-        instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["register"]))
-        instructionstream.AppendLine("{0} = mul i32 {1}, {2}".format(a[1], multiplier, a[0]))
-        instructionstream.AppendLine("store i32 {0}, i32* {1}".format(a[1], node["register"]))
+    child = GetPossibleChild(node, ["expression"])
+    row = GetRow(node)
+    node["register"] = child["register"]
+    row["register"] = node["register"]
 
 def postorder_lvalue_statement(node):
     if not node.Contains("assignment"):
@@ -230,31 +214,55 @@ def postorder_function_parameter(node):
 def postorder_expression(node):
     instructionstream.AppendLine("; expression")
     if node.Contains("operator"):
+        operator = node["operator"]
         expressions = node.AsArray("expression")
-        op, loc = GetValue(node["operator"])
         lhs = expressions[0]
         rhs = expressions[1]
-        prefix_map = {"i32":""}
-        op_map = {"+":"add", "-":"sub", "*":"mul", "/":"sdiv"}
+
+        op, loc = GetValue(GetPossibleChild(operator, ["arithmetic", "logical", "comparison"]))
         r, a = getRegisters(node)
+        s = a[2]
         t = ConvertType(node["type"])
-
-        prefix = prefix_map[t]
-        op = op_map[op]
-
         instructionstream.AppendLine("{0} = load {1}, {1}* {2}".format(a[0], t, lhs["register"]))
         instructionstream.AppendLine("{0} = load {1}, {1}* {2}".format(a[1], t, rhs["register"]))
         
-        s = a[2]
+        if t == "i32":
+            op = {
+                "+":"add", 
+                "-":"sub", 
+                "*":"mul", 
+                "/":"sdiv", 
+                "&&":"and", 
+                "||":"or",
+                ">":"icmp sgt",
+                ">=":"icmp sge",
+                "<":"icmp slt",
+                "<=":"icmp sle",
+                "==":"icmp eq",
+                "!=":"icmp ne"
+            }[op]
 
-        instructionstream.AppendLine("{0} = {1}{2} {3} {4}, {5}".format(s, prefix, op, t, a[0], a[1]))
+        instructionstream.AppendLine("{0} = {1} {2} {3}, {4}".format(s, op, t, a[0], a[1]))
+
+        if operator.Contains("comparison"):
+            instructionstream.AppendLine("{0} = zext i1 {1} to i32".format(a[3], s))
+            s = a[3]
+                
         instructionstream.AppendLine("{0} = alloca {1}".format(r, t))
         instructionstream.AppendLine("store {0} {1}, {0}* {2}".format(t, s, r))
     else:
-        possibleChildren = ["expression", "lvalue", "integer", "rvalue"]
-        for child in possibleChildren:
-            if node.Contains(child):
-                r = getRegister(node[child])
-                row = GetRow(node)
-                row["register"] = r
-                node["register"] = r
+        instructionstream.AppendLine("; sign")
+        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue"])
+        r = getRegister(child)
+        row = GetRow(node)
+        row["register"] = r
+        node["register"] = r
+
+        if node.Contains("sign"):
+            a = getAdditionalRegisters(node)
+            sign, _ = GetValue(node["sign"])
+            multiplier = "1" if sign == "+" else "-1"
+
+            instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["register"]))
+            instructionstream.AppendLine("{0} = mul i32 {1}, {2}".format(a[1], multiplier, a[0]))
+            instructionstream.AppendLine("store i32 {0}, i32* {1}".format(a[1], node["register"]))
