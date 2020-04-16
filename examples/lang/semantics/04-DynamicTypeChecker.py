@@ -120,3 +120,20 @@ def postorder_for_condition(node):
     row["type"] = type
 
     ErrorIf(type != "int", "For-statement condition needs to be of type int")
+
+def postorder_return_statement(node):
+    _, loc = GetValue(node["start_marker"])
+    type = node["rvalue"]["type"] if node.Contains("rvalue") else "void"
+
+    pstid = node["pstid"]
+    st = symboltable.GetOrCreate(pstid)
+
+    while st.GetMetaData("st_type") != "function":
+        pstid = getParentNamespaceID(1, pstid)
+        st = symboltable.GetOrCreate(pstid)
+
+    function_name = pstid[pstid.rindex("::") + 2:]
+    stid = getParentNamespaceID(1, pstid)
+    row = symboltable.GetOrCreate(stid).GetRowWhere("name", function_name, "entity_type", "function")
+    
+    ErrorIf(row["return_type"] != type, "Return statement at {0} should return type {1}. Instead got {2}".format(loc, row["return_type"], type))

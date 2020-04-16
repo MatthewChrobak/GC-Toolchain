@@ -81,7 +81,8 @@ while $while_condition:while_condition $scope_or_statement:while_body
 $scope:scope
 
 #production return_statement
-return $rvalue:rvalue
+return:start_marker $rvalue:rvalue
+return:start_marker
 
 #production declaration_statement
 $type:type id:identifier $equals_tail:^

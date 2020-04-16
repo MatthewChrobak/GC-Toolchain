@@ -87,7 +87,10 @@ def postorder_function_parameter(node):
     parameterIndex += 1
 
 def postorder_return_statement(node):
-    CreateRow(node, "return_statement", "return " + node["rvalue"]["label"])
+    if node.Contains("rvalue"):
+        CreateRow(node, "return_statement", "return " + node["rvalue"]["label"])
+    else:
+        CreateRow(node, "return_statement", "return void")
 
 def postorder_while_condition(node):
     CreateRow(node, "while_condition", node["rvalue"]["label"])

@@ -1,39 +1,9 @@
-void for_0() {
-    for (int i = 0; i < 10; i = i + 1) {
-        print_int(i);
-    }
-}
-
-void for_1() {
-    int i;
-    for (; i < 10; i = i + 1) {
-        print_int(i);
-    }
-}
-
-int for_2() {
+void main() {
     int i = 0;
     for (; ; i = i + 1) {
         if (i >= 10) {
-            return 1;
-        }
-    }
-}
-
-int for_3() {
-    int i = 0;
-    for (; ;) {
-        if (i >= 10) {
-            return 1;
+            return;
         }
         print_int(i);
-        i = i + 1;
     }
-}
-
-void main() {
-    for_0();
-    for_1();
-    for_2();
-    for_3();
 }

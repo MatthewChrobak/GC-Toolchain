@@ -204,16 +204,20 @@ def postorder_function_argument(node):
     instructionstream.AppendLine("store {2} {1}, {2}* {0}".format(r, a[0], type))
 
 def postorder_return_statement(node):
-    r = getRegister(node)
-    _ = getAdditionalRegisters(node)
-    rr = getRegister(node["rvalue"])
+    if node.Contains("rvalue"):
+        r = getRegister(node)
+        _ = getAdditionalRegisters(node)
+        rr = getRegister(node["rvalue"])
 
-    type = ConvertType(node["rvalue"]["type"])
+        type = ConvertType(node["rvalue"]["type"])
 
-    instructionstream.AppendLine("; return statement")
-    instructionstream.AppendLine("{0} = load {2}, {2}* {1}".format(r, rr, type))
-    type = ConvertType(node["rvalue"]["type"])
-    instructionstream.AppendLine("ret {0} {1}".format(type, r))
+        instructionstream.AppendLine("; return statement")
+        instructionstream.AppendLine("{0} = load {2}, {2}* {1}".format(r, rr, type))
+        type = ConvertType(node["rvalue"]["type"])
+        instructionstream.AppendLine("ret {0} {1}".format(type, r))
+    else:
+        _ = getAdditionalRegisters(node)
+        instructionstream.AppendLine("ret void")
 
 def postorder_function_parameter(node):
     row = GetRow(node)
@@ -386,6 +390,6 @@ def postorder_for_loop(node):
         instructionstream.AppendLineAt(compare_to_body_or_end_index, "br i1 {0}, label %{1}, label %{2}".format(node["for_condition"]["register"], body_marker, end_marker))
     else:
         instructionstream.AppendLineAt(compare_to_body_or_end_index, "br label %{0}".format(body_marker))
-        
+
     instructionstream.AppendLine("br label %{0}".format(update_marker))
     instructionstream.AppendLineNoIndent("{0}: ; For-Loop - end_marker".format(end_marker))
