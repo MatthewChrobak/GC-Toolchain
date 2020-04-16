@@ -13,6 +13,41 @@ namespace Tests.ExampleLang
         }
 
         [Test]
+        public void Variable_NotInLocalScope() {
+            string program = @"void main() {
+    {
+        int x = 10;
+    }
+    print_int(x);
+}";
+            AssertExceptionCause(program, "LFC was unable to find an entity in ::global::main for x.");
+        }
+
+        [Test]
+        public void Variable_InLocalScope1() {
+            string program = @"void main() {
+    {{{
+        int x = 10;
+        print_int(x);
+    }}}
+}";
+            var results = Run(program);
+            Assert.AreEqual("10", results.ProgramOutput);
+        }
+
+        [Test]
+        public void Variable_InLocalScope2() {
+            string program = @"void main() {
+    int x = 10;
+    {{{
+        print_int(x);
+    }}}
+}";
+            var results = Run(program);
+            Assert.AreEqual("10", results.ProgramOutput);
+        }
+
+        [Test]
         public void LiteralAssignment() {
             string program = @"void main() {
     int x = 10;

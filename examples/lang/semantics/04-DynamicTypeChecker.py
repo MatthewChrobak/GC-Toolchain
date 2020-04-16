@@ -13,12 +13,14 @@ def preorder_lvalue(node):
         ErrorIf(parent is None, "LFC was unable to find an entity in {0} for {1}".format(stid, identifier))
 
 
+
         row = symboltable.GetOrCreate(parent).GetRowWhere("name", identifier)
         type = row["return_type"] if component.Contains("function_call") else row["type"]
 
         row = GetRow(component)
         row["dynamic_pstid"] = parent
         row["dynamic_type"] = type
+        row["owner_st"] = parent
 
         stid = parent
         lvalueType = type
@@ -53,15 +55,14 @@ def LFC(entityName, startingNamespace):
     level = 0
     namespace = startingNamespace
     while True:
-        print(namespace + " " + entityName)
         namespace = getParentNamespaceID(level, namespace)
-        if namespace is None:
+        if len(namespace) == 0:
             break
         ErrorIfNot(symboltable.Exists(namespace), "LFC: The namespace {0} does not exist".format(namespace))
         st = symboltable.GetOrCreate(namespace)
         if st.RowExistsWhere("name", entityName):
             return namespace
-        level += 1
+        level = 1
 
     return None
 
@@ -109,3 +110,13 @@ def postorder_if_condition(node):
 
     _, loc = GetValue(node["start_marker"])
     ErrorIf(type != "int", "If-statement condition at {0} needs to be of type int".format(loc))
+
+def postorder_for_condition(node):
+    if not node.Contains("rvalue"):
+        return
+    row = GetRow(node)
+    type = node["rvalue"]["type"]
+    node["type"] = type
+    row["type"] = type
+
+    ErrorIf(type != "int", "For-statement condition needs to be of type int")

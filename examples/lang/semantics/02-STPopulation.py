@@ -94,3 +94,8 @@ def postorder_while_condition(node):
 
 def postorder_if_condition(node):
     CreateRow(node, "if_condition", node["rvalue"]["label"])
+
+def postorder_for_condition(node):
+    if not node.Contains("rvalue"):
+        return
+    CreateRow(node, "for_condition", node["rvalue"]["label"])

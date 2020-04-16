@@ -176,8 +176,9 @@ def postorder_lvalue(node):
                 instructionstream.AppendLine("{0} = alloca {1}".format(realRegister, returnType))
                 instructionstream.AppendLine("store {0} {1}, {0}* {2}".format(returnType, returnRegister, realRegister))
         else:
+            row = GetRow(component)
             instructionstream.AppendLine("; non-function call")
-            r = symboltable.GetOrCreate(component["pstid"]).GetRowWhere("name", identifier)["register"]
+            r = symboltable.GetOrCreate(row["owner_st"]).GetRowWhere("name", identifier)["register"]
             row = GetRow(node)
             node["register"] = r
             row["register"] = r
@@ -341,3 +342,50 @@ def preorder_else(node):
 
     node["branch_instruction_index"] = instructionstream.CreateEmptyInstruction()
     instructionstream.AppendLineNoIndent("{0}: ; If - else_marker".format(else_marker))
+
+def preorder_for_condition(node):
+    compare_marker = registerRegister(node["compare_marker"])[1:]
+    node["compare_marker"] = compare_marker
+
+    instructionstream.AppendLine("br label %{0}".format(compare_marker))
+    instructionstream.AppendLineNoIndent("{0}: ; For-loop - compare_marker".format(compare_marker))
+
+def postorder_for_condition(node):
+    if node.Contains("rvalue"):
+        r, a = getRegisters(node)
+    
+        instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["rvalue"]["register"]))
+        instructionstream.AppendLine("{0} = icmp ne i32 {1}, 0".format(r, a[0]))
+    node["branch_instruction_index"] = instructionstream.CreateEmptyInstruction()
+
+def preorder_for_update(node):
+    update_marker = registerRegister(node["update_marker"])[1:]
+    node["update_marker"] = update_marker
+    instructionstream.AppendLineNoIndent("{0}: ; For-Loop - update_marker".format(update_marker))
+
+def postorder_for_update(node):
+    node["branch_instruction_index"] = instructionstream.CreateEmptyInstruction()
+
+def preorder_for_body(node):
+    body_marker = registerRegister(node["body_marker"])[1:]
+    node["body_marker"] = body_marker
+    instructionstream.AppendLineNoIndent("{0}: ; For-Loop - body_marker".format(body_marker))
+
+def postorder_for_loop(node):
+    compare_marker = node["for_condition"]["compare_marker"]
+    update_marker = node["for_update"]["update_marker"]
+    body_marker = node["for_body"]["body_marker"]
+    end_marker = registerRegister(node["end_marker"])[1:]
+    node["end_marker"] = end_marker
+
+    update_to_compare_index = node["for_update"]["branch_instruction_index"]
+    instructionstream.AppendLineAt(update_to_compare_index, "br label %{0}".format(compare_marker))
+
+    compare_to_body_or_end_index = node["for_condition"]["branch_instruction_index"]
+    if node["for_condition"].Contains("rvalue"):
+        instructionstream.AppendLineAt(compare_to_body_or_end_index, "br i1 {0}, label %{1}, label %{2}".format(node["for_condition"]["register"], body_marker, end_marker))
+    else:
+        instructionstream.AppendLineAt(compare_to_body_or_end_index, "br label %{0}".format(body_marker))
+        
+    instructionstream.AppendLine("br label %{0}".format(update_marker))
+    instructionstream.AppendLineNoIndent("{0}: ; For-Loop - end_marker".format(end_marker))

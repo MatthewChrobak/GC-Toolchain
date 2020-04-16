@@ -105,8 +105,6 @@ def postorder_while_condition(node):
     node["compare_marker"] = get()
     node["true_marker"] = get()
 
-# def preorder_if_statement(node):
-
 def postorder_if_statement(node):
     node["end_marker"] = get()
     
@@ -117,3 +115,18 @@ def postorder_if_condition(node):
 
 def preorder_else(node):
     node["else_marker"] = get()
+
+def postorder_for_loop(node):
+    node["end_marker"] = get()
+
+def preorder_for_condition(node):
+    if node.Contains("rvalue"):
+        getAdditionalRegisters(node, 1)
+        allocate(node)
+    node["compare_marker"] = get()
+
+def preorder_for_update(node):
+    node["update_marker"] = get()
+
+def preorder_for_body(node):
+    node["body_marker"] = get()

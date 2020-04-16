@@ -73,3 +73,30 @@ def preorder_while_condition(node):
 
 def preorder_if_condition(node):
     pstid(node)
+
+def preorder_scope_statement(node):
+    scope, loc = GetValue(node["start_marker"])
+    enterNamespace("{0}_{1}".format(loc[0], loc[1]))
+
+    ErrorIf(symboltable.Exists(currentNamespaceID()), "The scope {0} at {1} already exists".format(currentNamespaceID(), loc))
+    st = symboltable.GetOrCreate(currentNamespaceID())
+    st.SetMetaData("st_type", "local")
+
+def postorder_scope_statement(node):
+    leaveNamespace()
+
+def preorder_for_loop(node):
+    _, loc = GetValue(node["start_marker"])
+    enterNamespace("{0}_{1}".format(loc[0], loc[1]))
+
+    ErrorIf(symboltable.Exists(currentNamespaceID()), "The scope {0} at {1} already exists".format(currentNamespaceID(), loc))
+    st = symboltable.GetOrCreate(currentNamespaceID())
+    st.SetMetaData("st_type", "local")
+    
+def postorder_for_loop(node):
+    leaveNamespace()
+
+def postorder_for_condition(node):
+    if not node.Contains("rvalue"):
+        return
+    pstid(node)

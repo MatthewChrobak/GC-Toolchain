@@ -27,7 +27,7 @@ $function_parameter:function_parameter $function_parameters_tail:^
 $type:type id:identifier
 
 #production scope
-{ $scope_statements:^ }
+{:start_marker $scope_statements:^ }
 
 #production scope_statements epsilon:true
 $scope_statement:statement $scope_statements:^
@@ -38,6 +38,29 @@ $lvalue_statement:lvalue_statement ;
 $return_statement:return_statement ;
 $while_loop:while_loop
 $if_statement:if_statement
+$scope:scope_statement
+$for_loop:for_loop
+
+#production for_loop
+for:start_marker ( $for_init:for_init ; $for_condition:for_condition ; $for_update:for_update ) $scope_or_statement:for_body
+
+#production for_init epsilon:true
+$for_init_inner:^
+
+#production for_init_inner
+$declaration_statement:declaration_statement
+
+#production for_condition
+$for_condition_inner:^
+
+#production for_condition_inner epsilon:true
+$rvalue:rvalue
+
+#production for_update
+$for_update_inner:^
+
+#production for_update_inner epsilon:true
+$lvalue_statement:lvalue_statement
 
 #production if_statement
 if $if_condition:if_condition $scope_or_statement:if_body $else:else
