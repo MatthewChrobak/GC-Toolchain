@@ -135,5 +135,27 @@ namespace Tests.ExampleLang
 }";
             AssertExceptionCause(program, "The variable 'x' at (1, 35) already exists in ::global::main.");
         }
+
+        [Test]
+        public void VariableDeclaration_Redifinition_LaterInOuterScope_Allowed() {
+            string program = @"int main() {
+    int x;
+    {
+        int x;
+    }
+}";
+            AssertExceptionCause(program, "The variable 'x' at (1, 46) already exists in ::global::main.");
+        }
+
+        [Test]
+        public void VariableDeclaration_Redifinition_InnerScope_2_NotAllowed() {
+            string program = @"int main() {
+    {
+        int x;
+    }
+    int x;
+}";
+            Run(program);
+        }
     }
 }

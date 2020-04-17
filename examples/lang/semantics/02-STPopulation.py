@@ -27,8 +27,15 @@ def preorder_function(node):
 
 def preorder_declaration_statement(node):
     identifier, loc = GetValue(node["identifier"])
-    error = "The variable '{0}' at {1} already exists in {2}".format(identifier, loc, node["pstid"])
-    row = CreateRow(node, "variable", identifier, ("name", identifier, error))
+    pstid = node["pstid"]
+    st = symboltable.GetOrCreate(pstid)
+
+    while st.GetMetaData("st_type") in ["local", "function"]:
+        ErrorIf(st.RowExistsWhere("name", identifier), "The variable '{0}' at {1} already exists in {2}".format(identifier, loc, pstid))
+        pstid = getParentNamespaceID(1, pstid)
+        st = symboltable.GetOrCreate(pstid)
+
+    row = CreateRow(node, "variable", identifier)
     row["name"] = identifier
 
 def postorder_lvalue(node):
