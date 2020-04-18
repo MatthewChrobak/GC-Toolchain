@@ -1,7 +1,6 @@
 ﻿using Automata;
 using Automata.NonDeterministic;
 using Core.ReportGeneration;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -114,9 +113,11 @@ namespace LexicalAnalysis.ReportGeneration
                 case '\n':
                     return "/n";
                 case '\t':
-                    return "/t ";
+                    return "/t";
                 case ' ':
                     return "' '";
+                case '"':
+                    return "''";
                 default:
                     return val.ToString();
             }

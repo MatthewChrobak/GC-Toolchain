@@ -45,7 +45,11 @@ namespace ASTVisitor
                 foreach (var row in table.Rows) {
                     sb.Append("<tr>");
                     foreach (var symbol in symbols) {
-                        sb.Append($"<td>{row[symbol].ToString()}</td>");
+                        string content = string.Empty;
+                        if (row.Contains(symbol)) {
+                            content = row[symbol].ToString();
+                        }
+                        sb.Append($"<td>{content}</td>");
                     }
                     sb.Append("</tr>");
                 }

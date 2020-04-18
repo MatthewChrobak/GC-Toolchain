@@ -58,7 +58,7 @@ namespace LexicalAnalysis
                     string highestPriorityTag = highestPriority.tag;
                     if (highestPriorityTag != null) {
                         Debug.Assert(secondHighestPriority.tag == null || highestPriority.priority > secondHighestPriority.priority, $"Conflict of priority found between {highestPriority.tag}:{highestPriority.priority} and {secondHighestPriority.tag}:{secondHighestPriority.priority}");
-                        token = new Token(highestPriorityTag, tokenContent.ToString(), startLine, startColumn);
+                        token = new Token(highestPriorityTag, tokenContent.ToString(), startLine + 1, startColumn + 1);
                     }
                     if (!fs.CanRead && fs.Peek() == TextFileScanner.EOF) {
                         break;
@@ -76,7 +76,7 @@ namespace LexicalAnalysis
                 stream.Add(token);
             }
 
-            return stream;
+            return new TokenStream(stream);
         }
 
         public TokenStream ParseFile(string sourcefile) {
@@ -93,7 +93,7 @@ namespace LexicalAnalysis
         }
 
         public ReportSection GetReportSections() {
-            return new TokenStreamReportSection("Token Stream", this.stream);
+            return new TokenStreamReportSection("Unfiltered Token Stream", this.stream);
         }
     }
 }

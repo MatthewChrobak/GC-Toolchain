@@ -56,6 +56,24 @@ namespace SyntacticAnalysis
             return sb.ToString();
         }
 
+        public string ToStringWithSymbol(int ptr, char symbol) {
+            var sb = new StringBuilder();
+            for (int i = 0; i <= this.Symbols.Count; i++) {
+                if (i == ptr) {
+                    sb.Append(symbol);
+                } else { 
+                    // Space can't be after last or before first symbol
+                    if (i < this.Symbols.Count && i != 0) {
+                        sb.Append(' ');
+                    }
+                }
+                if (i < this.Symbols.Count) {
+                    sb.Append(this.Symbols[i].ID);
+                }
+            }
+            return sb.ToString();
+        }
+
         public string ToString(int firstNSymbols) {
             var sb = new StringBuilder();
             for (int i = 0; i < this.Symbols.Count && i < firstNSymbols; i++) {

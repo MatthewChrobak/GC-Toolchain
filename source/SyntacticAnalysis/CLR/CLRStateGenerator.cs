@@ -9,6 +9,8 @@ namespace SyntacticAnalysis.CLR
         private readonly ProductionTable _productionTable;
         public readonly Dictionary<Kernel, State> States;
 
+        private Queue<(string id, Kernel kernel)> _queue;
+
         public CLRStateGenerator(ProductionTable productionTable, SyntacticConfigurationFile config) {
             this._productionTable = productionTable;
             this.States = new Dictionary<Kernel, State>();
@@ -17,7 +19,13 @@ namespace SyntacticAnalysis.CLR
             var startProduction = productionTable.GetProduction(startSymbol);
             var startRule = startProduction.Rules.First();
 
-            CreateState("", new Kernel(new ItemSet(startRule, 0)));
+            this._queue = new Queue<(string id, Kernel kernel)>();
+            this._queue.Enqueue(("", new Kernel(new ItemSet(startRule, 0))));
+
+            while (this._queue.Count != 0) {
+                (string id, var kernel) = this._queue.Dequeue();
+                CreateState(id, kernel);
+            }
         }
 
         private void CreateState(string id, Kernel kernel) {
@@ -32,12 +40,16 @@ namespace SyntacticAnalysis.CLR
             this.States.Add(kernel, state);
 
             foreach (var group in state.GroupRulesBySymbolAfter()) {
-                CreateState(id + group.Key.ID, group.Value);
+                this._queue.Enqueue((id + group.Key.ID, group.Value));
             }
         }
 
         public ReportSection GetReportSection() {
             return new CLRStatesReportSection(this.States);
+        }
+
+        public string ToTestString() {
+            return new CLRStatesReportSection(this.States).ToTestString();
         }
     }
 }

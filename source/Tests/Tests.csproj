@@ -14,7 +14,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Automata\Automata.csproj" />
+    <ProjectReference Include="..\CodeGeneration\CodeGeneration.csproj" />
     <ProjectReference Include="..\LexicalAnalysis\LexicalAnalysis.csproj" />
+    <ProjectReference Include="..\SemanticAnalysis\SemanticAnalysis.csproj" />
+    <ProjectReference Include="..\SyntacticAnalysis\SyntacticAnalysis.csproj" />
   </ItemGroup>
 
 </Project>

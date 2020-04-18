@@ -16,4 +16,4 @@ if (-Not (Test-Path $gct)) {
 $currentFolder = (Get-Location).Path;
 # Invoke GCT
 Write-Host $currentFolder;
-Start-Process $gct -ArgumentList "-f '$currentFolder' -v -all";
+Start-Process $gct -ArgumentList "-f '$currentFolder' -v -ast -symboltables";

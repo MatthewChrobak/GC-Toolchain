@@ -31,6 +31,10 @@ namespace CodeGeneration
             dynamic proxy = new ExpandoObject();
             proxy.Append = new Action<string>(instructionStream.Append);
             proxy.AppendLine = new Action<string>(instructionStream.AppendLine);
+            proxy.AppendLineNoIndent = new Action<string>(instructionStream.AppendLineNoIndent);
+            proxy.IncrementTab = new Action<int>(instructionStream.IncrementTab);
+            proxy.CreateEmptyInstruction = new Func<int>(instructionStream.CreateEmptyInstruction);
+            proxy.AppendLineAt = new Action<int, string>(instructionStream.AppendInstructionAt);
             return proxy;
         }
     }

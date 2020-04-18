@@ -3,6 +3,7 @@ using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace ASTVisitor
 {
@@ -22,7 +23,11 @@ namespace ASTVisitor
             this._pythonPluginPath = pythonPluginPath;
             Log.WriteLineVerbose($"Creating visitor for {this._pythonPluginPath}");
 
+            var fi = new FileInfo(pythonPluginPath);
+            string folder = fi.Directory.FullName;
+            string libs = Path.Combine(AppContext.BaseDirectory, "lib");
             this._engine = Python.CreateEngine();
+            this._engine.SetSearchPaths(new string[] { folder, libs });
             this._scope = this._engine.CreateScope();
             this._source = this._engine.CreateScriptSourceFromFile(pythonPluginPath);
             this._compiled = this._source.Compile();
@@ -57,21 +62,24 @@ namespace ASTVisitor
                     this.TryInvoke(post_visit_id, node);
                     continue;
                 }
-
-                foreach (var element in node.Elements) {
+                
+                foreach (var element in node.ReverseElements) {
                     var value = element.Value;
                     if (value is List<ASTNode> lst) {
-                        foreach (var member in lst) {
+                        for (int i = lst.Count - 1; i >= 0; i--) {
+                            var member = lst[i];
                             stk.Push((element.Key, member, false));
                         }
                     } else if (value is ASTNode astnode) {
                         stk.Push((element.Key, astnode, false));
-                    } else if (value is string str) {
+                    } else if (value is string) {
                         // Ignore
-                    } else if (value is int val) {
+                    } else if (value is int) {
                         // Ignore
+                    } else if (value is bool) {
+                        // ignore
                     } else {
-                        Log.WriteLineError($"Unknown element type in ASTNode: {element.Key}:{value.GetType()}");
+                        Log.WriteLineWarning($"Unknown element type in ASTNode: {element.Key}:{value?.GetType()}");
                     }
                 }
             }
@@ -82,7 +90,8 @@ namespace ASTVisitor
                 try {
                     this._engine.Operations.Invoke(variable, node);
                 } catch (Exception e) {
-                    Debug.Assert(false, e.Message);
+                    var eo = this._engine.GetService<ExceptionOperations>();
+                    Debug.Assert(false, eo.FormatException(e));
                 }
             }
         }
