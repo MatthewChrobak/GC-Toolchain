@@ -4,11 +4,9 @@ GC-Toolchain is a compiler development toolchain that is responsible for front-e
 
 ![img](https://i.imgur.com/lwjLdHn.png)
 
-## Usage
+## Building and Using GCT
+Please visit the Wiki for build and usage instructions.
 
-`GCT -t tokens.config -p program.c -v -r out`
-
-`GCT -tokens tokens.config -program program.c -verbose -report out`
 
 ## Lexical Analysis
 
