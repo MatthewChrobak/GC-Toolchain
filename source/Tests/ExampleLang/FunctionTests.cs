@@ -120,7 +120,14 @@ namespace Tests.ExampleLang
 
         [Test]
         public void FunctionArguments_Literal() {
-            string program = @"void main() { Foo(1, 2, 3); } void Foo(int a, int b, int c) { print_int(a); print_int(b); print_int(c); }";
+            string program = @"void main() {
+    Foo(1, 2, 3); 
+}
+void Foo(int a, int b, int c) { 
+    print_int(a);
+    print_int(b);
+    print_int(c);
+}";
             var results = Run(program);
             Assert.AreEqual("123", results.ProgramOutput);
         }
@@ -177,6 +184,15 @@ float Foo(int a) {
     return;
 }";
             AssertExceptionCause(program, "Return statement at (1, 87) should return type float. Instead got void.");
+        }
+
+        [Test]
+        public void Function_VoidReturn() {
+            string program = @"void main() {
+    return;
+}";
+            var results = Run(program);
+            Assert.AreEqual("", results.ProgramOutput);
         }
     }
 }
