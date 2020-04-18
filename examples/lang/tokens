@@ -5,8 +5,11 @@
 a-z
 A-Z
 
+#token float
+$digit $digit* . $digit $digit*
+
 #token integer
-$digit*
+$digit $digit*
 
 #subtoken valid_head_id
 $letter
@@ -19,11 +22,74 @@ $digit
 #token id
 $valid_head_id $valid_tail_id*
 
+#token if priority:1
+if
+
+#token for priority:1
+for
+
+#token else priority:1
+else
+
+#token while priority:1
+while
+
+#token !
+!
+
+#token && priority:1
+&&
+
+#token || priority:1
+||
+
+#token |
+|
+
+#token &
+&
+
+#token *
+\*
+
+#token +
++
+
+#token -
+\-
+
+#token /
+/
+
+#token .
+.
+
+#token ,
+,
+
+#token colon
+:
+
+#token scope_operator priority:1
+::
+
 #token ;
 ;
 
 #token =
 =
+
+#token += priority:1
++=
+
+#token *= priority:1
+*=
+
+#token -= priority:1
+\-=
+
+#token /= priority:1
+/=
 
 #token (
 (
@@ -37,6 +103,42 @@ $valid_head_id $valid_tail_id*
 #token }
 }
 
+#token [
+[
+
+#token ]
+]
+
+#token >
+>
+
+#token <
+<
+
+#token << priority:1
+<<
+
+#token >> priority:1
+>>
+
+#token >= priority:1
+>=
+
+#token <= priority:1
+<=
+
+#token == priority:1
+==
+
+#token != priority:1
+!=
+
+#token as priority:1
+as
+
+#token return priority:1
+return
+
 #token class priority:1
 class
 
@@ -49,12 +151,42 @@ namespace
 
 #subtoken whitespace_val
 %20
-%9
-%D
-%A
+%09
+%0D
+%0A
 
 #token static priority:1
 static
 
 #token whitespace priority:0
 $whitespace_val*
+
+#token string
+" $valid_string_character* "
+
+#subtoken valid_string_character
+%09
+%20-%21
+%23-%7E
+
+#token char
+' $valid_char_character '
+
+#subtoken valid_char_character
+%09
+%20-%26
+%28-%7E
+
+#token comment
+// $singleline_comment_value*
+/\* $multiline_comment_value* \*/
+
+#subtoken singleline_comment_value
+%09
+%20-%7E
+
+#subtoken multiline_comment_value
+%09
+%20-%7E
+%0A
+%0D

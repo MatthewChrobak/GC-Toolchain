@@ -26,5 +26,19 @@ namespace SyntacticAnalysis.CLR
             }
             return sb.ToString();
         }
+
+        public string ToTestString() {
+            var sb = new StringBuilder();
+
+            foreach (var state in this.states) {
+                sb.AppendLine($"{{{string.Join("; ", state.Value.Closure.Select(val => fmt(val)))}}}");
+            }
+
+            return sb.ToString();
+        }
+
+        private string fmt(ItemSet val) {
+            return $"[{val.Rule.Key.ID} -> {val.Rule.ToStringWithSymbol(val.Ptr, '.')}, {string.Join('/', val.Lookahead.Select(l => l.ID))}]";
+        }
     }
 }

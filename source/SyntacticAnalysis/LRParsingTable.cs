@@ -1,8 +1,10 @@
 ﻿using Core;
 using Core.ReportGeneration;
 using SyntacticAnalysis.CLR;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace SyntacticAnalysis
 {
@@ -73,6 +75,10 @@ namespace SyntacticAnalysis
             table.Rows[1].Actions[Symbol.EndStream.ID] = new LRParsingTableAction(ActionType.Accept, -1);
 
             return table;
+        }
+
+        public string ToTestString() {
+            return new LRParsingTableReportSection(this).ToTestString();
         }
 
         public ReportSection GetReportSection() {

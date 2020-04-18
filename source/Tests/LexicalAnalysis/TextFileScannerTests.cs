@@ -18,7 +18,9 @@ namespace Tests.LexicalAnalysis
                     char c = fr.Read();
                     Assert.AreEqual(c, fileContent[i]);
                 }
-
+                // Two extra reads for the ending /r/n
+                fr.Read();
+                fr.Read();
                 Assert.IsFalse(fr.CanRead);
             }
             File.Delete(path);
@@ -31,7 +33,8 @@ namespace Tests.LexicalAnalysis
             File.WriteAllText(path, fileContent);
 
             using (var fr = new TextFileScanner(path)) {
-                for (int i = 0; i < fileContent.Length; i++) {
+                // + 2 for \r\n
+                for (int i = 0; i < fileContent.Length + 2; i++) {
                     fr.GoNext();
                 }
 
@@ -48,7 +51,8 @@ namespace Tests.LexicalAnalysis
 
             using (var fr = new TextFileScanner(path)) {
                 fr.GoToEnd();
-                for (int i = 0; i <= fileContent.Length - 1; i++) {
+                // + 2 for \r\n
+                for (int i = 0; i <= fileContent.Length + 2 - 1; i++) {
                     fr.GoPrevious();
                 }
                 Assert.AreEqual(fr.Line, 0);
@@ -69,7 +73,8 @@ namespace Tests.LexicalAnalysis
 
                 Assert.AreEqual(fr.Line, 0);
                 Assert.AreEqual(fr.Peek(), TextFileScanner.EOF);
-                Assert.AreEqual(fr.Column, fileContent.Length);
+                // + 2 to account for \r\n
+                Assert.AreEqual(fr.Column, fileContent.Length + 2);
                 Assert.IsFalse(fr.CanRead);
             }
             File.Delete(path);
@@ -109,7 +114,8 @@ namespace Tests.LexicalAnalysis
                 }
             }
             File.Delete(path);
-            Assert.AreEqual(fileContent.Replace("\r\n", "").Length, count);
+            // + 2 to account for the last \r\n
+            Assert.AreEqual(fileContent.Length + 2, count);
         }
     }
 }

@@ -1,35 +1,173 @@
-#blacklist
-whitespace
-
 #rule start
 S
 
+#blacklist
+whitespace
+comment
+
 #production S
-$namespaces:^
+$global_elements:^
 
-#production namespaces epsilon:true
-$namespace:namespace $namespaces:^
+#production global_elements epsilon:true
+$global_element:^ $global_elements:^
 
-#production namespace
-namespace id:namespace_name { $namespace_elements:^ }
+#production global_element
+$function:function
 
-#production namespace_elements epsilon:true
-$class:class $namespace_elements:^
+#production function
+$type:return_type id:identifier ( $function_parameters:^ ) $scope:scope
 
-#production access_modifier epsilon:true
-access_modifier:access_modifier
+#production function_parameters epsilon:true
+$function_parameter:function_parameter $function_parameters_tail:^
 
-#production static epsilon:true
-static:static
+#production function_parameters_tail epsilon:true
+, $function_parameter:function_parameter $function_parameters_tail:^
 
-#production class
-$access_modifier:^ $static:^ class id:class_name { $class_elements:^ }
+#production function_parameter
+$type:type id:identifier
 
-#production class_elements epsilon:true
-$class_element:^ $class_elements:^
+#production scope
+{:start_marker $scope_statements:^ }
 
-#production class_element
-$field:field
+#production scope_statements epsilon:true
+$scope_statement:statement $scope_statements:^
 
-#production field
-$access_modifier:^ $static:^ id:field_type id:field_name ;
+#production scope_statement
+$declaration_statement:declaration_statement ;
+$lvalue_statement:lvalue_statement ;
+$return_statement:return_statement ;
+$while_loop:while_loop
+$if_statement:if_statement
+$scope:scope_statement
+$for_loop:for_loop
+
+#production for_loop
+for:start_marker ( $for_init:for_init ; $for_condition:for_condition ; $for_update:for_update ) $scope_or_statement:for_body
+
+#production for_init epsilon:true
+$for_init_inner:^
+
+#production for_init_inner
+$declaration_statement:declaration_statement
+
+#production for_condition
+$for_condition_inner:^
+
+#production for_condition_inner epsilon:true
+$rvalue:rvalue
+
+#production for_update
+$for_update_inner:^
+
+#production for_update_inner epsilon:true
+$lvalue_statement:lvalue_statement
+
+#production if_statement
+if $if_condition:if_condition $scope_or_statement:if_body $else:else
+
+#production if_condition
+(:start_marker $rvalue:rvalue )
+
+#production else epsilon:true
+else $scope_or_statement:else_body
+
+#production while_loop
+while $while_condition:while_condition $scope_or_statement:while_body
+
+#production while_condition
+(:start_marker $rvalue:rvalue )
+
+#production scope_or_statement
+$scope:scope
+
+#production return_statement
+return:start_marker $rvalue:rvalue
+return:start_marker
+
+#production declaration_statement
+$type:type id:identifier $equals_tail:^
+
+#production lvalue_statement
+$lvalue:lvalue $equals_tail:^
+
+#production equals_tail epsilon:true
+=:assignment $rvalue:rvalue
+
+#production lvalue
+$lvalue_component:lvalue_component $lvalue_components:^
+
+#production lvalue_components epsilon:true
+. $lvalue_component:lvalue_component $lvalue_components:^
+
+#production lvalue_component
+id:identifier $function_call:function_call
+
+#production function_call epsilon:true
+( $function_arguments:^ )
+
+#production function_arguments epsilon:true
+$function_argument:function_argument $function_arguments_tail:^
+
+#production function_arguments_tail epsilon:true
+, $function_argument:function_argument $function_arguments_tail:^
+
+#production function_argument
+$rvalue:rvalue
+
+#production rvalue
+$p10_expression:expression
+
+#production p10_expression
+$p10_expression:expression $p10_operator:operator $p9_expression:expression
+$p9_expression:expression
+
+#production p10_operator
+&&:logical
+
+#production p9_expression
+$p9_expression:expression $p9_operator:operator $p8_expression:expression
+$p8_expression:expression
+
+#production p9_operator
+||:logical
+
+#production p8_expression
+$p8_expression:expression $p8_operator:operator $p7_expression:expression
+$p7_expression:expression
+
+#production p8_operator
+>=:comparison
+<=:comparison
+<:comparison
+>:comparison
+!=:comparison
+==:comparison
+
+#production p7_expression
+$p7_expression:expression $p7_operator:operator $p6_expression:expression
+$p6_expression:expression
+
+#production p7_operator
++:arithmetic
+-:arithmetic
+
+#production p6_expression
+$p6_expression:expression $p6_operator:operator $rvalue_noexpression:expression
+$rvalue_noexpression:expression
+
+#production p6_operator
+*:arithmetic
+/:arithmetic
+
+#production rvalue_noexpression
+$sign:^ $lvalue:lvalue
+$sign:^ integer:integer
+$sign:^ ( $rvalue:rvalue )
+$sign:^ float:float
+
+#production sign epsilon:true
++:sign
+-:sign
+
+#production type
+id:identifier

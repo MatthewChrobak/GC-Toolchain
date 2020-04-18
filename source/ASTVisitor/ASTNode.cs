@@ -25,7 +25,7 @@ namespace ASTVisitor
 
                     sb.Append("]");
                 } else {
-                    sb.Append($"\"{element.Value}\"");
+                    sb.Append($"\"{Escape(element.Value.ToString())}\"");
                 }
                 sb.AppendLine(",");
             }
@@ -34,13 +34,33 @@ namespace ASTVisitor
             return sb.ToString();
         }
 
-        public void Add(string tag, ASTNode ast) {
+        private string Escape(string value) {
+            value = value.Replace("\r", "/r");
+            value = value.Replace("\"", "''");
+            value = value.Replace("\n", "/n");
+            return value;
+        }
+
+        public void AddReverse(string tag, ASTNode ast) {
             if (this.Contains(tag)) {
                 if (this[tag] is List<ASTNode> lst) {
                     lst.Add(ast);
                 } else {
                     // Re-Create the node as a list.
                     this[tag] = new List<ASTNode>() { this[tag], ast };
+                }
+            } else {
+                this[tag] = ast;
+            }
+        }
+
+        public void Add(string tag, ASTNode ast) {
+            if (this.Contains(tag)) {
+                if (this[tag] is List<ASTNode> lst) {
+                    lst.Insert(0, ast);
+                } else {
+                    // Re-Create the node as a list.
+                    this[tag] = new List<ASTNode>() { ast, this[tag]};
                 }
             } else {
                 this[tag] = ast;

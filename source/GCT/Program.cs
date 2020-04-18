@@ -15,6 +15,7 @@ namespace GCT
     public static class Program
     {
         private static Report report;
+        private static string logDumpPath;
 
         public static void Main(string[] args) {
             // If no args are given, take some.
@@ -27,8 +28,13 @@ namespace GCT
                 RealMain(args);
             } catch (AssertionFailedException e) {
                 Console.WriteLine($"\r\nUnable to continue due to exception of type {e.GetType()} being thrown during {Log.State}. Exiting.");
+                Console.ReadKey();
             } finally {
+                report.AddSection(Log.GetReportSections());
                 report.Save();
+
+                Log.WriteLineVerbose($"Writing log to {logDumpPath}...");
+                Log.Dump(logDumpPath);
             }
         }
 
@@ -42,6 +48,7 @@ namespace GCT
             string? postBuildScript = null;
             string? instructionStreamFilepath = null;
             string? cwd = AppDomain.CurrentDomain.BaseDirectory;
+            logDumpPath = Path.Join(cwd, "dmp.log");
 
             bool includeAST = false;
             bool includeStateMachine = false;
@@ -51,7 +58,6 @@ namespace GCT
             bool includeLRTrace = false;
             bool includeLRStates = false;
             bool includeSymbolTables = false;
-            bool includeLogs = false;
 
             // Extract arguments
             var matches = Regex.Matches(string.Join(' ', args), @"\-(\w+)((\s+\'[^\r\n\']+\')|(\s+\""[^\r\n\""]+\"")|(\s+[^\r\n\s\-]+))?");
@@ -86,6 +92,16 @@ namespace GCT
                         MakeSureFileExists(postBuildScript);
 
                         cwd = flagValue;
+                        logDumpPath = Path.Combine(cwd, "dmp.log");
+                        break;
+                    case "semantics":
+                        semanticsFolder = flagValue;
+                        break;
+                    case "codegen":
+                        codeGeneratorFolder = flagValue;
+                        break;
+                    case "buildscript":
+                        postBuildScript = flagValue;
                         break;
                     case "v":
                     case "verbose":
@@ -136,9 +152,6 @@ namespace GCT
                     case "symboltables":
                         includeSymbolTables = true;
                         break;
-                    case "logs":
-                        includeLogs = true;
-                        break;
                     case "all":
                         includeAST = true;
                         includeGrammar = true;
@@ -148,7 +161,7 @@ namespace GCT
                         includeLRTrace = true;
                         includeLRStates = true;
                         includeSymbolTables = true;
-                        includeLogs = true;
+                        logDumpPath = "log.dmp";
                         break;
                 }
             }
@@ -242,13 +255,12 @@ namespace GCT
                 process.StartInfo = new System.Diagnostics.ProcessStartInfo() {
                     FileName = "powershell",
                     Arguments = postBuildScript,
-                    WorkingDirectory = cwd
+                    WorkingDirectory = cwd,
+                    RedirectStandardOutput = true
                 };
                 process.Start();
-            }
-
-            if (includeLogs) {
-                report.AddSection(Log.GetReportSections());
+                process.WaitForExit();
+                Log.WriteLineVerbose(process.StandardOutput.ReadToEnd());
             }
         }
 

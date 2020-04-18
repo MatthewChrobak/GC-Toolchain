@@ -1,6 +1,6 @@
 # Build the stdio lib
 Write-Host "Compiling stdio lib..."
-clang -emit-llvm -S stdio.c
+clang -emit-llvm -S stdio_d.c
 
 # Remove the previous .ll
 if (Test-Path output.ir) {
@@ -11,4 +11,4 @@ if (Test-Path output.ir) {
 }
 
 Write-Host "Compiling output.ir..."
-clang output.ll stdio.ll -o program.exe -v
+clang output.ll stdio_d.ll -o program.exe -v

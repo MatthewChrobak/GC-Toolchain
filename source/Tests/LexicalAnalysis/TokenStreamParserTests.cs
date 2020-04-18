@@ -19,6 +19,106 @@ namespace Tests.LexicalAnalysis
         }
 
         [Test]
+        public void RangeLiteral_NoRHS() {
+            string config = @"
+#rule range_inclusive
+:
+
+#rule literal_prefix
+\
+
+#token :
+\:
+";
+            string program = @":";
+            var tokens = GetTokenStreamFromConfig(config, program);
+            Assert.AreEqual(tokens.Next.TokenType, ":");
+            Assert.AreEqual(tokens.Current.Content, ":");
+        }
+
+        [Test]
+        public void RangeLiteral_RHS() {
+            string config = @"
+#rule range_inclusive
+:
+
+#rule literal_prefix
+\
+
+#token :1
+\:1
+";
+            string program = @":1";
+            var tokens = GetTokenStreamFromConfig(config, program);
+            Assert.AreEqual(tokens.Next.TokenType, ":1");
+            Assert.AreEqual(tokens.Current.Content, ":1");
+        }
+
+        [Test]
+        public void Range_Hex_Val() {
+            string config = @"
+#rule range_inclusive
+-
+
+#token range2
+%43-D
+";
+            string program = @"CD";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Next.TokenType, "range2");
+            Assert.AreEqual(tokens.Next.TokenType, "range2");
+        }
+
+        [Test]
+        public void Range_Val_Hex() {
+            string config = @"
+#rule range_inclusive
+-
+
+#token range3
+E-%46
+";
+            string program = @"EF";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Next.TokenType, "range3");
+            Assert.AreEqual(tokens.Next.TokenType, "range3");
+        }
+
+        [Test]
+        public void Range_Val_Val() {
+            string config = @"
+#rule range_inclusive
+-
+
+#token range4
+G-H
+";
+            string program = @"GH";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Next.TokenType, "range4");
+            Assert.AreEqual(tokens.Next.TokenType, "range4");
+        }
+
+        [Test]
+        public void Range_Hex_Hex() {
+            string config = @"
+#rule range_inclusive
+-
+
+#token range1
+%41-%42
+";
+            string program = @"AB";
+            var tokens = GetTokenStreamFromConfig(config, program);
+
+            Assert.AreEqual(tokens.Next.TokenType, "range1");
+            Assert.AreEqual(tokens.Next.TokenType, "range1");
+        }
+
+        [Test]
         public void ReadMultiLines() {
             string config = @"
 #token number
@@ -116,7 +216,7 @@ abcd
 
             Assert.AreEqual("high_priority", token.TokenType);
             Assert.AreEqual(program, token.Content);
-            Assert.AreEqual(0, token.Row);
+            Assert.AreEqual(1, token.Row);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -139,8 +239,8 @@ A{val}
             Assert.IsTrue(tokens.HasNext);
             var token = tokens.Next;
             Assert.AreEqual("hex", token.TokenType);
-            Assert.AreEqual(0, token.Row);
-            Assert.AreEqual(0, token.Column);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(1, token.Column);
             Assert.AreEqual(((char)byteVal).ToString(), token.Content);
             Assert.IsFalse(tokens.HasNext);
         }
@@ -158,13 +258,13 @@ aAz
             var tokens = GetTokenStreamFromConfig(config, program);
 
             Assert.AreEqual(tokens.Count, program.Length);
-            int i = 0;
+            int i = 1;
             while (tokens.HasNext) {
                 var token = tokens.Next;
                 Assert.AreEqual(token.TokenType, "range");
-                Assert.AreEqual(token.Row, 0);
-                Assert.AreEqual(token.Column, i);
-                Assert.AreEqual(token.Content, program[i].ToString());
+                Assert.AreEqual(1, token.Row);
+                Assert.AreEqual(i, token.Column);
+                Assert.AreEqual(program[i - 1].ToString(), token.Content);
                 i++;
             }
             Assert.IsFalse(tokens.HasNext);
@@ -187,8 +287,8 @@ $zero_or_more_subtokenA
 
             Assert.AreEqual(1, tokens.Count);
             var token = tokens.Next;
-            Assert.AreEqual(0, token.Row);
-            Assert.AreEqual(0, token.Column);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(1, token.Column);
             Assert.AreEqual("zero_or_more", token.TokenType);
             Assert.AreEqual(program, token.Content);
             Assert.IsFalse(tokens.HasNext);
@@ -211,8 +311,8 @@ $zero_or_more_subtoken
 
             Assert.AreEqual(1, tokens.Count);
             var token = tokens.Next;
-            Assert.AreEqual(0, token.Row);
-            Assert.AreEqual(0, token.Column);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(1, token.Column);
             Assert.AreEqual("zero_or_more", token.TokenType);
             Assert.AreEqual(program, token.Content);
             Assert.IsFalse(tokens.HasNext);
@@ -232,8 +332,8 @@ aA
 
             Assert.AreEqual(1, tokens.Count);
             var token = tokens.Next;
-            Assert.AreEqual(0, token.Row);
-            Assert.AreEqual(0, token.Column);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(1, token.Column);
             Assert.AreEqual("zero_or_more", token.TokenType);
             Assert.AreEqual(program, token.Content);
             Assert.IsFalse(tokens.HasNext);
@@ -261,12 +361,12 @@ Baaz
             var tokens = GetTokenStreamFromConfig(config, valid_program);
 
             Assert.IsTrue(tokens.HasNext);
-            Assert.AreEqual(tokens.Count, 1);
+            Assert.AreEqual(1, tokens.Count);
             var token = tokens.Next;
             Assert.AreEqual("range", token.TokenType);
-            Assert.AreEqual(token.Column, 0);
-            Assert.AreEqual(token.Row, 0);
-            Assert.AreEqual(token.Content, valid_program);
+            Assert.AreEqual(1, token.Column);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(valid_program, token.Content);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -293,9 +393,9 @@ asub_token
             Assert.AreEqual(tokens.Count, 1);
             var token = tokens.Next;
             Assert.AreEqual("final_token", token.TokenType);
-            Assert.AreEqual(token.Column, 0);
-            Assert.AreEqual(token.Row, 0);
-            Assert.AreEqual(token.Content, program);
+            Assert.AreEqual(1, token.Column);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(program, token.Content);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -321,44 +421,44 @@ $nonzero $digit*
             Assert.IsTrue(tokens.HasNext);
             var token = tokens.Next;
             Assert.AreEqual("integer", token.TokenType);
-            Assert.AreEqual(token.Row, 0);
-            Assert.AreEqual(token.Column, 0);
-            Assert.AreEqual(token.Content, "0");
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(1, token.Column);
+            Assert.AreEqual("0", token.Content);
 
             Assert.IsTrue(tokens.HasNext);
             token = tokens.Next;
             Assert.AreEqual("whitespace", token.TokenType);
-            Assert.AreEqual(token.Row, 0);
-            Assert.AreEqual(token.Column, 1);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(2, token.Column);
+            Assert.AreEqual(" ", token.Content);
+
+            Assert.IsTrue(tokens.HasNext);
+            token = tokens.Next;
+            Assert.AreEqual("integer", token.TokenType);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(3, token.Column);
+            Assert.AreEqual("123", token.Content);
+
+            Assert.IsTrue(tokens.HasNext);
+            token = tokens.Next;
+            Assert.AreEqual("whitespace", token.TokenType);
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(6, token.Column);
             Assert.AreEqual(token.Content, " ");
 
             Assert.IsTrue(tokens.HasNext);
             token = tokens.Next;
             Assert.AreEqual("integer", token.TokenType);
-            Assert.AreEqual(token.Row, 0);
-            Assert.AreEqual(token.Column, 2);
-            Assert.AreEqual(token.Content, "123");
-
-            Assert.IsTrue(tokens.HasNext);
-            token = tokens.Next;
-            Assert.AreEqual("whitespace", token.TokenType);
-            Assert.AreEqual(token.Row, 0);
-            Assert.AreEqual(token.Column, 5);
-            Assert.AreEqual(token.Content, " ");
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(7, token.Column);
+            Assert.AreEqual("0", token.Content);
 
             Assert.IsTrue(tokens.HasNext);
             token = tokens.Next;
             Assert.AreEqual("integer", token.TokenType);
-            Assert.AreEqual(token.Row, 0);
-            Assert.AreEqual(token.Column, 6);
-            Assert.AreEqual(token.Content, "0");
-
-            Assert.IsTrue(tokens.HasNext);
-            token = tokens.Next;
-            Assert.AreEqual("integer", token.TokenType);
-            Assert.AreEqual(token.Row, 0);
-            Assert.AreEqual(token.Column, 7);
-            Assert.AreEqual(token.Content, "123");
+            Assert.AreEqual(1, token.Row);
+            Assert.AreEqual(8, token.Column);
+            Assert.AreEqual("123", token.Content);
         }
     }
 }

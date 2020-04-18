@@ -40,6 +40,10 @@ namespace LexicalAnalysis
             this._tokens = new List<Token>();
         }
 
+        public TokenStream(TokenStream copy) {
+            this._tokens = new List<Token>(copy._tokens);
+        }
+
         public IEnumerator<Token> GetEnumerator() {
             return this._tokens.GetEnumerator();
         }
