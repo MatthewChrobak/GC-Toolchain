@@ -24,4 +24,4 @@ def preorder_lvalue_component(node):
     fullParameters = "({0})".format(", ".join(fullParameters))
     fullArguments = "({0})".format(", ".join(fullArguments))
 
-    ErrorIfNot(fullParameters == fullArguments, "Expected {0}. Got {1}".format(fullParameters, fullArguments))
+    ErrorIfNot(fullParameters == fullArguments, "Expected {3}{0} at {2}. Got {3}{1}".format(fullParameters, fullArguments, loc, identifier))

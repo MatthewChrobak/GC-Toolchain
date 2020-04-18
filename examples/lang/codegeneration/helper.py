@@ -19,6 +19,8 @@ def ConvertType(type, allowVoid=False):
         return "void"
     if type == "int":
         return "i32"
+    if type == "float":
+        return "float"
     Error("Unknown type {0} allowVoid:{1}".format(type, allowVoid))
 
 def GetPossibleChild(node, possibleChildren):

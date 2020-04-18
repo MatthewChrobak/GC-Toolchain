@@ -1,6 +1,21 @@
 from helper import *
+import struct
 
 registerMap = {}
+
+def ToHex(f):
+    if f == 0:
+        return "0x0000000000000000"
+
+    # LLVM 'floats' are expressed as doubles.
+    double = struct.pack('d', f)
+    ulonglong = struct.unpack('<Q', double)[0]
+
+    # Round the double portion.
+    if hex(ulonglong)[-8] in "89abcdef":
+        ulonglong += 2**28
+
+    return hex(ulonglong)[:-8] + "0000000"
 
 def GetRow(node):
     st = symboltable.GetOrCreate(node["pstid"])
@@ -59,6 +74,7 @@ def getRegisters(node):
 
 def preorder_global(node):
     instructionstream.AppendLine("declare void @print_int(i32)")
+    instructionstream.AppendLine("declare void @print_float(float)")
 
 def preorder_function(node):
     row = GetRow(node)
@@ -103,6 +119,8 @@ def postorder_function(node):
         instructionstream.AppendLine("ret void")
     if returnType == "i32":
         instructionstream.AppendLine("ret i32 0")
+    if returnType == "float":
+        instructionstream.AppendLine("ret float 0.000000e+00")
     instructionstream.IncrementTab(-1)
     instructionstream.AppendLine("}")
 
@@ -114,6 +132,16 @@ def postorder_integer(node):
 
     instructionstream.AppendLine("{0} = alloca {1}".format(r, type))
     instructionstream.AppendLine("store {2} {1}, {2}* {0}".format(r, value, type))
+
+def postorder_float(node):
+    r = getRegister(node)
+    instructionstream.AppendLine("; float")
+    value, loc = GetValue(node)
+    type = ConvertType(node["type"])
+    fvalue = ToHex(float(value))
+
+    instructionstream.AppendLine("{0} = alloca {1}".format(r, type))
+    instructionstream.AppendLine("store {2} {1}, {2}* {0}".format(r, fvalue, type))
 
 def postorder_rvalue(node):
     instructionstream.AppendLine("; rvalue")
@@ -235,7 +263,7 @@ def postorder_expression(node):
         op, loc = GetValue(GetPossibleChild(operator, ["arithmetic", "logical", "comparison"]))
         r, a = getRegisters(node)
         s = a[2]
-        t = ConvertType(node["type"])
+        t = ConvertType(lhs["type"])
         instructionstream.AppendLine("{0} = load {1}, {1}* {2}".format(a[0], t, lhs["register"]))
         instructionstream.AppendLine("{0} = load {1}, {1}* {2}".format(a[1], t, rhs["register"]))
         
@@ -254,17 +282,33 @@ def postorder_expression(node):
                 "==":"icmp eq",
                 "!=":"icmp ne"
             }[op]
+        if t == "float":
+            op = {
+                "+":"fadd", 
+                "-":"fsub", 
+                "*":"fmul", 
+                "/":"fdiv", 
+                "&&":"and", 
+                "||":"or",
+                ">":"fcmp ogt",
+                ">=":"fcmp oge",
+                "<":"fcmp olt",
+                "<=":"fcmp ole",
+                "==":"fcmp oeq",
+                "!=":"fcmp one"
+            }[op]
 
         instructionstream.AppendLine("{0} = {1} {2} {3}, {4}".format(s, op, t, a[0], a[1]))
 
         if operator.Contains("comparison"):
             instructionstream.AppendLine("{0} = zext i1 {1} to i32".format(a[3], s))
             s = a[3]
+            t = "i32"
                 
         instructionstream.AppendLine("{0} = alloca {1}".format(r, t))
         instructionstream.AppendLine("store {0} {1}, {0}* {2}".format(t, s, r))
     else:
-        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue"])
+        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue", "float"])
         r = getRegister(child)
         row = GetRow(node)
         row["register"] = r
@@ -275,10 +319,20 @@ def postorder_expression(node):
             a = getAdditionalRegisters(node)
             sign, _ = GetValue(node["sign"])
             multiplier = "1" if sign == "+" else "-1"
+            type = ConvertType(node["type"])
 
-            instructionstream.AppendLine("{0} = load i32, i32* {1}".format(a[0], node["register"]))
-            instructionstream.AppendLine("{0} = mul i32 {1}, {2}".format(a[1], multiplier, a[0]))
-            instructionstream.AppendLine("store i32 {0}, i32* {1}".format(a[1], node["register"]))
+            mul_map = {
+                "i32":"mul",
+                "float":"fmul"
+            }
+            mul = mul_map[type]
+
+            if type == "float":
+                multiplier += ".0"
+
+            instructionstream.AppendLine("{0} = load {2}, {2}* {1}".format(a[0], node["register"], type))
+            instructionstream.AppendLine("{0} = {4} {3} {1}, {2}".format(a[1], multiplier, a[0], type, mul))
+            instructionstream.AppendLine("store {2} {0}, {2}* {1}".format(a[1], node["register"], type))
 
 def postorder_while_loop(node):
     while_condition = node["while_condition"]

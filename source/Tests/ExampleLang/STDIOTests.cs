@@ -28,5 +28,21 @@ namespace Tests.ExampleLang
             var results = Run(program);
             Assert.AreEqual("1", results.ProgramOutput);
         }
+
+        [Test]
+        public void PrintInt_WithFloat_NotAllowed() {
+            string program = @"void main() {
+    print_int(1.0);
+}";
+            AssertExceptionCause(program, "Expected print_int(int) at (1, 20). Got print_int(float).");
+        }
+
+        [Test]
+        public void PrintFloat_WithInt_NotAllowed() {
+            string program = @"void main() {
+    print_float(1);
+}";
+            AssertExceptionCause(program, "Expected print_float(float) at (1, 20). Got print_float(int).");
+        }
     }
 }

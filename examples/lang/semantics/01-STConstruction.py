@@ -13,6 +13,11 @@ def preorder_global(node):
     row["return_type"] = "void"
     row["entity_type"] = "function"
 
+    row, id = gst.CreateRow()
+    row["name"] = "print_float"
+    row["return_type"] = "void"
+    row["entity_type"] = "function"
+
     st = symboltable.GetOrCreate("::global::print_int")
     st.SetMetaData("st_type", "function")
     row, id = st.CreateRow()
@@ -21,6 +26,15 @@ def preorder_global(node):
     row["is_parameter"] = True
     row["parameter_index"] = 0
     row["type"] = "int"
+
+    st = symboltable.GetOrCreate("::global::print_float")
+    st.SetMetaData("st_type", "function")
+    row, id = st.CreateRow()
+    row["name"] = "arg"
+    row["entity_type"] = "variable"
+    row["is_parameter"] = True
+    row["parameter_index"] = 0
+    row["type"] = "float"
 
 def preorder_function(node):
     pstid(node)
@@ -51,6 +65,9 @@ def preorder_function_call(node):
     pstid(node)
 
 def preorder_integer(node):
+    pstid(node)
+
+def preorder_float(node):
     pstid(node)
 
 def preorder_rvalue(node):

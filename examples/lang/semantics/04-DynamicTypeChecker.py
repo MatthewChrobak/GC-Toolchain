@@ -80,14 +80,17 @@ def postorder_expression(node):
 
         ErrorIf(lhs_type != rhs_type, "LHS and RHS at {0} have incompatible types for operator '{2}': {1}{2}{3}".format(loc, lhs_type, op, rhs_type))
 
-        type = lhs_type
+        if node["operator"].Contains("comparison"):
+            type = "int"
+        else:
+            type = lhs_type
     else:
-        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue"])
+        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue", "float"])
         type = child["type"]
 
     if node.Contains("sign"):
         _, loc = GetValue(node["sign"])
-        ErrorIf(type not in ["int"], "{0} at {1} cannot be signed".format(type, loc))
+        ErrorIf(type not in ["int", "float"], "{0} at {1} cannot be signed".format(type, loc))
 
     row = GetRow(node)
     node["type"] = type
@@ -137,3 +140,20 @@ def postorder_return_statement(node):
     row = symboltable.GetOrCreate(stid).GetRowWhere("name", function_name, "entity_type", "function")
     
     ErrorIf(row["return_type"] != type, "Return statement at {0} should return type {1}. Instead got {2}".format(loc, row["return_type"], type))
+
+def postorder_declaration_statement(node):
+    if node.Contains("rvalue"):
+        _, loc = GetValue(node["assignment"])
+        expected_type = GetRow(node)["type"]
+        actual_type = node["rvalue"]["type"]
+
+        ErrorIf(expected_type != actual_type, "Unable to assign '{0}' to '{1}' at {2}".format(actual_type, expected_type, loc))
+
+
+def postorder_lvalue_statement(node):
+    if node.Contains("rvalue"):
+        _, loc = GetValue(node["assignment"])
+        expected_type = node["lvalue"]["type"]
+        actual_type = node["rvalue"]["type"]
+
+        ErrorIf(expected_type != actual_type, "Unable to assign '{0}' to '{1}' at {2}".format(actual_type, expected_type, loc))

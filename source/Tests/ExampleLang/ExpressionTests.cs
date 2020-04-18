@@ -2,7 +2,8 @@
 
 namespace Tests.ExampleLang
 {
-    public class ExpressionTests : LangUnitTestSuite {
+    public class ExpressionTests : LangUnitTestSuite
+    {
         [Test]
         public void Addition_Literals() {
             string program = @"void main() {
@@ -265,6 +266,28 @@ void main() {
 }";
             var results = Run(program);
             Assert.AreEqual("0", results.ProgramOutput);
+        }
+
+        public void Operator_DifferentTypes_V1(string op) {
+            string program = @$"void main() {{
+    print_int(5 {op} 5.0);
+}}";
+            AssertExceptionCause(program, $"LHS and RHS at (1, 32) have incompatible types for operator '{op}': int{op}float.");
+        }
+
+        public void Operator_DifferentTypes_V2(string op) {
+            string program = @$"void main() {{
+    print_int(5.0 {op} 5);
+}}";
+            AssertExceptionCause(program, $"LHS and RHS at (1, 34) have incompatible types for operator '{op}': float{op}int.");
+        }
+
+        [Test]
+        public void Operator_DifferentTypes() {
+            foreach (char symbol in "+*/-") {
+                Operator_DifferentTypes_V1(symbol.ToString());
+                Operator_DifferentTypes_V2(symbol.ToString());
+            }
         }
     }
 }

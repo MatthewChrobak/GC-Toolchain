@@ -163,6 +163,7 @@ $rvalue_noexpression:expression
 $sign:^ $lvalue:lvalue
 $sign:^ integer:integer
 $sign:^ ( $rvalue:rvalue )
+$sign:^ float:float
 
 #production sign epsilon:true
 +:sign

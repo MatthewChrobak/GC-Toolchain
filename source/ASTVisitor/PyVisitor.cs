@@ -25,9 +25,9 @@ namespace ASTVisitor
 
             var fi = new FileInfo(pythonPluginPath);
             string folder = fi.Directory.FullName;
-
+            string libs = Path.Combine(AppContext.BaseDirectory, "lib");
             this._engine = Python.CreateEngine();
-            this._engine.SetSearchPaths(new string[] { folder });
+            this._engine.SetSearchPaths(new string[] { folder, libs });
             this._scope = this._engine.CreateScope();
             this._source = this._engine.CreateScriptSourceFromFile(pythonPluginPath);
             this._compiled = this._source.Compile();

@@ -5,8 +5,11 @@
 a-z
 A-Z
 
+#token float
+$digit $digit* . $digit $digit*
+
 #token integer
-$digit*
+$digit $digit*
 
 #subtoken valid_head_id
 $letter

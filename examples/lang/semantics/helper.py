@@ -43,7 +43,7 @@ def GetValue(node):
     return node["value"], (node["row"], node["column"])
 
 
-valid_types = ["int"]
+valid_types = ["int", "float"]
 def isValidType(type):
     global valid_types
     return type in valid_types

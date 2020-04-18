@@ -65,7 +65,7 @@ namespace Tests.ExampleLang
         [Test]
         public void FunctionParameters_CorrectNumber_IncorrectTypes_NotAllowed() {
             string program = @"void Test(float x, float y) { } int main() { Test(1, 2); }";
-            AssertExceptionCause(program, "Expected (float, float). Got (int, int).");
+            AssertExceptionCause(program, "Expected Test(float, float) at (1, 46). Got Test(int, int).");
         }
 
         [Test]
@@ -93,7 +93,7 @@ namespace Tests.ExampleLang
         [Test]
         public void FunctionArguments_CorrectNumber_IncorrectTypes_NotAllowed() {
             string program = @"void Test(float x, float y) { } int main() { Test(1, 2); }";
-            AssertExceptionCause(program, "Expected (float, float). Got (int, int).");
+            AssertExceptionCause(program, "Expected Test(float, float) at (1, 46). Got Test(int, int).");
         }
 
         [Test]
@@ -143,7 +143,7 @@ void Foo(int a, int b, int c) {
         }
 
         [Test]
-        public void Function_ReturnValue() {
+        public void Function_ReturnValue_RightType() {
             string program = @"void main() {
     int a = 100;
     print_int(Foo(a));
@@ -153,6 +153,30 @@ int Foo(int a) {
 }";
             var results = Run(program);
             Assert.AreEqual("100", results.ProgramOutput);
+        }
+
+        [Test]
+        public void Function_ReturnValue_WrongType() {
+            string program = @"void main() {
+    int a = 100;
+    print_float(Foo(a));
+}
+float Foo(int a) {
+    return a;
+}";
+            AssertExceptionCause(program, "Return statement at (1, 87) should return type float. Instead got int.");
+        }
+
+        [Test]
+        public void Function_ReturnValue_WrongType_Void() {
+            string program = @"void main() {
+    int a = 100;
+    print_float(Foo(a));
+}
+float Foo(int a) {
+    return;
+}";
+            AssertExceptionCause(program, "Return statement at (1, 87) should return type float. Instead got void.");
         }
     }
 }

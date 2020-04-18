@@ -42,6 +42,9 @@ def postorder_function(node):
 def postorder_integer(node):
     allocate(node)
 
+def postorder_float(node):
+    allocate(node)
+
 def postorder_lvalue_component(node):
     if node.Contains("function_call"):
         row = GetRow(node)

@@ -57,7 +57,7 @@ def postorder_expression(node):
 
         label = "{0} {1} {2}".format(lhs["label"], op, rhs["label"])
     else:
-        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue"])
+        child = GetPossibleChild(node, ["expression", "lvalue", "integer", "rvalue", "float"])
         label = child["label"]
 
     if node.Contains("sign"):
@@ -72,6 +72,9 @@ def postorder_lvalue_component(node):
 
 def postorder_integer(node):
     CreateRow(node, "integer", node["value"])
+
+def postorder_float(node):
+    CreateRow(node, "float", node["value"])
 
 def postorder_rvalue(node):
     label = ""

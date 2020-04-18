@@ -22,3 +22,6 @@ def postorder_declaration_statement(node):
 
 def postorder_integer(node):
     node["type"] = "int"
+
+def postorder_float(node):
+    node["type"] = "float"
