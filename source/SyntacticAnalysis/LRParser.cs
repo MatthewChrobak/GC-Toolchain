@@ -1,5 +1,6 @@
 ﻿using ASTVisitor;
 using Core;
+using Core.Logging;
 using Core.ReportGeneration;
 using LexicalAnalysis;
 using System;
@@ -12,13 +13,14 @@ namespace SyntacticAnalysis
     {
         private List<(string stack, string nextInputs, string action)> _parsingTrace;
         private readonly SyntacticConfigurationFile _config;
+        private readonly Log? _log;
 
         private static Token EndStream => new Token(Symbol.EndStream.ID, "", 0, 0);
 
-        public LRParser(SyntacticConfigurationFile config, TokenStream tokenstream) {
+        public LRParser(SyntacticConfigurationFile config, TokenStream tokenstream, Log? log) {
+            this._log = log;
             this._parsingTrace = new List<(string stack, string nextInputs, string action)>();
             this._config = config;
-
             foreach (var section in config.GetSections(SyntacticConfigurationFile.SECTION_TAG_BLACKLIST)) {
                 foreach (var line in section.Body) {
                     string tokenType = line.Trim();
@@ -95,8 +97,8 @@ namespace SyntacticAnalysis
                         return element?.ASTNode;
                     }
                 } else {
-                    Log.WriteLineVerboseClean($"couldn't retrieve: state {x} symbol {a.TokenType}");
-                    Log.WriteLineError($"Expected {string.Join(", ", tableRow.Actions.Keys)}. Instead got {a.TokenType} at {a.Row}:{a.Column}");
+                    this._log?.WriteLineVerboseClean($"couldn't retrieve: state {x} symbol {a.TokenType}");
+                    this._log?.WriteLineError($"Expected {string.Join(", ", tableRow.Actions.Keys)}. Instead got {a.TokenType} at {a.Row}:{a.Column}");
                     return null;
                 }
             }

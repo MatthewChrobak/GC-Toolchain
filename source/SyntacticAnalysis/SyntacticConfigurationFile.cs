@@ -1,4 +1,5 @@
 ﻿using Core.Config;
+using Core.Logging;
 
 namespace SyntacticAnalysis
 {
@@ -20,11 +21,11 @@ namespace SyntacticAnalysis
 
         public const string HEADER_EPSILON_PREFIX = "epsilon:";
 
-        public SyntacticConfigurationFile(string path) : base(path) {
+        public SyntacticConfigurationFile(string path, Log? log) : base(path, log) {
             this.DefineDefaultRules();
         }
 
-        public SyntacticConfigurationFile(string[] contents, string name) : base(contents, name) {
+        public SyntacticConfigurationFile(string[] contents, string name, Log? log) : base(contents, name, log) {
             this.DefineDefaultRules();
         }
 

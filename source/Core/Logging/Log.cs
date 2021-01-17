@@ -3,17 +3,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Core
+namespace Core.Logging
 {
-    public static class Log
+    public partial class Log
     {
-        private static readonly bool[] AllowedOutputs = new bool[Enum.GetNames(typeof(OutputLevel)).Length];
-        private static string _state;
-        public static string State => _state;
-        private static Dictionary<string, List<string>> _stateHistory;
-        private static List<string> AllLines = new List<string>();
+        private readonly bool[] AllowedOutputs = new bool[Enum.GetNames(typeof(OutputLevel)).Length];
+        private string _state = default!;
+        public string State => _state;
+        private Dictionary<string, List<string>> _stateHistory;
+        private List<string> AllLines = new List<string>();
 
-        static Log() {
+        public Log() {
             _stateHistory = new Dictionary<string, List<string>>();
             AllowedOutputs[(int)OutputLevel.Verbose] = false;
             AllowedOutputs[(int)OutputLevel.Warning] = true;
@@ -21,38 +21,42 @@ namespace Core
             SetState("Unknown");
         }
 
-        public static void Dump(string path) {
+        public void Dump(string path) {
+            WriteLineVerbose($"Writing log to {path}...");
             File.AppendAllText(path, string.Join('\0', AllLines));
             AllLines = new List<string>();
             _stateHistory = new Dictionary<string, List<string>>();
             SetState("Unknown");
         }
 
-        public static void SetState(string state) {
+        public void WriteException(Exception e) {
+            WriteLineError($"{e.GetType()} :{e.Message}");
+        }
+
+        public void SetState(string state) {
             _state = state;
             if (!_stateHistory.ContainsKey(state)) {
                 _stateHistory[state] = new List<string>();
             }
         }
 
-        public static void WriteLineVerbose(string message) {
+        public void WriteLineVerbose(string message) {
             WriteLine(message, OutputLevel.Verbose);
         }
 
-        public static void WriteLineVerboseClean(string message) {
+        public void WriteLineVerboseClean(string message) {
             WriteLineClean(message, OutputLevel.Verbose);
         }
 
-        public static void WriteLineError(string message) {
+        public void WriteLineError(string message) {
             WriteLine(message, OutputLevel.Error);
         }
 
-        public static void WriteLineWarning(string message) {
+        public void WriteLineWarning(string message) {
             WriteLine(message, OutputLevel.Warning);
         }
 
-
-        public static void WriteClean(string message, OutputLevel level) {
+        public void WriteClean(string message, OutputLevel level) {
             if (!AllowedOutputs[(int)level]) {
                 return;
             }
@@ -61,28 +65,31 @@ namespace Core
             Console.Write(message);
         }
 
-        public static void WriteLevel(string message, OutputLevel level) {
+        public void WriteLevel(string message, OutputLevel level) {
             WriteClean($"[{level}] - {message}", level);
         }
 
-        public static void WriteLine(string message, OutputLevel level) {
+        public void WriteLine(string message, OutputLevel level) {
             WriteLevel($"{message}\r\n", level);
         }
 
-        public static void WriteLineClean(string message, OutputLevel level) {
+        public void WriteLineClean(string message, OutputLevel level) {
             WriteClean($"{message}\r\n", level);
         }
 
-        public static void EnableLevel(OutputLevel level) {
+        public void EnableLevel(OutputLevel level) {
             AllowedOutputs[(int)level] = true;
         }
 
-        public static void DisableLevel(OutputLevel level) {
+        public void DisableLevel(OutputLevel level) {
             AllowedOutputs[(int)level] = false;
         }
+    }
 
-        public static ReportSection GetReportSections() {
-            return new LogSection(_stateHistory);
+    public partial class Log : IReportable
+    {
+        public IEnumerable<ReportSection> GetReportSections() {
+            yield return new LogSection(_stateHistory);
         }
     }
 }

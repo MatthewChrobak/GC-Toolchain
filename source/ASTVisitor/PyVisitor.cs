@@ -1,4 +1,5 @@
 ﻿using Core;
+using Core.Logging;
 using IronPython.Hosting;
 using Microsoft.Scripting.Hosting;
 using System;
@@ -9,6 +10,7 @@ namespace ASTVisitor
 {
     public abstract class PyVisitor
     {
+        protected readonly Log? _log;
         private readonly string _pythonPluginPath;
         private readonly ScriptEngine _engine;
         protected readonly dynamic _scope;
@@ -19,9 +21,11 @@ namespace ASTVisitor
         private const string PRE_ORDER_PREFIX = "preorder_";
         private const string POST_ORDER_PREFIX = "postorder_";
 
-        public PyVisitor(string pythonPluginPath) {
+        public PyVisitor(string pythonPluginPath, Log? log) {
+            this._log = log;
+
             this._pythonPluginPath = pythonPluginPath;
-            Log.WriteLineVerbose($"Creating visitor for {this._pythonPluginPath}");
+            this._log?.WriteLineVerbose($"Creating visitor for {this._pythonPluginPath}");
 
             var fi = new FileInfo(pythonPluginPath);
             string folder = fi.Directory.FullName;
@@ -42,7 +46,7 @@ namespace ASTVisitor
         }
 
         public void Traverse(ASTNode ast) {
-            Log.WriteLineVerbose($"Running visitor for {this._pythonPluginPath}");
+            this._log?.WriteLineVerbose($"Running visitor for {this._pythonPluginPath}");
 
             var stk = new Stack<(string key, ASTNode node, bool visited)>();
             stk.Push(("global", ast, false));
@@ -79,7 +83,7 @@ namespace ASTVisitor
                     } else if (value is bool) {
                         // ignore
                     } else {
-                        Log.WriteLineWarning($"Unknown element type in ASTNode: {element.Key}:{value?.GetType()}");
+                        this._log?.WriteLineWarning($"Unknown element type in ASTNode: {element.Key}:{value?.GetType()}");
                     }
                 }
             }

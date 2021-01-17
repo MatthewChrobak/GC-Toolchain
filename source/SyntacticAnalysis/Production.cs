@@ -1,5 +1,6 @@
 ﻿using Core;
 using Core.Config;
+using Core.Logging;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,7 +12,7 @@ namespace SyntacticAnalysis
         public readonly List<Rule> Rules;
         public readonly bool CanBeEpsilon;
 
-        public Production(ConfigSection section, SyntacticConfigurationFile config) {
+        public Production(ConfigSection section, SyntacticConfigurationFile config, Log? log) {
             this.Key = new Symbol(config.GetRule(SyntacticConfigurationFile.RULE_PRODUCTION_PREFIX_KEY) + section.Header.First(), config);
             this.Rules = new List<Rule>();
 
@@ -21,7 +22,7 @@ namespace SyntacticAnalysis
                     if (bool.TryParse(value, out bool canBeEpsilon)) {
                         this.CanBeEpsilon = canBeEpsilon;
                     } else {
-                        Log.WriteLineWarning($"Unable to determine if {this.Key.ID} production can be epsilon or not from: '{value}'.");
+                        log?.WriteLineWarning($"Unable to determine if {this.Key.ID} production can be epsilon or not from: '{value}'.");
                     }
                 }
             }

@@ -15,7 +15,7 @@ A
 A
 ";
             Assert.Throws<AssertionFailedException>(new TestDelegate(() => {
-                new RuleConfigurationFile(config.Split("\r\n"), "config");
+                new RuleConfigurationFile(config.Split("\r\n"), "config", null);
             }));
         }
     }

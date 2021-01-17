@@ -1,5 +1,6 @@
 ﻿using ASTVisitor;
 using Core;
+using Core.Logging;
 using System;
 using System.Dynamic;
 
@@ -7,7 +8,7 @@ namespace CodeGeneration
 {
     public class CodeGeneratorVisiter : PyVisitor
     {
-        public CodeGeneratorVisiter(string pythonPluginPath, InstructionStream instructionStream) : base(pythonPluginPath) {
+        public CodeGeneratorVisiter(string pythonPluginPath, InstructionStream instructionStream, Log? log) : base(pythonPluginPath, log) {
             this._scope.log = CreateLogProxy();
             this._scope.symboltable = CreateSymbolTableProxy();
             this._scope.instructionstream = CreateInstructionStreamProxy(instructionStream);
@@ -15,8 +16,13 @@ namespace CodeGeneration
 
         private dynamic CreateLogProxy() {
             dynamic proxy = new ExpandoObject();
-            proxy.WriteLineVerbose = new Action<string>(Log.WriteLineVerbose);
-            proxy.WriteLineError = new Action<string>(Log.WriteLineError);
+            if (this._log is not null) {
+                proxy.WriteLineVerbose = new Action<string>(this._log.WriteLineVerbose);
+                proxy.WriteLineError = new Action<string>(this._log.WriteLineError);
+            } else {
+                proxy.WriteLineVerbose = new Action<string>((_) => { });
+                proxy.WriteLineError = new Action<string>((_) => { });
+            }
             return proxy;
         }
 

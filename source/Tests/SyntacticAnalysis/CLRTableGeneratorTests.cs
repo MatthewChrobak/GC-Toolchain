@@ -632,8 +632,8 @@ goto(3, a)	{[A -> a.A, $]; [A -> a., $]}	3	 ";
         }
 
         private void BuildAndCompare(string configContents, string solutionTable, string solutionStates) {
-            var config = new SyntacticConfigurationFile(configContents.Split("\r\n"), "fakefile");
-            var productionTable = new ProductionTable(config);
+            var config = new SyntacticConfigurationFile(configContents.Split("\r\n"), "fakefile", null);
+            var productionTable = new ProductionTable(config, null);
             var clrStates = GetCLRStateGenerator(productionTable, config);
             var submissionTable = GetLRParsingTable(productionTable, clrStates).ToTestString();
             var submissionStates = clrStates.ToTestString();

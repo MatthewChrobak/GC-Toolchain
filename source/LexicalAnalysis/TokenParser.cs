@@ -1,6 +1,7 @@
 ﻿using Automata;
 using Automata.NonDeterministic;
 using Core;
+using Core.Logging;
 using Core.ReportGeneration;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,14 +12,16 @@ namespace LexicalAnalysis
     public class TokenParser
     {
         private NFATable nfaTable;
+        private Log _log;
         private TokenStream stream;
 
-        public TokenParser(NFATable nFATable) {
+        public TokenParser(NFATable nFATable, Log? log) {
             this.nfaTable = nFATable;
+            this._log = log;
         }
 
         private TokenStream Parse(TextFileScanner fs) {
-            stream = new TokenStream();
+            stream = new TokenStream(this._log);
             var tokenContent = new StringBuilder();
             int startLine = 0;
             int startColumn = 0;
@@ -76,7 +79,7 @@ namespace LexicalAnalysis
                 stream.Add(token);
             }
 
-            return new TokenStream(stream);
+            return new TokenStream(stream, this._log);
         }
 
         public TokenStream ParseFile(string sourcefile) {

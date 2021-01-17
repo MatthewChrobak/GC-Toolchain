@@ -1,4 +1,4 @@
-﻿using Core;
+﻿using Core.Logging;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -15,6 +15,8 @@ namespace LexicalAnalysis
         public Token Current => this._tokens[this._ptr];
         public Token Next => this._tokens[++this._ptr];
         public Token Previous => this._tokens[--this._ptr];
+
+        private Log? _log;
 
         public void GoToStart() => this._ptr = -1;
         public void GoToEnd() => this._ptr = this.Count;
@@ -33,14 +35,16 @@ namespace LexicalAnalysis
             this._tokens.RemoveAll(token => token.TokenType == tokenType);
             int after = this._tokens.Count;
             int totalRemoved = before - after;
-            Log.WriteLineVerbose($"Removed {totalRemoved} tokens of type {tokenType} as specified by the blacklist of the syntax configuration file.");
+            this._log?.WriteLineVerbose($"Removed {totalRemoved} tokens of type {tokenType} as specified by the blacklist of the syntax configuration file.");
         }
 
-        public TokenStream() {
+        public TokenStream(Log? log) {
+            this._log = log;
             this._tokens = new List<Token>();
         }
 
-        public TokenStream(TokenStream copy) {
+        public TokenStream(TokenStream copy, Log? log) {
+            this._log = log;
             this._tokens = new List<Token>(copy._tokens);
         }
 

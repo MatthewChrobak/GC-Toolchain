@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,25 +11,28 @@ namespace Core.Config
     {
         public const string SECTION_TAG_RULE = "rule";
         private readonly Dictionary<string, char> _rules = new Dictionary<string, char>();
+        private readonly Log? _log;
 
-        public RuleConfigurationFile(string configurationFilePath) : this(File.ReadAllLines(configurationFilePath), new FileInfo(configurationFilePath).Name) {
+        public RuleConfigurationFile(string configurationFilePath, Log? log) : this(File.ReadAllLines(configurationFilePath), new FileInfo(configurationFilePath).Name, log) {
         }
 
-        public RuleConfigurationFile(string[] configurationFileContents, string configurationFileName) : base(configurationFileContents, configurationFileName) {
+        public RuleConfigurationFile(string[] configurationFileContents, string configurationFileName, Log? log) : base(configurationFileContents, configurationFileName) {
+            this._log = log;
+
             foreach (var section in this.GetSections(SECTION_TAG_RULE)) {
                 string ruleKey = section.Header.FirstOrDefault();
                 if (String.IsNullOrEmpty(ruleKey)) {
-                    Log.WriteLineWarning($"Unable to find rule key in {section.GetLocation()}.");
+                    this._log?.WriteLineWarning($"Unable to find rule key in {section.GetLocation()}.");
                     continue;
                 }
 
                 string ruleValueString = section.Body.FirstOrDefault();
                 if (String.IsNullOrEmpty(ruleValueString)) {
-                    Log.WriteLineWarning($"Unable to find rule value for rule {ruleKey} in {section.GetLocation()}.");
+                    this._log?.WriteLineWarning($"Unable to find rule value for rule {ruleKey} in {section.GetLocation()}.");
                     continue;
                 }
                 if (ruleValueString.Length != 1) {
-                    Log.WriteLineWarning($"Rule values can only be one character long. Shortening the rule {ruleKey} from '{ruleValueString}' to '{ruleValueString[0]}'.");
+                    this._log?.WriteLineWarning($"Rule values can only be one character long. Shortening the rule {ruleKey} from '{ruleValueString}' to '{ruleValueString[0]}'.");
                 }
                 char ruleValue = ruleValueString[0];
 
@@ -51,7 +55,7 @@ namespace Core.Config
 
         private void SetRule(string ruleKey, char ruleValue) {
             Debug.Assert(!this.RuleExists(ruleKey), $"Unable to set the rule {ruleKey} which already exists");
-            Log.WriteLineVerbose($"Setting {ruleKey} rule as {ruleValue}");
+            this._log?.WriteLineVerbose($"Setting {ruleKey} rule as {ruleValue}");
             VerifyNonDuplicateRuleValue(ruleValue);
             this._rules[ruleKey] = ruleValue;
         }
@@ -64,7 +68,7 @@ namespace Core.Config
 
         private void OverrideRule(string ruleKey, char ruleValue) {
             Debug.Assert(this.RuleExists(ruleKey), $"Unable to override the rule {ruleKey} which does not exist");
-            Log.WriteLineWarning($"Changing {ruleKey} rule from {this.GetRule(ruleKey)} to {ruleValue}");
+            this._log?.WriteLineWarning($"Changing {ruleKey} rule from {this.GetRule(ruleKey)} to {ruleValue}");
             VerifyNonDuplicateRuleValue(ruleValue);
             this._rules[ruleKey] = ruleValue;
         }

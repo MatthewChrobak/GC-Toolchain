@@ -1,15 +1,11 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 
 namespace Core.ReportGeneration
 {
     public class Report : ReportSection
     {
-        private string reportPath;
-
-        public Report(string reportPath) : base("") {
-            this.reportPath = reportPath;
+        public Report() : base("") {
         }
 
         public new string ToHTML() {
@@ -30,9 +26,8 @@ namespace Core.ReportGeneration
             return html;
         }
 
-        public void Save() {
-            Log.WriteLineVerbose("Creating report...");
-            File.WriteAllText(this.reportPath, this.ToHTML());
+        public void Save(string reportPath) {
+            File.WriteAllText(reportPath, this.ToHTML());
         }
     }
 }

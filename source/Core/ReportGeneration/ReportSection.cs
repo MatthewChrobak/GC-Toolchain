@@ -21,8 +21,10 @@ namespace Core.ReportGeneration
             this.Content = System.String.Empty;
         }
 
-        public void AddSection(ReportSection section) {
-            this.Sections.Add(section);
+        public void Add(IReportable reportable) {
+            foreach (var section in reportable.GetReportSections()) {
+                this.Sections.Add(section);
+            }
         }
 
         public IEnumerable<ReportSection> GetOrderedSections() {
@@ -49,6 +51,10 @@ namespace Core.ReportGeneration
                     this.Sections[i - 1].RefreshSectionNumber($"{prefix}.{i}");
                 }
             }
+        }
+
+        public void AddSection(ReportSection section) {
+            this.Sections.Add(section);
         }
 
         public virtual string GetContent() {

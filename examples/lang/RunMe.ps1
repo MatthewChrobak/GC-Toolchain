@@ -1,5 +1,5 @@
 # Build GCT
-$gct = "../../source/GCT/bin/Debug/netcoreapp3.1/GCT.exe";
+$gct = "../../source/GCT/bin/Debug/net5.0/GCT.exe";
 if (-Not (Test-Path $gct)) {
     Write-Host "Building GCT...";
     $csproj = "../../source/GCT/GCT.csproj";

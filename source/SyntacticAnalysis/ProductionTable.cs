@@ -1,5 +1,6 @@
 ﻿using Core;
 using Core.Config;
+using Core.Logging;
 using Core.ReportGeneration;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,11 +11,14 @@ namespace SyntacticAnalysis
     {
         private Dictionary<string, Production> _productions;
         public IEnumerable<Production> Productions => this._productions.Values;
+
+        private Log? _log;
+
         public const string START_PRIME = "'";
 
         private readonly Dictionary<string, HashSet<Symbol>> _first;
 
-        public ProductionTable(SyntacticConfigurationFile config) {
+        public ProductionTable(SyntacticConfigurationFile config, Log? log) {
             this._productions = new Dictionary<string, Production>();
             this._first = new Dictionary<string, HashSet<Symbol>>();
 
@@ -26,6 +30,7 @@ namespace SyntacticAnalysis
 
             this.TransformEpsilonTransitions(config);
             this.ComputeFirst();
+            this._log = log;
         }
 
         private void TransformEpsilonTransitions(SyntacticConfigurationFile config) {
@@ -157,7 +162,7 @@ namespace SyntacticAnalysis
             Debug.Assert(section.Header.Any(entry => !string.IsNullOrEmpty(entry)), $"Cannot have empty {SyntacticConfigurationFile.SECTION_TAG_PRODUCTION} header at {section.GetLocation()}");
             string key = section.Header.First();
 
-            var production = new Production(section, config);
+            var production = new Production(section, config, this._log);
             this._productions.Add(key, production);
         }
 

@@ -1,4 +1,5 @@
 ﻿using Core.Config;
+using Core.Logging;
 
 namespace LexicalAnalysis
 {
@@ -27,11 +28,11 @@ namespace LexicalAnalysis
 
         public const string HEADER_PRIORITY_PREFIX = "priority:";
 
-        public LexicalConfigurationFile(string configurationFilePath) : base(configurationFilePath) {
+        public LexicalConfigurationFile(string configurationFilePath, Log? log) : base(configurationFilePath, log) {
             this.DefineDefaultRules();
         }
 
-        public LexicalConfigurationFile(string[] configurationFileContents, string configurationFileName) : base(configurationFileContents, configurationFileName) {
+        public LexicalConfigurationFile(string[] configurationFileContents, string configurationFileName, Log? log) : base(configurationFileContents, configurationFileName, log) {
             this.DefineDefaultRules();
         }
 

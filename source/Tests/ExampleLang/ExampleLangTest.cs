@@ -1,6 +1,6 @@
 ﻿using ASTVisitor;
 using CodeGeneration;
-using Core;
+using Core.Logging;
 using LexicalAnalysis;
 using NUnit.Framework;
 using SemanticAnalysis;
@@ -46,6 +46,7 @@ namespace Tests.ExampleLang
         public string ProgramOutput => File.Exists(this.OutputPath) ? File.ReadAllText(this.OutputPath) : string.Empty;
 
         public ExampleLangTest(string program, [CallerMemberNameAttribute] string testName = "unknown") {
+            var log = new Log();
             string cwd = Directory.GetCurrentDirectory();
             string localDirectory;
             using (var md5 = System.Security.Cryptography.MD5.Create()) {
@@ -59,26 +60,26 @@ namespace Tests.ExampleLang
             try {
                 SymbolTable.Reset();
                 // Lexical analysis
-                var tokenConfigurationFile = new LexicalConfigurationFile(TokenPath);
-                var tokenParserTableGenerator = new TokenParserTableGenerator(tokenConfigurationFile);
-                var tokenParser = new TokenParser(tokenParserTableGenerator.NFATable);
+                var tokenConfigurationFile = new LexicalConfigurationFile(TokenPath, log);
+                var tokenParserTableGenerator = new TokenParserTableGenerator(tokenConfigurationFile, log);
+                var tokenParser = new TokenParser(tokenParserTableGenerator.NFATable, log);
                 var tokenStream = tokenParser.ParseString(program);
 
                 // Syntactic analysis
-                var syntaxConfigurationFile = new SyntacticConfigurationFile(SyntaxPath);
-                var productionTable = new ProductionTable(syntaxConfigurationFile);
+                var syntaxConfigurationFile = new SyntacticConfigurationFile(SyntaxPath, log);
+                var productionTable = new ProductionTable(syntaxConfigurationFile, log);
                 var clrStates = new CLRStateGenerator(productionTable, syntaxConfigurationFile);
                 var lrTable = LRParsingTable.From(clrStates, productionTable);
-                var syntaxParser = new LRParser(syntaxConfigurationFile, tokenStream);
+                var syntaxParser = new LRParser(syntaxConfigurationFile, tokenStream, log);
                 var ast = syntaxParser.Parse(lrTable, tokenStream);
 
                 foreach (var file in Directory.GetFiles(SemanticVisitorsPath, "*.py")) {
-                    new SemanticVisitor(file).Traverse(ast);
+                    new SemanticVisitor(file, log).Traverse(ast);
                 }
 
                 var instructionStream = new InstructionStream();
                 foreach (var file in Directory.GetFiles(CodeGeneratorVisitorsPath, "*.py")) {
-                    new CodeGeneratorVisiter(file, instructionStream).Traverse(ast);
+                    new CodeGeneratorVisiter(file, instructionStream, log).Traverse(ast);
                 }
                 File.WriteAllText(Path.Combine(localDirectory, InstructionStreamFileName), instructionStream.ToString());
 
@@ -93,7 +94,7 @@ namespace Tests.ExampleLang
                 };
                 process.Start();
                 process.WaitForExit();
-                Log.WriteLineVerbose(process.StandardOutput.ReadToEnd());
+                log.WriteLineVerbose(process.StandardOutput.ReadToEnd());
 
                 string exePath = Path.Combine(localDirectory, "program.exe");
 
@@ -112,7 +113,7 @@ namespace Tests.ExampleLang
             } catch (Exception e) {
                 throw e;
             } finally {
-                Log.Dump(Path.Combine(localDirectory, "dmp.log"));
+                log.Dump(Path.Combine(localDirectory, "dmp.log"));
             }
         }
 

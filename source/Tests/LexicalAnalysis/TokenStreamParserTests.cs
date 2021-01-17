@@ -1,4 +1,5 @@
 ﻿using Core;
+using Core.Logging;
 using LexicalAnalysis;
 using NUnit.Framework;
 using System;
@@ -8,9 +9,10 @@ namespace Tests.LexicalAnalysis
     public class TokenStreamParserTests
     {
         private TokenParser ConstructParser(string configuration) {
-            var config = new LexicalConfigurationFile(configuration.Split("\r\n"), "config");
-            var nfa = new TokenParserTableGenerator(config).NFATable;
-            return new TokenParser(nfa);
+            var log = new Log();
+            var config = new LexicalConfigurationFile(configuration.Split("\r\n"), "config", log);
+            var nfa = new TokenParserTableGenerator(config, log).NFATable;
+            return new TokenParser(nfa, log);
         }
 
         private TokenStream GetTokenStreamFromConfig(string configuration, string program) {
