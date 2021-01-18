@@ -1,7 +1,8 @@
 ﻿using ASTVisitor;
 using CodeGeneration;
+using Core.LexicalAnalysis;
 using Core.Logging;
-using LexicalAnalysis;
+using GCTDefault.LexicalAnalysis;
 using NUnit.Framework;
 using SemanticAnalysis;
 using SyntacticAnalysis;
@@ -63,7 +64,7 @@ namespace Tests.ExampleLang
                 var tokenConfigurationFile = new LexicalConfigurationFile(TokenPath, log);
                 var tokenParserTableGenerator = new TokenParserTableGenerator(tokenConfigurationFile, log);
                 var tokenParser = new TokenParser(tokenParserTableGenerator.NFATable, log);
-                var tokenStream = tokenParser.ParseString(program);
+                var tokenStream = tokenParser.Parse(program);
 
                 // Syntactic analysis
                 var syntaxConfigurationFile = new SyntacticConfigurationFile(SyntaxPath, log);

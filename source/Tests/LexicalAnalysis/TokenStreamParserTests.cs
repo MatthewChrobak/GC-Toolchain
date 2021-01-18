@@ -1,6 +1,7 @@
 ﻿using Core;
+using Core.LexicalAnalysis;
 using Core.Logging;
-using LexicalAnalysis;
+using GCTDefault.LexicalAnalysis;
 using NUnit.Framework;
 using System;
 
@@ -15,9 +16,14 @@ namespace Tests.LexicalAnalysis
             return new TokenParser(nfa, log);
         }
 
+        private void VerifyNewline(TokenStream tokens) {
+            Assert.AreEqual(tokens.Next.TokenType, "whitespace");
+            Assert.AreEqual(tokens.Next.TokenType, "whitespace");
+        }
+
         private TokenStream GetTokenStreamFromConfig(string configuration, string program) {
             var parser = ConstructParser(configuration);
-            return parser.ParseString(program);
+            return parser.Parse(program);
         }
 
         [Test]
@@ -31,11 +37,16 @@ namespace Tests.LexicalAnalysis
 
 #token :
 \:
+
+#token whitespace
+%0D
+%0A
 ";
             string program = @":";
             var tokens = GetTokenStreamFromConfig(config, program);
             Assert.AreEqual(tokens.Next.TokenType, ":");
             Assert.AreEqual(tokens.Current.Content, ":");
+            VerifyNewline(tokens);
         }
 
         [Test]
@@ -49,11 +60,16 @@ namespace Tests.LexicalAnalysis
 
 #token :1
 \:1
+
+#token whitespace
+%0D
+%0A
 ";
             string program = @":1";
             var tokens = GetTokenStreamFromConfig(config, program);
             Assert.AreEqual(tokens.Next.TokenType, ":1");
             Assert.AreEqual(tokens.Current.Content, ":1");
+            VerifyNewline(tokens);
         }
 
         [Test]
@@ -64,12 +80,17 @@ namespace Tests.LexicalAnalysis
 
 #token range2
 %43-D
+
+#token whitespace
+%0D
+%0A
 ";
             string program = @"CD";
             var tokens = GetTokenStreamFromConfig(config, program);
 
             Assert.AreEqual(tokens.Next.TokenType, "range2");
             Assert.AreEqual(tokens.Next.TokenType, "range2");
+            VerifyNewline(tokens);
         }
 
         [Test]
@@ -80,12 +101,17 @@ namespace Tests.LexicalAnalysis
 
 #token range3
 E-%46
+
+#token whitespace
+%0D
+%0A
 ";
             string program = @"EF";
             var tokens = GetTokenStreamFromConfig(config, program);
 
             Assert.AreEqual(tokens.Next.TokenType, "range3");
             Assert.AreEqual(tokens.Next.TokenType, "range3");
+            VerifyNewline(tokens);
         }
 
         [Test]
@@ -96,12 +122,17 @@ E-%46
 
 #token range4
 G-H
+
+#token whitespace
+%0D
+%0A
 ";
             string program = @"GH";
             var tokens = GetTokenStreamFromConfig(config, program);
 
             Assert.AreEqual(tokens.Next.TokenType, "range4");
             Assert.AreEqual(tokens.Next.TokenType, "range4");
+            VerifyNewline(tokens);
         }
 
         [Test]
@@ -112,12 +143,17 @@ G-H
 
 #token range1
 %41-%42
+
+#token whitespace
+%0D
+%0A
 ";
             string program = @"AB";
             var tokens = GetTokenStreamFromConfig(config, program);
 
             Assert.AreEqual(tokens.Next.TokenType, "range1");
             Assert.AreEqual(tokens.Next.TokenType, "range1");
+            VerifyNewline(tokens);
         }
 
         [Test]
@@ -140,7 +176,7 @@ G-H
                 var token = tokens.Next;
                 count++;
             }
-            Assert.AreEqual(program.Replace("\r\n", " ").Length, count);
+            Assert.AreEqual(program.Replace("\r\n", " ").Length + 1, count);
         }
 
         [Test]
@@ -208,17 +244,23 @@ abcd
 
 #token high_priority {LexicalConfigurationFile.HEADER_PRIORITY_PREFIX}1
 abcd
+
+#token whitespace
+%20
+%0D
+%0A
 ";
             string program = "abcd";
             var tokens = GetTokenStreamFromConfig(config, program);
 
             Assert.IsTrue(tokens.HasNext);
-            Assert.AreEqual(1, tokens.Count);
+            Assert.AreEqual(3, tokens.Count);
             var token = tokens.Next;
 
             Assert.AreEqual("high_priority", token.TokenType);
             Assert.AreEqual(program, token.Content);
             Assert.AreEqual(1, token.Row);
+            VerifyNewline(tokens);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -233,17 +275,22 @@ A
 
 #token hex
 A{val}
+
+#token whitespace
+A0D
+A0A
 ";
             string program = ((char)byteVal).ToString();
             var tokens = GetTokenStreamFromConfig(config, program);
 
-            Assert.AreEqual(tokens.Count, 1);
+            Assert.AreEqual(tokens.Count, 3); // Account for return carriage and newline
             Assert.IsTrue(tokens.HasNext);
             var token = tokens.Next;
             Assert.AreEqual("hex", token.TokenType);
             Assert.AreEqual(1, token.Row);
             Assert.AreEqual(1, token.Column);
             Assert.AreEqual(((char)byteVal).ToString(), token.Content);
+            VerifyNewline(tokens);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -255,11 +302,14 @@ A
 
 #token range
 aAz
-";
+
+#token whitespace
+%0D
+%0A";
             string program = "abcdefghijklmnopqrstuvwxyz";
             var tokens = GetTokenStreamFromConfig(config, program);
 
-            Assert.AreEqual(tokens.Count, program.Length);
+            Assert.AreEqual(tokens.Count, program.Length + 2);
             int i = 1;
             while (tokens.HasNext) {
                 var token = tokens.Next;
@@ -268,7 +318,12 @@ aAz
                 Assert.AreEqual(i, token.Column);
                 Assert.AreEqual(program[i - 1].ToString(), token.Content);
                 i++;
+
+                if (i > program.Length) {
+                    break;
+                }
             }
+            VerifyNewline(tokens);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -276,23 +331,28 @@ aAz
         public void ZeroOrMore_SubTokens() {
             string config = $@"
 #rule {LexicalConfigurationFile.RULE_ZERO_OR_MORE_KEY}
-A
+F
 
 #subtoken zero_or_more_subtoken
 a
 
 #token zero_or_more
-$zero_or_more_subtokenA
+$zero_or_more_subtokenF
+
+#token whitespace
+%0D
+%0A
 ";
             string program = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
             var tokens = GetTokenStreamFromConfig(config, program);
 
-            Assert.AreEqual(1, tokens.Count);
+            Assert.AreEqual(3, tokens.Count);
             var token = tokens.Next;
             Assert.AreEqual(1, token.Row);
             Assert.AreEqual(1, token.Column);
             Assert.AreEqual("zero_or_more", token.TokenType);
             Assert.AreEqual(program, token.Content);
+            VerifyNewline(tokens);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -300,23 +360,28 @@ $zero_or_more_subtokenA
         public void ZeroOrMore_SubToken() {
             string config = $@"
 #rule {LexicalConfigurationFile.RULE_ZERO_OR_MORE_KEY}
-A
+F
 
 #subtoken zero_or_more_subtoken
-aA
+aF
 
 #token zero_or_more
 $zero_or_more_subtoken
+
+#token whitespace
+%0D
+%0A
 ";
             string program = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
             var tokens = GetTokenStreamFromConfig(config, program);
 
-            Assert.AreEqual(1, tokens.Count);
+            Assert.AreEqual(3, tokens.Count);
             var token = tokens.Next;
             Assert.AreEqual(1, token.Row);
             Assert.AreEqual(1, token.Column);
             Assert.AreEqual("zero_or_more", token.TokenType);
             Assert.AreEqual(program, token.Content);
+            VerifyNewline(tokens);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -324,20 +389,25 @@ $zero_or_more_subtoken
         public void ZeroOrMore() {
             string config = $@"
 #rule {LexicalConfigurationFile.RULE_ZERO_OR_MORE_KEY}
-A
+F
 
 #token zero_or_more
-aA
+aF
+
+#token whitespace
+%0D
+%0A
 ";
             string program = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
             var tokens = GetTokenStreamFromConfig(config, program);
 
-            Assert.AreEqual(1, tokens.Count);
+            Assert.AreEqual(3, tokens.Count);
             var token = tokens.Next;
             Assert.AreEqual(1, token.Row);
             Assert.AreEqual(1, token.Column);
             Assert.AreEqual("zero_or_more", token.TokenType);
             Assert.AreEqual(program, token.Content);
+            VerifyNewline(tokens);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -351,24 +421,30 @@ B
 
 #token range
 Baaz
+
+#token whitespace
+%20
+%0D
+%0A
 ";
             string invalid_program = "a";
             var parser = ConstructParser(config);
 
             Assert.Throws<AssertionFailedException>(new TestDelegate(() => {
-                parser.ParseString(invalid_program);
+                parser.Parse(invalid_program);
             }));
 
             string valid_program = "aaz";
             var tokens = GetTokenStreamFromConfig(config, valid_program);
 
             Assert.IsTrue(tokens.HasNext);
-            Assert.AreEqual(1, tokens.Count);
+            Assert.AreEqual(3, tokens.Count); // Account for the newline
             var token = tokens.Next;
             Assert.AreEqual("range", token.TokenType);
             Assert.AreEqual(1, token.Column);
             Assert.AreEqual(1, token.Row);
             Assert.AreEqual(valid_program, token.Content);
+            VerifyNewline(tokens);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -387,17 +463,21 @@ zabcd
 #token final_token
 asub_token
 
+#token whitespace
+%0D
+%0A
 ";
             string program = "abcd";
             var tokens = GetTokenStreamFromConfig(config, program);
 
             Assert.IsTrue(tokens.HasNext);
-            Assert.AreEqual(tokens.Count, 1);
+            Assert.AreEqual(tokens.Count, 3);
             var token = tokens.Next;
             Assert.AreEqual("final_token", token.TokenType);
             Assert.AreEqual(1, token.Column);
             Assert.AreEqual(1, token.Row);
             Assert.AreEqual(program, token.Content);
+            VerifyNewline(tokens);
             Assert.IsFalse(tokens.HasNext);
         }
 
@@ -416,6 +496,8 @@ $nonzero $digit*
 
 #token whitespace
 %20
+%0D
+%0A
 ";
             string program = "0 123 0123";
             var tokens = GetTokenStreamFromConfig(config, program);

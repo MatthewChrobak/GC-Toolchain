@@ -1,7 +1,7 @@
 ﻿using Core.Config;
 using Core.Logging;
 
-namespace LexicalAnalysis
+namespace Core.LexicalAnalysis
 {
     public class LexicalConfigurationFile : RuleConfigurationFile
     {

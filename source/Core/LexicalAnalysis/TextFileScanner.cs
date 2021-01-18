@@ -1,9 +1,9 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 
-namespace LexicalAnalysis
+namespace Core.LexicalAnalysis
 {
+    // TODO: Does this need to be here?
     public class TextFileScanner : IDisposable
     {
         private string[] _contents;
@@ -16,10 +16,10 @@ namespace LexicalAnalysis
         private char CurrentChar => this.Column < this.CurrentLine.Length ? this.CurrentLine[this.Column] : EOF;
         public bool CanRead => this.Line < this._contents.Length && this.Column < this.CurrentLine.Length;
 
-        public TextFileScanner(string sourcefile) {
+        public TextFileScanner(string content) {
             this.Line = 0;
             this.Column = 0;
-            this._contents = File.ReadAllLines(sourcefile).Select(line => $"{line}\r\n").ToArray();
+            this._contents = content.Split("\r\n").Select(line => $"{line}\r\n").ToArray();
         }
 
         public TextFileScanner(string[] lines) {

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace LexicalAnalysis.ReportGeneration
+namespace GCTDefault.LexicalAnalysis.ReportGeneration
 {
     internal class AutomataVisualizationSection : ReportSection
     {

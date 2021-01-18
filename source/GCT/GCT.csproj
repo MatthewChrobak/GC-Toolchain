@@ -10,7 +10,6 @@
     <ProjectReference Include="..\CodeGeneration\CodeGeneration.csproj" />
     <ProjectReference Include="..\Core\Core.csproj" />
     <ProjectReference Include="..\GCTPlugin\GCTPlugin.csproj" />
-    <ProjectReference Include="..\LexicalAnalysis\LexicalAnalysis.csproj" />
     <ProjectReference Include="..\SemanticAnalysis\SemanticAnalysis.csproj" />
     <ProjectReference Include="..\SyntacticAnalysis\SyntacticAnalysis.csproj" />
   </ItemGroup>

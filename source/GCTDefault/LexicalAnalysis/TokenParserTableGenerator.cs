@@ -1,16 +1,17 @@
 ﻿using Automata;
 using Automata.NonDeterministic;
 using Core;
+using Core.LexicalAnalysis;
 using Core.Logging;
 using Core.ReportGeneration;
-using LexicalAnalysis.Automata;
-using LexicalAnalysis.ReportGeneration;
+using GCTDefault.LexicalAnalysis.Automata;
+using GCTDefault.LexicalAnalysis.ReportGeneration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace LexicalAnalysis
+namespace GCTDefault.LexicalAnalysis
 {
     public partial class TokenParserTableGenerator
     {

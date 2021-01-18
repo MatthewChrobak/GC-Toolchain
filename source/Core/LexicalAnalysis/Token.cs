@@ -1,4 +1,4 @@
-﻿namespace LexicalAnalysis
+﻿namespace Core.LexicalAnalysis
 {
     public class Token
     {

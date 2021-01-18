@@ -1,8 +1,8 @@
 ﻿using ASTVisitor;
 using Core;
+using Core.LexicalAnalysis;
 using Core.Logging;
 using Core.ReportGeneration;
-using LexicalAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;

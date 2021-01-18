@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace LexicalAnalysis
+namespace Core.LexicalAnalysis
 {
     public class TokenStream : IEnumerable<Token>
     {

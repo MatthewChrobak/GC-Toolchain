@@ -1,7 +1,8 @@
-﻿using Core.ReportGeneration;
+﻿using Core.LexicalAnalysis;
+using Core.ReportGeneration;
 using System.Linq;
 
-namespace LexicalAnalysis
+namespace GCTDefault.LexicalAnalysis.ReportGeneration
 {
     internal class TokenStreamReportSection : ReportSection
     {

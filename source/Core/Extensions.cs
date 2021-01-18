@@ -1,4 +1,4 @@
-﻿namespace GCT
+﻿namespace Core
 {
     public static class Extensions
     {

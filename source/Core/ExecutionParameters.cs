@@ -5,7 +5,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace GCT
+namespace Core
 {
     public partial class ExecutionParameters
     {

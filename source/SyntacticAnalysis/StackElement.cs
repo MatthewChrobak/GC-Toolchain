@@ -1,7 +1,5 @@
 ﻿using ASTVisitor;
-using LexicalAnalysis;
-using System.Collections.Generic;
-using System.Text;
+using Core.LexicalAnalysis;
 
 namespace SyntacticAnalysis
 {

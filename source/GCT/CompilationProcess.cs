@@ -1,10 +1,11 @@
 ﻿using Core;
+using Core.LexicalAnalysis;
 using Core.Logging;
 using Core.ReportGeneration;
 using GCT.Caching;
 using GCT.Plugins;
 using GCTPlugin;
-using LexicalAnalysis;
+using GCTPlugin.Serialization;
 
 namespace GCT
 {
@@ -31,32 +32,49 @@ namespace GCT
             }
 
             // Lexical analysis
-            string? pluginId = parameters.Get(LexerFlag, null);
-            var plugin = pluginLoader.Load(pluginId, this._log);
-            this.LexicalAnalysis(plugin!, cache, parameters);
+
+            var lexer = this.LexicalAnalysis(pluginLoader, cache, parameters);
+
+            if (lexer is IJsonSerializable serializable) {
+                cache?.Cache("test", serializable);
+            }
         }
 
-        private void LexicalAnalysis(Plugin plugin, ComponentCache? cache, ExecutionParameters parameters) {
+        private ILexicalAnalyzer LexicalAnalysis(PluginLoader pluginLoader, ComponentCache? cache, ExecutionParameters parameters) {
+
+            // Get the plugin for lexical analysis
+            string? pluginId = parameters.Get(LexerFlag, null);
+            var plugin = pluginLoader.Load(pluginId, this._log);
+
+            // Get the configuration file
             string lexicalConfigurationFilePath = parameters.GetFilePath(LexicalConfigurationFilePath, "tokens");
             this._log?.WriteLineVerbose($"Parsing configuration file: {lexicalConfigurationFilePath}");
             var config = new LexicalConfigurationFile(lexicalConfigurationFilePath, this._log);
             this._log?.WriteLineVerbose($"Done.");
 
-            ITokenParser? parser = default;
+            // Either deserialize the parser, or create a new one.
+            ILexicalAnalyzer? parser = default;
 
             if (cache is not null) {
-                if (cache.IsCached(config, out string cachedFilePath)) {
-                    parser = plugin.Deserialize<ITokenParser>(cachedFilePath) as ITokenParser;
+                if (cache.IsCached($"{plugin.Name}-{config.GetCacheID()}", out string cachedFilePath)) {
+                    parser = plugin.Deserialize<ILexicalAnalyzer>(cachedFilePath, parameters);
                 }
             }
 
             // Failed to load? Or just no cached version found?
             if (parser is null) {
                 this._log?.WriteLineVerbose("No cached parser found. Constructing new parser");
-                parser = plugin.Create<ITokenParser>(config);
+                parser = plugin.Create<ILexicalAnalyzer>(config, parameters);
             }
 
             Debug.Assert(parser != null, "Unable to construct a parser");
+
+            // Add stuff to the report
+            if (parser is IReportable reportable) {
+                this._report?.Add(reportable);
+            }
+
+            return parser!;
         }
     }
 }

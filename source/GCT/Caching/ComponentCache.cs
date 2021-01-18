@@ -1,4 +1,5 @@
 ﻿using Core;
+using GCTPlugin.Serialization;
 using System.IO;
 
 namespace GCT.Caching
@@ -12,9 +13,13 @@ namespace GCT.Caching
             this._cachePath = parameters.GetFolderPath(CachePath, "temp");
         }
 
-        public bool IsCached(ICachable cachable, out string cachedFilePath) {
-            cachedFilePath = Path.Combine(this._cachePath, cachable.GetCacheID());
+        public bool IsCached(string id, out string cachedFilePath) {
+            cachedFilePath = Path.Combine(this._cachePath, id);
             return File.Exists(cachedFilePath);
+        }
+
+        internal void Cache(string id, IJsonSerializable serializable) {
+
         }
     }
 }

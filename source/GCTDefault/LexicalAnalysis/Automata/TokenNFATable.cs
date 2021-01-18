@@ -3,7 +3,7 @@ using Automata.NonDeterministic;
 using Core;
 using System.Linq;
 
-namespace LexicalAnalysis.Automata
+namespace GCTDefault.LexicalAnalysis.Automata
 {
     public class TokenNFATable : NFATable
     {
