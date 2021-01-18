@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Core.Config
 {
-    public class ConfigurationFile
+    public partial class ConfigurationFile
     {
         public const string SectionSymbol = "#";
         // Tag -> Sections
@@ -22,11 +22,13 @@ namespace Core.Config
              * #Tag Header
              * Body
              */
+            this.CacheID = Guid.NewGuid().ToString();
             this.ConfigFileName = configFileName;
             this.Parse(configurationFileContents);
         }
 
         public ConfigurationFile(string configurationFilePath) : this(File.ReadAllLines(configurationFilePath), new FileInfo(configurationFilePath).Name) {
+            this.CacheID = MD5.HashFile(configurationFilePath);
         }
 
         private void Parse(string[] lines) {
@@ -83,6 +85,15 @@ namespace Core.Config
                 return Array.Empty<ConfigSection>();
             }
             return this._sections[tag];
+        }
+    }
+
+    public partial class ConfigurationFile : ICachable
+    {
+        private readonly string CacheID;
+
+        public string GetCacheID() {
+            return this.CacheID;
         }
     }
 }

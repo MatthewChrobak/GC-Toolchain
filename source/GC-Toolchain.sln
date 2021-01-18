@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASTVisitor", "ASTVisitor\AS
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CodeGeneration", "CodeGeneration\CodeGeneration.csproj", "{8B5823D1-AEC7-44D8-AE6F-5FA4293B1DE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GCTPlugin", "GCTPlugin\GCTPlugin.csproj", "{97CC281F-928F-40B2-A5E2-30D5163D7598}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{8B5823D1-AEC7-44D8-AE6F-5FA4293B1DE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B5823D1-AEC7-44D8-AE6F-5FA4293B1DE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B5823D1-AEC7-44D8-AE6F-5FA4293B1DE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97CC281F-928F-40B2-A5E2-30D5163D7598}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97CC281F-928F-40B2-A5E2-30D5163D7598}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97CC281F-928F-40B2-A5E2-30D5163D7598}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97CC281F-928F-40B2-A5E2-30D5163D7598}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
